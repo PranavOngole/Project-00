@@ -1,0 +1,225 @@
+%md
+# US Immigration Data Project - Data Dictionary
+
+> **What is this document?**  
+> This file describes every table and column in our database. Think of it as a "map" of how our data is organized. Anyone looking at this project can understand exactly what each piece of data means.
+
+---
+
+## Overview
+
+Our database contains **5 main tables**:
+
+| Table Name | What It Stores | Primary Source |
+|------------|----------------|----------------|
+| `arrivals` | People entering the US at ports of entry | CBP, DHS Yearbook, I-94 Program |
+| `visa_issuances` | Visas issued by US embassies/consulates | State Department |
+| `visa_refusals` | Visa applications that were denied | State Department |
+| `inadmissibles` | People denied entry at ports of entry | CBP |
+| `overstays` | People who stayed past their authorized period | DHS Entry/Exit Reports |
+
+---
+
+## Table 1: `arrivals`
+
+**Description:** Every record represents a count of people who entered the United States in a given month, at a specific port, under a specific admission class.
+
+| Column Name | Data Type | Description | Example |
+|-------------|-----------|-------------|---------|
+| `id` | INTEGER | Unique row identifier (auto-generated) | 1, 2, 3... |
+| `year_month` | TEXT | Year and month of arrival (YYYY-MM format) | "2024-03" |
+| `fiscal_year` | INTEGER | Federal fiscal year (Oct-Sept) | 2024 |
+| `port_of_entry` | TEXT | Airport, land port, or seaport code/name | "JFK", "San Ysidro", "Miami Seaport" |
+| `port_type` | TEXT | Category of port | "air", "land", "sea" |
+| `admission_class` | TEXT | Visa or status type used for entry | "H-1B", "F-1", "B-1/B-2", "LPR", "US Citizen" |
+| `country_of_citizenship` | TEXT | Traveler's citizenship (ISO 3166 code preferred) | "IND", "CHN", "MEX", "GBR" |
+| `arrival_count` | INTEGER | Number of arrivals matching this combination | 15420 |
+| `source_file` | TEXT | Original file this data came from | "fy2024_i94_arrivals.xlsx" |
+| `source_url` | TEXT | URL where source was downloaded | "https://www.trade.gov/..." |
+| `date_retrieved` | TEXT | When we downloaded the source file | "2025-01-15" |
+
+**Notes:**
+- One person taking multiple trips = counted multiple times
+- US Citizens and LPRs (green card holders) are included when available
+- Land border data from Canada/Mexico may use estimates
+
+---
+
+## Table 2: `visa_issuances`
+
+**Description:** Every record represents the number of visas issued in a given month, at a specific embassy/consulate, for a specific visa class and nationality.
+
+| Column Name | Data Type | Description | Example |
+|-------------|-----------|-------------|---------|
+| `id` | INTEGER | Unique row identifier | 1, 2, 3... |
+| `year_month` | TEXT | Year and month of issuance (YYYY-MM) | "2024-06" |
+| `fiscal_year` | INTEGER | Federal fiscal year | 2024 |
+| `visa_class` | TEXT | Type of visa issued | "H-1B", "F-1", "B-1/B-2", "L-1A", "IR-1" |
+| `visa_category` | TEXT | Broader category | "nonimmigrant", "immigrant" |
+| `embassy_consulate` | TEXT | Issuing post location | "Mumbai", "Ciudad Juarez", "London" |
+| `country_of_nationality` | TEXT | Applicant's nationality | "India", "Mexico", "China" |
+| `issuance_count` | INTEGER | Number of visas issued | 8523 |
+| `source_file` | TEXT | Original file name | "FY2024_NIV_Detail.xlsx" |
+| `source_url` | TEXT | Download URL | "https://travel.state.gov/..." |
+| `date_retrieved` | TEXT | When we downloaded it | "2025-01-15" |
+
+**Notes:**
+- Monthly State Dept data should NOT be summed for fiscal year totals (use Annual Report instead)
+- Border Crossing Cards (BCCs) are counted separately in some reports
+
+---
+
+## Table 3: `visa_refusals`
+
+**Description:** Visa applications that were refused, with refusal rates where available.
+
+| Column Name | Data Type | Description | Example |
+|-------------|-----------|-------------|---------|
+| `id` | INTEGER | Unique row identifier | 1, 2, 3... |
+| `fiscal_year` | INTEGER | Federal fiscal year | 2024 |
+| `visa_class` | TEXT | Type of visa applied for | "H-1B", "F-1", "B-1/B-2" |
+| `country_of_nationality` | TEXT | Applicant's nationality (B-visa only) | "Nigeria", "Pakistan" |
+| `applications` | INTEGER | Total applications received | 50000 |
+| `issuances` | INTEGER | Applications approved | 42000 |
+| `refusals` | INTEGER | Applications denied | 8000 |
+| `refusal_rate` | REAL | Percentage refused (0.00 to 100.00) | 16.00 |
+| `refusal_reason` | TEXT | INA section if known | "214(b)", "221(g)", "212(a)" |
+| `source_file` | TEXT | Original file name | "FY2024_NIV_Workload.pdf" |
+| `source_url` | TEXT | Download URL | "https://travel.state.gov/..." |
+| `date_retrieved` | TEXT | When we downloaded it | "2025-01-15" |
+
+**Notes:**
+- Refusal rates by nationality only available for B-1/B-2 visas
+- Other visa classes only have aggregate (worldwide) refusal rates
+- 221(g) = administrative processing, 214(b) = insufficient ties to home country
+
+---
+
+## Table 4: `inadmissibles`
+
+**Description:** People encountered at ports of entry who were found inadmissible (denied entry).
+
+| Column Name | Data Type | Description | Example |
+|-------------|-----------|-------------|---------|
+| `id` | INTEGER | Unique row identifier | 1, 2, 3... |
+| `year_month` | TEXT | Year and month (YYYY-MM) | "2024-08" |
+| `fiscal_year` | INTEGER | Federal fiscal year | 2024 |
+| `encounter_type` | TEXT | How they were processed | "OFO Inadmissible", "Expedited Removal", "Withdrawal" |
+| `country_of_citizenship` | TEXT | Person's nationality | "Guatemala", "India" |
+| `demographic_group` | TEXT | If available | "Single Adult", "Family Unit", "Unaccompanied Child" |
+| `encounter_count` | INTEGER | Number of encounters | 2340 |
+| `source_file` | TEXT | Original file name | "cbp_nationwide_encounters_fy24.csv" |
+| `source_url` | TEXT | Download URL | "https://www.cbp.gov/..." |
+| `date_retrieved` | TEXT | When we downloaded it | "2025-01-15" |
+
+**Notes:**
+- OFO = Office of Field Operations (ports of entry)
+- Does NOT include Border Patrol (USBP) apprehensions between ports
+- Port-level denial data is NOT publicly available (only aggregate)
+
+---
+
+## Table 5: `overstays`
+
+**Description:** Annual overstay statistics by country, from DHS Entry/Exit reports.
+
+| Column Name | Data Type | Description | Example |
+|-------------|-----------|-------------|---------|
+| `id` | INTEGER | Unique row identifier | 1, 2, 3... |
+| `fiscal_year` | INTEGER | Federal fiscal year | 2024 |
+| `country` | TEXT | Country of nationality | "Brazil", "Nigeria" |
+| `expected_departures` | INTEGER | People expected to leave that year | 125000 |
+| `in_country_overstays` | INTEGER | Still in US past authorized stay | 5200 |
+| `overstay_rate` | REAL | Percentage who overstayed | 4.16 |
+| `visa_waiver_status` | TEXT | Whether country is in VWP | "VWP", "Non-VWP" |
+| `source_file` | TEXT | Original file name | "fy2024_entry_exit_overstay_report.pdf" |
+| `source_url` | TEXT | Download URL | "https://www.dhs.gov/..." |
+| `date_retrieved` | TEXT | When we downloaded it | "2025-01-15" |
+
+**Notes:**
+- Only covers AIR and SEA departures
+- Land border departures NOT tracked (no biometric exit system)
+- VWP overstay rate (~1.3%) is much lower than non-VWP (~7%)
+
+---
+
+## Table 6: `sources` (Metadata)
+
+**Description:** Master list of all data sources used in this project.
+
+| Column Name | Data Type | Description | Example |
+|-------------|-----------|-------------|---------|
+| `source_id` | INTEGER | Unique identifier | 1, 2, 3... |
+| `source_name` | TEXT | Short name for the source | "NIV_Detail_Tables" |
+| `agency` | TEXT | Publishing agency | "State Department" |
+| `url` | TEXT | Where to download | "https://travel.state.gov/..." |
+| `format` | TEXT | File format | "Excel", "CSV", "PDF" |
+| `update_frequency` | TEXT | How often it's updated | "Monthly", "Annual" |
+| `time_coverage` | TEXT | Years available | "FY1997-FY2024" |
+| `last_checked` | TEXT | When we last verified the source | "2025-01-15" |
+| `notes` | TEXT | Any important caveats | "Do not aggregate monthly for FY totals" |
+
+---
+
+## Standard Values
+
+### Visa Classes (admission_class / visa_class)
+Use these standardized codes:
+
+| Code | Full Name |
+|------|-----------|
+| H-1B | Specialty Occupation Worker |
+| H-2A | Temporary Agricultural Worker |
+| H-2B | Temporary Non-Agricultural Worker |
+| H-4 | Dependent of H-1B/H-2 |
+| F-1 | Academic Student |
+| F-2 | Dependent of F-1 |
+| J-1 | Exchange Visitor |
+| J-2 | Dependent of J-1 |
+| L-1A | Intracompany Transferee (Manager) |
+| L-1B | Intracompany Transferee (Specialized Knowledge) |
+| L-2 | Dependent of L-1 |
+| B-1 | Business Visitor |
+| B-2 | Tourist/Visitor |
+| B-1/B-2 | Combined Business/Tourist |
+| O-1 | Extraordinary Ability |
+| E-2 | Treaty Investor |
+| K-1 | Fiancé(e) of US Citizen |
+| IR-1 | Immediate Relative (Spouse) |
+| IR-2 | Immediate Relative (Child) |
+| LPR | Lawful Permanent Resident (Green Card) |
+| US_CITIZEN | United States Citizen |
+| VWP | Visa Waiver Program (ESTA) |
+
+### Country Codes
+Use ISO 3166-1 alpha-3 codes when possible:
+
+| Code | Country |
+|------|---------|
+| IND | India |
+| CHN | China |
+| MEX | Mexico |
+| PHL | Philippines |
+| VNM | Vietnam |
+| BRA | Brazil |
+| NGA | Nigeria |
+| GBR | United Kingdom |
+| CAN | Canada |
+| KOR | South Korea |
+
+Full list: https://en.wikipedia.org/wiki/ISO_3166-1_alpha-3
+
+---
+
+## Data Quality Notes
+
+1. **Duplicates:** Same person traveling multiple times = counted multiple times in arrivals
+2. **Land border gaps:** No biometric exit at land borders; overstay data incomplete for Canada/Mexico travelers
+3. **Monthly vs Annual:** State Dept monthly data uses different methodology than annual reports — don't sum monthly for FY totals
+4. **Lag time:** CBP data has ~45-day publication lag; USCIS has ~90-day lag
+5. **Nationality vs Citizenship:** Some sources use country of residence, others use citizenship — we standardize to citizenship
+
+---
+
+*Last updated: 2025-12-31  
+*Maintained by: DataForge365
