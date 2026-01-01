@@ -1,0 +1,150 @@
+version 1.0, 12/31/2025
+
+# US Immigration Data Project - Progress Checkpoint
+
+> **Purpose:** This document tracks project progress. Save it to your repo at `docs/project_checkpoint.md` so you can resume work in a new chat if needed.
+
+---
+
+## Project Overview
+
+**Goal:** Build a free, public platform showing US immigration data — arrivals, visas, denials by country, port, and visa type.
+
+**Repository:** github.com/DataForge365/US-Immigration-Data
+
+**License:** Creative Commons Attribution 4.0 (CC BY 4.0)
+
+---
+
+## Completed Steps ✅
+
+### Phase 1: GitHub Setup
+- [x] Created GitHub repository (public)
+- [x] Added folder structure:
+  - `data/raw/` — Original downloaded files
+  - `data/processed/` — Cleaned/standardized CSVs
+  - `data/consolidated/` — Final merged datasets
+  - `scripts/` — Python code for scraping/cleaning
+  - `docs/` — Documentation
+  - `database/` — SQLite database
+- [x] Updated LICENSE to CC BY 4.0
+- [x] Created `docs/data_dictionary.md` with full data model
+
+### Phase 2: Local Environment
+- [x] VS Code installed with Python support
+- [x] GitHub Copilot available
+
+---
+
+## Next Steps To Do 🔲
+
+### Immediate (Phase 2 continued):
+- [ ] Install Python extensions in VS Code (Python, Jupyter)
+- [ ] Clone GitHub repo to local Mac
+- [ ] Set up Python virtual environment
+- [ ] Install required packages (pandas, requests, openpyxl, sqlite3)
+- [ ] Create first Jupyter notebook for data exploration
+
+### Data Collection (Phase 3):
+- [ ] Download first priority dataset: State Dept NIV Detail Tables
+- [ ] Download second priority: DHS Yearbook Tables 25-32
+- [ ] Download third priority: I-94 Historical Data
+- [ ] Save raw files to `data/raw/`
+
+### Data Processing (Phase 4):
+- [ ] Write cleaning script for NIV data
+- [ ] Standardize country codes (ISO 3166-1 alpha-3)
+- [ ] Standardize visa class codes
+- [ ] Export cleaned CSVs to `data/processed/`
+
+### Database (Phase 5):
+- [ ] Create SQLite database: `database/immigration.db`
+- [ ] Load arrivals table
+- [ ] Load visa_issuances table
+- [ ] Load visa_refusals table
+- [ ] Create sources metadata table
+
+### Visualization (Phase 6):
+- [ ] Deploy Datasette for public access
+- [ ] Create basic charts/dashboards
+
+---
+
+## Tech Stack
+
+| Layer | Tool | Status |
+|-------|------|--------|
+| Storage | GitHub | ✅ Set up |
+| Code Editor | VS Code | ✅ Installed |
+| Language | Python 3.x | 🔲 Verify version |
+| Data Processing | pandas | 🔲 Install |
+| Database | SQLite | 🔲 Create |
+| Visualization | Datasette | 🔲 Later |
+| Hosting | Vercel/Fly.io | 🔲 Later |
+
+---
+
+## Key Data Sources (Priority Order)
+
+1. **State Dept NIV Detail Tables** (FY1997-2024)
+   - URL: https://travel.state.gov/content/dam/visas/Statistics/Non-Immigrant-Statistics/NIVDetailTables/FYs97-24_NIVDetailTable.xlsx
+   - Format: Excel
+   - Contains: All visa issuances by class × nationality
+
+2. **DHS Yearbook Tables 25-32**
+   - URL: https://ohss.dhs.gov/topics/immigration/yearbook
+   - Format: Excel/PDF
+   - Contains: Admissions by visa class, country, port, month, demographics
+
+3. **I-94 Historical Data**
+   - URL: https://www.trade.gov/i-94-arrivals-historical-data
+   - Format: Excel
+   - Contains: Monthly arrivals by country, visa type, port
+
+4. **Full source inventory:** See the CSV artifact created earlier in chat or `Immigration Data Sources Master Inventory v2.csv`
+
+---
+
+## Data Model Summary
+
+**5 Main Tables:**
+1. `arrivals` — People entering US at ports of entry
+2. `visa_issuances` — Visas issued by embassies
+3. `visa_refusals` — Denied visa applications
+4. `inadmissibles` — People denied at ports of entry
+5. `overstays` — People who stayed past authorization
+
+**Full schema:** See `docs/data_dictionary.md` in repo
+
+---
+
+## Commands Reference (for later)
+
+```bash
+# Clone repo to your Mac (run in Terminal)
+cd ~/Documents
+git clone https://github.com/DataForge365/US-Immigration-Data.git
+cd US-Immigration-Data
+
+# Create Python virtual environment
+python3 -m venv venv
+source venv/bin/activate
+
+# Install packages
+pip install pandas openpyxl requests jupyter
+
+# Start Jupyter in VS Code
+# Just open a .ipynb file and VS Code handles it
+```
+
+---
+
+## If Starting a New Chat
+
+Copy this message to Claude:
+
+> "I'm working on a US immigration data project. Here's my progress checkpoint: [paste contents of this file]. I have VS Code set up with Python. My next step is [X]. Please continue helping me from there."
+
+---
+
+*Last updated: December 31, 2024*
