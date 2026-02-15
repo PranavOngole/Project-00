@@ -13,7 +13,7 @@ Process US immigration datasets into clean, queryable formats for visualization.
 ## Technical Stack
 - **Database**: DuckDB
 - **Processing**: Python 3.13 + pandas
-- **File handling**: openpyxl for Excel
+- **File handlin g**: openpyxl for Excel
 - **Output**: CSV (processed), Parquet (final)
 
 ## Code Standards
