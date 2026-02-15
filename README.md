@@ -4,7 +4,7 @@
 
 **One AI agent. 27 years of messy government data. Zero manual wrangling.**
 
-🔴 [Live Dashboard](https://https://pranavongole.github.io/Project-00/dashboard.html)
+🔴 [Live Dashboard](https://https://pranavongole.github.io/Project-00/)
 ---
 
 ## What This Is
