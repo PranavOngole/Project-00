@@ -15,17 +15,17 @@ DB_PATH = Path(__file__).parent.parent / "database" / "immigration.duckdb"
 OUTPUT_PATH = Path(__file__).parent.parent / "docs" / "dashboard.html"
 
 COLORS = [
-    "#3B82F6", "#10B981", "#EF4444", "#8B5CF6", "#06B6D4",
-    "#EC4899", "#84CC16", "#FB923C", "#A78BFA", "#22D3EE",
+    "#64748B", "#7C9885", "#B87070", "#8B7BA8", "#5E8B9A",
+    "#A8788B", "#8A9B6C", "#C4A35A", "#7B8FA8", "#6C9B8A",
 ]
-BG = "#09090b"
-CARD = "#18181b"
-TEXT = "#d4d4d8"
-GRID = "#27272a"
-ACCENT = "#3B82F6"
-ACCENT2 = "#10B981"
-RED = "#EF4444"
-GOLD = "#F59E0B"
+BG = "#0C0F14"
+CARD = "#151921"
+TEXT = "#C8CCD4"
+GRID = "#1E2530"
+ACCENT = "#64748B"
+ACCENT2 = "#7C9885"
+RED = "#B87070"
+GOLD = "#C4A35A"
 
 CHART_LAYOUT_BASE = dict(
     plot_bgcolor=CARD, paper_bgcolor="rgba(0,0,0,0)",
@@ -225,12 +225,12 @@ def chart_h1b_top10(df):
         title=dict(text="H-1B Visa Issuances — Top 10 Countries (FY1997–2024)", font=dict(size=18, color=TEXT), x=0.5),
         updatemenus=[dict(buttons=buttons, direction="down", showactive=True,
             x=0.0, xanchor="left", y=1.22, yanchor="top",
-            bgcolor="#1e1e21", bordercolor="rgba(59,130,246,0.35)", font=dict(color=TEXT, size=11), active=0)],
+            bgcolor="#1A1F2A", bordercolor="rgba(100,116,139,0.35)", font=dict(color=TEXT, size=11), active=0)],
         xaxis=dict(title="Fiscal Year", gridcolor=GRID, dtick=2, color=TEXT),
         yaxis=dict(title="Visas Issued", gridcolor=GRID, color=TEXT,
             tickvals=list(range(0, 200001, 25000)),
             ticktext=[f"{v//1000}K" for v in range(0, 200001, 25000)]),
-        legend=dict(bgcolor="rgba(24,24,27,0.9)", bordercolor=GRID, borderwidth=1, font=dict(size=10)),
+        legend=dict(bgcolor="rgba(21,25,33,0.9)", bordercolor=GRID, borderwidth=1, font=dict(size=10)),
         height=520, margin=dict(l=65, r=25, t=100, b=45),
     )
     return make_chart(fig)
@@ -239,7 +239,7 @@ def chart_h1b_top10(df):
 def chart_india_china(df):
     """India vs China H-1B filled area."""
     fig = go.Figure()
-    cfg = {"India": (RED, "rgba(239,68,68,0.15)"), "China": (ACCENT, "rgba(59,130,246,0.15)")}
+    cfg = {"India": (RED, "rgba(184,112,112,0.15)"), "China": (ACCENT, "rgba(100,116,139,0.15)")}
     for country, (color, fill) in cfg.items():
         cd = df[df["country"] == country]
         fig.add_trace(go.Scatter(
@@ -254,7 +254,7 @@ def chart_india_china(df):
         yaxis=dict(title="H-1B Visas Issued", gridcolor=GRID, color=TEXT,
             tickvals=list(range(0, 175001, 25000)),
             ticktext=[f"{v//1000}K" for v in range(0, 175001, 25000)]),
-        legend=dict(bgcolor="rgba(24,24,27,0.9)", bordercolor=GRID, borderwidth=1, font=dict(size=13),
+        legend=dict(bgcolor="rgba(21,25,33,0.9)", bordercolor=GRID, borderwidth=1, font=dict(size=13),
             orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5),
         height=460,
     )
@@ -280,7 +280,7 @@ def chart_workload(df):
             tickvals=list(range(0, 10000001, 2000000)),
             ticktext=[f"{v//1000000}M" for v in range(0, 10000001, 2000000)]),
         yaxis=dict(color=TEXT, tickfont=dict(size=10)),
-        legend=dict(bgcolor="rgba(24,24,27,0.9)", bordercolor=GRID, borderwidth=1, font=dict(size=12),
+        legend=dict(bgcolor="rgba(21,25,33,0.9)", bordercolor=GRID, borderwidth=1, font=dict(size=12),
             orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5),
         height=520, margin=dict(l=80, r=25, t=80, b=45),
     )
@@ -308,7 +308,7 @@ def chart_bvisa_workload(df):
             tickvals=list(range(0, 1500001, 250000)),
             ticktext=[f"{v//1000}K" for v in range(0, 1500001, 250000)]),
         yaxis=dict(color=TEXT, tickfont=dict(size=10)),
-        legend=dict(bgcolor="rgba(24,24,27,0.9)", bordercolor=GRID, borderwidth=1, font=dict(size=12),
+        legend=dict(bgcolor="rgba(21,25,33,0.9)", bordercolor=GRID, borderwidth=1, font=dict(size=12),
             orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5),
         height=520, margin=dict(l=160, r=25, t=80, b=45),
     )
@@ -451,7 +451,7 @@ def build_html(data, charts):
 :root {{
   --bg: {BG}; --card: {CARD}; --text: {TEXT}; --grid: {GRID};
   --accent: {ACCENT}; --accent2: {ACCENT2}; --red: {RED}; --gold: {GOLD};
-  --glass: rgba(24,24,27,0.8); --glass-border: rgba(59,130,246,0.12);
+  --glass: rgba(21,25,33,0.8); --glass-border: rgba(100,116,139,0.12);
 }}
 * {{ margin:0; padding:0; box-sizing:border-box; }}
 html {{ scroll-behavior: smooth; }}
@@ -461,8 +461,8 @@ body {{ background:var(--bg); color:var(--text); font-family:'Inter',system-ui,s
 body::before {{
   content:''; position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0;
   background-image:
-    linear-gradient(rgba(39,39,42,0.3) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(39,39,42,0.3) 1px, transparent 1px);
+    linear-gradient(rgba(30,37,48,0.3) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(30,37,48,0.3) 1px, transparent 1px);
   background-size: 60px 60px;
   opacity: 0.4;
 }}
@@ -474,8 +474,8 @@ body::before {{
 .hero h1 {{ font-size:3rem; font-weight:900; letter-spacing:-1.5px;
   background:linear-gradient(135deg,#fff 0%,{ACCENT} 50%,{ACCENT2} 100%);
   -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }}
-.hero .subtitle {{ font-size:1.1rem; color:#71717a; margin-top:8px; font-weight:300; max-width:700px; margin-left:auto; margin-right:auto; }}
-.hero .version-badge {{ display:inline-block; margin-top:12px; background:rgba(59,130,246,0.1); border:1px solid rgba(59,130,246,0.25);
+.hero .subtitle {{ font-size:1.1rem; color:#7A8494; margin-top:8px; font-weight:300; max-width:700px; margin-left:auto; margin-right:auto; }}
+.hero .version-badge {{ display:inline-block; margin-top:12px; background:rgba(100,116,139,0.1); border:1px solid rgba(100,116,139,0.25);
   border-radius:20px; padding:4px 16px; font-size:0.7rem; font-weight:600; color:{ACCENT}; letter-spacing:1px; text-transform:uppercase; }}
 
 /* === Stats Row === */
@@ -487,53 +487,53 @@ body::before {{
 .stat-card .value {{ font-size:2rem; font-weight:800;
   background:linear-gradient(135deg,{ACCENT},{ACCENT2});
   -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }}
-.stat-card .label {{ font-size:0.7rem; color:#52525b; text-transform:uppercase; letter-spacing:1.5px; margin-top:4px; font-weight:600; }}
+.stat-card .label {{ font-size:0.7rem; color:#5A6577; text-transform:uppercase; letter-spacing:1.5px; margin-top:4px; font-weight:600; }}
 
 /* === Insight Banner === */
 .insight {{ max-width:1200px; margin:24px auto; padding:0 20px; }}
-.insight-card {{ background:linear-gradient(135deg,rgba(59,130,246,0.06),rgba(16,185,129,0.04));
-  border:1px solid rgba(59,130,246,0.15); border-radius:16px; padding:24px 32px;
+.insight-card {{ background:linear-gradient(135deg,rgba(100,116,139,0.06),rgba(124,152,133,0.04));
+  border:1px solid rgba(100,116,139,0.15); border-radius:16px; padding:24px 32px;
   display:flex; align-items:center; gap:20px; flex-wrap:wrap; }}
 .insight-icon {{ font-size:2.4rem; }}
 .insight-body {{ flex:1; min-width:200px; }}
 .insight-body h3 {{ font-size:1.15rem; font-weight:700; color:#fff; margin-bottom:4px; }}
-.insight-body p {{ font-size:0.9rem; color:#71717a; line-height:1.6; }}
+.insight-body p {{ font-size:0.9rem; color:#7A8494; line-height:1.6; }}
 .insight-body strong {{ color:var(--accent); }}
 .pills {{ display:flex; gap:12px; flex-wrap:wrap; }}
-.pill {{ background:rgba(59,130,246,0.08); border:1px solid rgba(59,130,246,0.15);
+.pill {{ background:rgba(100,116,139,0.08); border:1px solid rgba(100,116,139,0.15);
   border-radius:20px; padding:8px 20px; text-align:center; min-width:100px; }}
 .pill .pv {{ font-size:1.1rem; font-weight:700; color:#fff; }}
-.pill .pl {{ font-size:0.6rem; color:#52525b; text-transform:uppercase; letter-spacing:1px; margin-top:2px; }}
+.pill .pl {{ font-size:0.6rem; color:#5A6577; text-transform:uppercase; letter-spacing:1px; margin-top:2px; }}
 
 /* === Section === */
 .section {{ max-width:1200px; margin:0 auto; padding:0 20px; }}
 .section-header {{ padding:40px 0 16px; }}
 .section-header .tag {{ font-size:0.65rem; text-transform:uppercase; letter-spacing:2.5px; color:var(--accent); font-weight:700; }}
 .section-header h2 {{ font-size:1.6rem; font-weight:700; color:#fff; margin-top:4px; }}
-.section-header p {{ font-size:0.9rem; color:#71717a; margin-top:4px; max-width:700px; }}
+.section-header p {{ font-size:0.9rem; color:#7A8494; margin-top:4px; max-width:700px; }}
 
 /* === Chart Card === */
 .chart-card {{ background:var(--glass); border:1px solid var(--glass-border); border-radius:16px;
   padding:24px; margin-bottom:24px; transition:border-color 0.3s ease; }}
-.chart-card:hover {{ border-color:rgba(59,130,246,0.25); }}
+.chart-card:hover {{ border-color:rgba(100,116,139,0.25); }}
 
 /* === Chart Controls & Dropdowns === */
 .chart-controls {{ display:flex; gap:12px; margin-bottom:16px; flex-wrap:wrap; align-items:end; }}
 .chart-ctrl {{ display:flex; flex-direction:column; gap:4px; }}
 .chart-ctrl label {{ font-size:0.65rem; text-transform:uppercase; letter-spacing:1.5px; color:{ACCENT}; font-weight:600; }}
 .chart-ctrl select {{
-  background:#1e1e21; color:var(--text); border:1.5px solid rgba(59,130,246,0.35); border-radius:8px;
+  background:#1A1F2A; color:var(--text); border:1.5px solid rgba(100,116,139,0.35); border-radius:8px;
   padding:8px 36px 8px 12px; font-size:0.85rem; font-family:inherit; cursor:pointer; min-width:180px;
   -webkit-appearance:none; appearance:none;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%233B82F6' stroke-width='2' fill='none'/%3E%3C/svg%3E");
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%2364748B' stroke-width='2' fill='none'/%3E%3C/svg%3E");
   background-repeat:no-repeat; background-position:right 12px center; background-size:12px;
   transition:border-color 0.2s, box-shadow 0.2s;
 }}
-.chart-ctrl select:hover {{ border-color:rgba(59,130,246,0.6); box-shadow:0 0 12px rgba(59,130,246,0.08); }}
-.chart-ctrl select:focus {{ outline:none; border-color:{ACCENT}; box-shadow:0 0 0 3px rgba(59,130,246,0.15); }}
+.chart-ctrl select:hover {{ border-color:rgba(100,116,139,0.6); box-shadow:0 0 12px rgba(100,116,139,0.08); }}
+.chart-ctrl select:focus {{ outline:none; border-color:{ACCENT}; box-shadow:0 0 0 3px rgba(100,116,139,0.15); }}
 .chart-ctrl select[multiple] {{ min-height:100px; background-image:none; padding-right:12px; }}
-.chart-note {{ font-size:0.78rem; color:#52525b; margin-top:12px; line-height:1.5; padding:12px 16px;
-  background:rgba(39,39,42,0.5); border-radius:8px; border-left:3px solid var(--accent); }}
+.chart-note {{ font-size:0.78rem; color:#5A6577; margin-top:12px; line-height:1.5; padding:12px 16px;
+  background:rgba(30,37,48,0.5); border-radius:8px; border-left:3px solid var(--accent); }}
 
 /* === Knowledge Cards === */
 .know-grid {{ display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:16px; margin:16px 0 32px; }}
@@ -542,10 +542,10 @@ body::before {{
 .know-card:hover {{ transform:translateY(-3px); border-color:var(--accent); }}
 .know-card .kc-tag {{ font-size:0.6rem; text-transform:uppercase; letter-spacing:2px; font-weight:700; margin-bottom:8px; }}
 .know-card .kc-tag.work {{ color:{RED}; }} .know-card .kc-tag.student {{ color:{ACCENT2}; }}
-.know-card .kc-tag.tourist {{ color:{GOLD}; }} .know-card .kc-tag.family {{ color:#EC4899; }}
-.know-card .kc-tag.exchange {{ color:#8B5CF6; }} .know-card .kc-tag.other {{ color:#06B6D4; }}
+.know-card .kc-tag.tourist {{ color:{GOLD}; }} .know-card .kc-tag.family {{ color:#A8788B; }}
+.know-card .kc-tag.exchange {{ color:#8B7BA8; }} .know-card .kc-tag.other {{ color:#5E8B9A; }}
 .know-card h4 {{ font-size:1rem; font-weight:700; color:#fff; margin-bottom:6px; }}
-.know-card p {{ font-size:0.82rem; color:#71717a; line-height:1.5; }}
+.know-card p {{ font-size:0.82rem; color:#7A8494; line-height:1.5; }}
 .know-card .kc-stat {{ font-size:0.75rem; color:var(--accent); font-weight:600; margin-top:8px; }}
 
 /* === Fun Facts === */
@@ -554,32 +554,32 @@ body::before {{
 .fact-card .fact-number {{ font-size:1.8rem; font-weight:800;
   background:linear-gradient(135deg,{ACCENT},{ACCENT2});
   -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }}
-.fact-card .fact-label {{ font-size:0.7rem; color:#52525b; text-transform:uppercase; letter-spacing:1.5px; font-weight:600; margin-top:2px; }}
-.fact-card .fact-desc {{ font-size:0.82rem; color:#71717a; margin-top:8px; line-height:1.5; }}
+.fact-card .fact-label {{ font-size:0.7rem; color:#5A6577; text-transform:uppercase; letter-spacing:1.5px; font-weight:600; margin-top:2px; }}
+.fact-card .fact-desc {{ font-size:0.82rem; color:#7A8494; margin-top:8px; line-height:1.5; }}
 
 /* === AI Stats === */
 .ai-stats-grid {{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; margin:16px 0 32px; }}
-.ai-stat-card {{ background:var(--glass); border:1px solid rgba(139,92,246,0.15); border-radius:14px; padding:20px 24px;
+.ai-stat-card {{ background:var(--glass); border:1px solid rgba(139,123,168,0.15); border-radius:14px; padding:20px 24px;
   transition:transform 0.3s ease, border-color 0.3s ease; }}
-.ai-stat-card:hover {{ transform:translateY(-3px); border-color:rgba(139,92,246,0.4); }}
-.ai-stat-card .ai-label {{ font-size:0.6rem; text-transform:uppercase; letter-spacing:2px; color:#8B5CF6; font-weight:700; margin-bottom:6px; }}
+.ai-stat-card:hover {{ transform:translateY(-3px); border-color:rgba(139,123,168,0.4); }}
+.ai-stat-card .ai-label {{ font-size:0.6rem; text-transform:uppercase; letter-spacing:2px; color:#8B7BA8; font-weight:700; margin-bottom:6px; }}
 .ai-stat-card .ai-value {{ font-size:1.1rem; font-weight:700; color:#fff; }}
-.ai-stat-card .ai-detail {{ font-size:0.78rem; color:#52525b; margin-top:4px; line-height:1.4; }}
+.ai-stat-card .ai-detail {{ font-size:0.78rem; color:#5A6577; margin-top:4px; line-height:1.4; }}
 
 /* === Explorer === */
 .explorer-controls {{ display:flex; gap:16px; margin-bottom:16px; flex-wrap:wrap; align-items:end; }}
 .ctrl {{ display:flex; flex-direction:column; gap:6px; }}
 .ctrl label {{ font-size:0.7rem; text-transform:uppercase; letter-spacing:1.5px; color:{ACCENT}; font-weight:600; }}
 .ctrl select {{
-  background:#1e1e21; color:var(--text); border:1.5px solid rgba(59,130,246,0.35); border-radius:10px;
+  background:#1A1F2A; color:var(--text); border:1.5px solid rgba(100,116,139,0.35); border-radius:10px;
   padding:10px 36px 10px 14px; font-size:0.9rem; font-family:inherit; cursor:pointer; min-width:200px;
   -webkit-appearance:none; appearance:none;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%233B82F6' stroke-width='2' fill='none'/%3E%3C/svg%3E");
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%2364748B' stroke-width='2' fill='none'/%3E%3C/svg%3E");
   background-repeat:no-repeat; background-position:right 12px center; background-size:12px;
   transition:border-color 0.2s, box-shadow 0.2s;
 }}
-.ctrl select:hover {{ border-color:rgba(59,130,246,0.6); box-shadow:0 0 12px rgba(59,130,246,0.08); }}
-.ctrl select:focus {{ outline:none; border-color:{ACCENT}; box-shadow:0 0 0 3px rgba(59,130,246,0.15); }}
+.ctrl select:hover {{ border-color:rgba(100,116,139,0.6); box-shadow:0 0 12px rgba(100,116,139,0.08); }}
+.ctrl select:focus {{ outline:none; border-color:{ACCENT}; box-shadow:0 0 0 3px rgba(100,116,139,0.15); }}
 .ctrl select[multiple] {{ min-height:120px; background-image:none; padding-right:14px; }}
 
 /* === Heatmap === */
@@ -588,33 +588,33 @@ body::before {{
 .heatmap-table th {{ padding:10px 12px; text-align:center; color:{ACCENT}; font-weight:600;
   font-size:0.65rem; text-transform:uppercase; letter-spacing:1px; border-bottom:1px solid var(--grid); }}
 .heatmap-table th:first-child {{ text-align:left; }}
-.heatmap-table td {{ padding:8px 12px; text-align:center; border-bottom:1px solid rgba(39,39,42,0.5); }}
+.heatmap-table td {{ padding:8px 12px; text-align:center; border-bottom:1px solid rgba(30,37,48,0.5); }}
 .heatmap-table td:first-child {{ text-align:left; color:#fff; font-weight:600; font-size:0.82rem; }}
-.heatmap-table tr:hover {{ background:rgba(59,130,246,0.05); }}
+.heatmap-table tr:hover {{ background:rgba(100,116,139,0.05); }}
 .hm-cell {{ display:inline-block; padding:4px 10px; border-radius:6px; font-weight:600; font-size:0.78rem; min-width:50px; }}
 
 /* === Pipeline Architecture === */
 .pipeline {{ margin:24px 0; }}
 .pipeline-layer {{ margin:8px 0; }}
-.layer-label {{ font-size:0.7rem; text-transform:uppercase; letter-spacing:2px; font-weight:700; margin-bottom:10px; color:#71717a; }}
+.layer-label {{ font-size:0.7rem; text-transform:uppercase; letter-spacing:2px; font-weight:700; margin-bottom:10px; color:#7A8494; }}
 .layer-nodes {{ display:flex; gap:12px; flex-wrap:wrap; }}
 .p-node {{ background:var(--glass); border-radius:10px; padding:14px 18px; font-size:0.85rem;
   font-weight:600; color:#fff; flex:1; min-width:180px; max-width:280px; }}
-.p-node span {{ display:block; font-size:0.72rem; color:#52525b; font-weight:400; margin-top:4px; }}
-.p-node.source {{ border:1.5px solid #8B5CF6; }}
+.p-node span {{ display:block; font-size:0.72rem; color:#5A6577; font-weight:400; margin-top:4px; }}
+.p-node.source {{ border:1.5px solid #8B7BA8; }}
 .p-node.etl {{ border:1.5px solid {GOLD}; }}
 .p-node.table {{ border:1.5px solid {ACCENT}; }}
 .p-node.table.primary {{ border:1.5px solid {ACCENT2}; }}
 .p-node.output {{ border:1.5px solid {ACCENT2}; }}
-.pipeline-arrow {{ text-align:center; color:#52525b; font-size:1.4rem; margin:6px 0; letter-spacing:8px; }}
+.pipeline-arrow {{ text-align:center; color:#5A6577; font-size:1.4rem; margin:6px 0; letter-spacing:8px; }}
 .rel-grid {{ display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:16px; margin:16px 0 32px; }}
 .rel-card {{ background:var(--glass); border:1px solid var(--glass-border); border-radius:14px; padding:18px 22px; }}
 .rel-card h4 {{ font-size:0.9rem; font-weight:700; color:#fff; margin-bottom:6px; }}
-.rel-card p {{ font-size:0.78rem; color:#71717a; line-height:1.5; }}
-.rel-card code {{ font-size:0.72rem; color:{ACCENT}; background:rgba(59,130,246,0.08); padding:2px 6px; border-radius:4px; }}
+.rel-card p {{ font-size:0.78rem; color:#7A8494; line-height:1.5; }}
+.rel-card code {{ font-size:0.72rem; color:{ACCENT}; background:rgba(100,116,139,0.08); padding:2px 6px; border-radius:4px; }}
 
 /* === Footer === */
-.footer {{ text-align:center; padding:40px 20px; color:#27272a; font-size:0.8rem; max-width:1200px; margin:0 auto;
+.footer {{ text-align:center; padding:40px 20px; color:#1E2530; font-size:0.8rem; max-width:1200px; margin:0 auto;
   border-top:1px solid var(--grid); }}
 .footer a {{ color:var(--accent); text-decoration:none; }}
 .footer a:hover {{ text-decoration:underline; }}
@@ -987,50 +987,56 @@ body::before {{
   <div class="section-header">
     <div class="tag">Architecture</div>
     <h2>Data Model &amp; Pipeline Architecture</h2>
-    <p>From raw government PDFs and Excel files to interactive dashboard — here's how the data flows through 3 ETL scripts, 6 DuckDB tables, and one Python generator.</p>
+    <p>From raw government PDFs and Excel files to interactive dashboard — 5 ETL scripts, 8 DuckDB tables, 6,000+ rows of cleaned data, and one Python generator that stitches it all together.</p>
   </div>
   <div class="chart-card">
     <div class="pipeline">
       <div class="pipeline-layer">
-        <div class="layer-label">Raw Sources</div>
+        <div class="layer-label">Raw Sources (5 files)</div>
         <div class="layer-nodes">
-          <div class="p-node source">State Dept Excel<span>FYs97-24_NIVDetailTable.xlsx — 28 sheets, one per fiscal year</span></div>
-          <div class="p-node source">NIV Workload PDF<span>FY2024 workload by visa category — 3 pages of tables</span></div>
-          <div class="p-node source">B-Visa Refusal PDF<span>FY2024 adjusted refusal rates by nationality — 7 pages</span></div>
+          <div class="p-node source">State Dept Excel<span>FYs97-24_NIVDetailTable.xlsx — 28 sheets, one per fiscal year, 5,564 rows</span></div>
+          <div class="p-node source">NIV Workload PDF<span>FY2024 workload by visa category — 3 pages, 81 visa classes</span></div>
+          <div class="p-node source">B-Visa Refusal PDF<span>FY2024 adjusted refusal rates by nationality — 7 pages, 199 countries</span></div>
+          <div class="p-node source">Table XIX PDF<span>Visa ineligibility grounds — every INA section with IV/NIV findings &amp; waivers</span></div>
+          <div class="p-node source">Table IV PDF<span>Visas issued by consular post — 220 embassies/consulates across 6 regions</span></div>
         </div>
       </div>
-      <div class="pipeline-arrow">&#x25BC; &#x25BC; &#x25BC;</div>
+      <div class="pipeline-arrow">&#x25BC; &#x25BC; &#x25BC; &#x25BC; &#x25BC;</div>
       <div class="pipeline-layer">
-        <div class="layer-label">ETL Scripts</div>
+        <div class="layer-label">ETL Scripts (5 scripts)</div>
         <div class="layer-nodes">
-          <div class="p-node etl">merge_niv_sheets.py<span>Reads 28 Excel sheets &rarr; standardizes columns &rarr; single CSV (5,564 rows)</span></div>
-          <div class="p-node etl">extract_refusal_data.py<span>pdfplumber extracts tables from PDF &rarr; cleans rates &rarr; CSV</span></div>
-          <div class="p-node etl">standardize_countries.py<span>34 name mappings across 3 tables with different naming conventions</span></div>
+          <div class="p-node etl">merge_niv_sheets.py<span>Reads 28 Excel sheets &rarr; standardizes 96 visa type names &rarr; single CSV (5,564 rows)</span></div>
+          <div class="p-node etl">extract_refusal_data.py<span>pdfplumber extracts tables from B-visa PDF &rarr; cleans rates &rarr; CSV</span></div>
+          <div class="p-node etl">standardize_countries.py<span>34 name mappings across tables — "Korea, South" &harr; "South Korea" etc.</span></div>
+          <div class="p-node etl">extract_refusal_grounds.py<span>Regex parser for Table XIX &rarr; 79 INA sections with finding/overcome counts</span></div>
+          <div class="p-node etl">extract_consular_posts.py<span>Text extraction for Table IV &rarr; 220 posts with IV/NIV/BCC breakdowns</span></div>
         </div>
       </div>
-      <div class="pipeline-arrow">&#x25BC; &#x25BC; &#x25BC;</div>
+      <div class="pipeline-arrow">&#x25BC; &#x25BC; &#x25BC; &#x25BC; &#x25BC;</div>
       <div class="pipeline-layer">
-        <div class="layer-label">DuckDB Tables</div>
+        <div class="layer-label">DuckDB Tables (8 tables)</div>
         <div class="layer-nodes">
-          <div class="p-node table primary">visa_issuances<span>5,564 rows &middot; 28 FYs &times; 199 countries &middot; Primary fact table</span></div>
+          <div class="p-node table primary">visa_issuances<span>5,564 rows &middot; 28 FYs &times; 199 countries &middot; 90+ visa columns &middot; Primary fact table</span></div>
           <div class="p-node table">niv_workload<span>81 rows &middot; FY2024 applications, issued, refused by category</span></div>
           <div class="p-node table">b_visa_refusals<span>199 rows &middot; Adjusted refusal rates by nationality</span></div>
-          <div class="p-node table">country_mapping<span>34 rows &middot; Bridge table for name standardization</span></div>
+          <div class="p-node table">country_mapping<span>34 rows &middot; Bridge table for cross-source name standardization</span></div>
           <div class="p-node table">b_visa_workload_by_country<span>Derived &middot; issued &times; rate / (1 - rate) = estimated refused</span></div>
           <div class="p-node table">niv_workload_by_country<span>Derived &middot; National totals disaggregated by country proportion</span></div>
+          <div class="p-node table">visa_ineligibility_grounds<span>79 rows &middot; INA sections with IV/NIV finding &amp; overcome counts</span></div>
+          <div class="p-node table">visas_by_consular_post<span>227 rows &middot; 220 posts + 7 regional/grand totals across 6 regions</span></div>
         </div>
       </div>
       <div class="pipeline-arrow">&#x25BC;</div>
       <div class="pipeline-layer">
         <div class="layer-label">Output</div>
         <div class="layer-nodes">
-          <div class="p-node output">dashboard.html<span>Single-file static site &rarr; GitHub Pages &middot; All data embedded as JSON</span></div>
+          <div class="p-node output">dashboard.html<span>760 KB single-file static site &rarr; GitHub Pages &middot; All data embedded as JSON &middot; Zero server dependencies</span></div>
         </div>
       </div>
     </div>
   </div>
 
-  <h3 style="font-size:1.1rem;font-weight:700;color:#fff;margin:24px 0 12px;">How the 6 Tables Connect</h3>
+  <h3 style="font-size:1.1rem;font-weight:700;color:#fff;margin:24px 0 12px;">How the 8 Tables Connect</h3>
   <div class="rel-grid">
     <div class="rel-card">
       <h4>visa_issuances (Primary)</h4>
@@ -1038,7 +1044,7 @@ body::before {{
     </div>
     <div class="rel-card">
       <h4>b_visa_refusals &rarr; b_visa_workload</h4>
-      <p>Refusal rates by nationality are JOINed to B-visa issuance counts via <code>country_mapping</code>. Derived formula: <code>est_refused = issued &times; rate / (1 - rate)</code>. This is an estimate — State Dept doesn't publish per-country refusal counts.</p>
+      <p>Refusal rates by nationality JOINed to B-visa issuance counts via <code>country_mapping</code>. Derived: <code>est_refused = issued &times; rate / (1 - rate)</code>. State Dept doesn't publish per-country refusal counts — we reverse-engineer them.</p>
     </div>
     <div class="rel-card">
       <h4>niv_workload &rarr; niv_workload_by_country</h4>
@@ -1046,7 +1052,15 @@ body::before {{
     </div>
     <div class="rel-card">
       <h4>country_mapping (Bridge)</h4>
-      <p>Maps 34 different country names across tables. Example: "Korea, South" in visa_issuances matches "South Korea" in b_visa_refusals. Without this, JOINs fail silently — the worst kind of data bug.</p>
+      <p>34 name mappings across tables. "Korea, South" in visa_issuances = "South Korea" in b_visa_refusals. Without this, JOINs fail silently — the worst kind of data bug.</p>
+    </div>
+    <div class="rel-card">
+      <h4>visa_ineligibility_grounds</h4>
+      <p>79 INA statutory sections — every legal reason a visa can be denied. Each row has <code>iv_finding</code>, <code>iv_overcome</code>, <code>niv_finding</code>, <code>niv_overcome</code>. 214(b) alone = 77% of all NIV denials.</p>
+    </div>
+    <div class="rel-card">
+      <h4>visas_by_consular_post</h4>
+      <p>220 embassies &amp; consulates across 6 global regions. Each post has <code>iv_issued</code>, <code>niv_issued</code>, <code>border_crossing_cards</code>. Monterrey, Mexico processes more NIVs than any other post on Earth (681K).</p>
     </div>
   </div>
 </div>
@@ -1061,7 +1075,7 @@ body::before {{
     <div class="know-card">
       <div class="kc-tag other">Data Sources</div>
       <h4>U.S. Department of State</h4>
-      <p>All data comes from officially published State Department statistics: NIV issuance tables (FY1997–2024), NIV Workload by Visa Category (FY2024), and B-Visa Adjusted Refusal Rates by Nationality (FY2024).</p>
+      <p>All data comes from officially published State Department statistics: NIV issuance tables (FY1997–2024), NIV Workload by Category (FY2024), B-Visa Refusal Rates (FY2024), Table XIX ineligibility grounds (FY2024), and Table IV consular post issuances (FY2024). Five source files, five ETL scripts, eight DuckDB tables.</p>
     </div>
     <div class="know-card">
       <div class="kc-tag other">Estimated Refusals</div>
@@ -1082,7 +1096,7 @@ body::before {{
 <div class="footer">
   Built by <strong>Pranav Ongole</strong> | Data: U.S. Department of State |
   <a href="https://github.com/PranavOngole/Project-00">View on GitHub</a><br>
-  <span style="font-size:0.7rem;color:#27272a;margin-top:8px;display:inline-block;">DataForge365 &middot; Project 00 &middot; 2026</span>
+  <span style="font-size:0.7rem;color:#1E2530;margin-top:8px;display:inline-block;">DataForge365 &middot; Project 00 &middot; 2026</span>
 </div>
 
 <!-- ===== EMBEDDED DATA FOR CLIENT-SIDE CHARTS ===== -->
@@ -1190,7 +1204,7 @@ const COVID_TOTAL = {covid_total};
       yaxis: {{title: 'Visas Issued', gridcolor: GRID_COLOR, color: TEXT_COLOR, tickvals: tv, ticktext: tt}},
       plot_bgcolor: CARD_BG, paper_bgcolor: 'rgba(0,0,0,0)',
       font: {{color: TEXT_COLOR, family: 'Inter,system-ui,sans-serif'}},
-      legend: {{bgcolor: 'rgba(24,24,27,0.9)', bordercolor: GRID_COLOR, borderwidth: 1, font: {{size: 11}}}},
+      legend: {{bgcolor: 'rgba(21,25,33,0.9)', bordercolor: GRID_COLOR, borderwidth: 1, font: {{size: 11}}}},
       hovermode: 'x unified', margin: {{l: 65, r: 25, t: 55, b: 45}},
       annotations: annotations
     }}, {{responsive: true, displayModeBar: false}});
@@ -1219,24 +1233,24 @@ const COVID_TOTAL = {covid_total};
     const countries = d.countries.slice().reverse();
     const values = d.values.slice().reverse();
 
-    // Log-normalized color mapping: small bars get visible dark blue, large bars get bright blue
+    // Log-normalized color mapping: small bars get muted dark slate, large bars get lighter slate
     const maxVal = Math.max(...values, 1);
     const logMax = Math.log10(maxVal);
     const colors = values.map(v => {{
-      if (v <= 0) return '#1E3A5F';
+      if (v <= 0) return '#2A3444';
       const norm = Math.log10(Math.max(v, 1)) / logMax;
-      // Interpolate #1E3A5F (dark blue) -> #3B82F6 (accent blue) -> #93C5FD (light blue)
+      // Interpolate #2A3444 (dark slate) -> #64748B (slate) -> #94A3B8 (light slate)
       let r, g, b;
       if (norm < 0.5) {{
         const t = norm * 2;
-        r = Math.round(30 + t * 29);   // 30 -> 59
-        g = Math.round(58 + t * 72);   // 58 -> 130
-        b = Math.round(95 + t * 151);  // 95 -> 246
+        r = Math.round(42 + t * 58);   // 42 -> 100
+        g = Math.round(52 + t * 64);   // 52 -> 116
+        b = Math.round(68 + t * 71);   // 68 -> 139
       }} else {{
         const t = (norm - 0.5) * 2;
-        r = Math.round(59 + t * 88);   // 59 -> 147
-        g = Math.round(130 + t * 67);  // 130 -> 197
-        b = Math.round(246 + t * 7);   // 246 -> 253
+        r = Math.round(100 + t * 48);  // 100 -> 148
+        g = Math.round(116 + t * 47);  // 116 -> 163
+        b = Math.round(139 + t * 45);  // 139 -> 184
       }}
       return 'rgb(' + r + ',' + g + ',' + b + ')';
     }});
@@ -1336,7 +1350,7 @@ const COVID_TOTAL = {covid_total};
         title = 'Country not found — showing Top 20';
       }}
 
-      barColors = chartData.map(d => d.nationality === country ? GOLD_COLOR : 'rgba(59,130,246,0.4)');
+      barColors = chartData.map(d => d.nationality === country ? GOLD_COLOR : 'rgba(100,116,139,0.4)');
     }}
 
     const textLabels = chartData.map(d => d.rate.toFixed(1) + '%');
@@ -1388,7 +1402,7 @@ const COVID_TOTAL = {covid_total};
       const maxVal = Math.max(...chartData.map(d => d.niv_find), 1);
       const logMax = Math.log10(maxVal);
       barColors = chartData.map(d => {{
-        if (d.niv_find <= 0) return '#1E3A5F';
+        if (d.niv_find <= 0) return '#2A3444';
         const norm = Math.log10(Math.max(d.niv_find, 1)) / logMax;
         const r = Math.round(30 + norm * 66);
         const g = Math.round(58 + norm * 107);
@@ -1480,13 +1494,13 @@ const COVID_TOTAL = {covid_total};
   const reversed = data.slice().reverse();
 
   const regionColors = {{
-    'Africa': '#8B5CF6',
-    'East Asia and Pacific': '#06B6D4',
+    'Africa': '#8B7BA8',
+    'East Asia and Pacific': '#5E8B9A',
     'Europe and Eurasia': ACCENT_COLOR,
     'Near East': GOLD_COLOR,
-    'South and Central Asia': '#EC4899',
+    'South and Central Asia': '#A8788B',
     'Western Hemisphere': ACCENT2_COLOR,
-    'null': '#71717a'
+    'null': '#7A8494'
   }};
 
   const colors = reversed.map(d => regionColors[d.region] || ACCENT_COLOR);
@@ -1527,13 +1541,13 @@ const COVID_TOTAL = {covid_total};
     // Green (low) -> Yellow (mid) -> Red (high)
     if (rate <= 10) {{
       const t = rate / 10;
-      return 'rgba(16,185,129,' + (0.15 + t * 0.35) + ')';
+      return 'rgba(124,152,133,' + (0.15 + t * 0.35) + ')';
     }} else if (rate <= 30) {{
       const t = (rate - 10) / 20;
       return 'rgba(245,158,11,' + (0.2 + t * 0.4) + ')';
     }} else {{
       const t = Math.min((rate - 30) / 40, 1);
-      return 'rgba(239,68,68,' + (0.25 + t * 0.5) + ')';
+      return 'rgba(184,112,112,' + (0.25 + t * 0.5) + ')';
     }}
   }}
 
@@ -1556,14 +1570,14 @@ const COVID_TOTAL = {covid_total};
       const span = document.createElement('span');
       span.className = 'hm-cell';
       span.style.background = getColor(rate);
-      span.style.color = rate > 40 ? '#fff' : (rate > 20 ? '#fff' : '#d4d4d8');
+      span.style.color = rate > 40 ? '#fff' : (rate > 20 ? '#fff' : '#C8CCD4');
       span.textContent = rate.toFixed(1) + '%';
       td.appendChild(span);
       tr.appendChild(td);
     }});
     // Total issued
     const tdTotal = document.createElement('td');
-    tdTotal.style.color = '#d4d4d8';
+    tdTotal.style.color = '#C8CCD4';
     tdTotal.style.fontWeight = '600';
     tdTotal.textContent = fmtK(row.grand_total);
     tr.appendChild(tdTotal);
@@ -1600,7 +1614,7 @@ const COVID_TOTAL = {covid_total};
       yaxis:{{title:vt+' Visas Issued',gridcolor:GRID_COLOR,color:TEXT_COLOR,tickvals:tv,ticktext:tt}},
       plot_bgcolor:CARD_BG,paper_bgcolor:'rgba(0,0,0,0)',
       font:{{color:TEXT_COLOR,family:'Inter,system-ui,sans-serif'}},
-      legend:{{bgcolor:'rgba(24,24,27,0.9)',bordercolor:GRID_COLOR,borderwidth:1,font:{{size:10}}}},
+      legend:{{bgcolor:'rgba(21,25,33,0.9)',bordercolor:GRID_COLOR,borderwidth:1,font:{{size:10}}}},
       hovermode:'x unified', margin:{{l:65,r:25,t:55,b:45}}, height:460
     }},{{responsive:true,displayModeBar:false}});
   }}
