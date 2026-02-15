@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(python3 -c \"\nimport pandas as pd\ndf = pd.read_csv\\(''data/processed/visa_issuances_fy97-24.csv''\\)\n\nprint\\(''Shape:'', df.shape\\)\nprint\\(\\)\nprint\\(''Columns:''\\)\nprint\\(list\\(df.columns\\)\\)\nprint\\(\\)\nprint\\(''First 5 rows:''\\)\nprint\\(df.head\\(\\).to_string\\(\\)\\)\nprint\\(\\)\nprint\\(''Last 5 rows:''\\)\nprint\\(df.tail\\(\\).to_string\\(\\)\\)\nprint\\(\\)\n\n# Verify no region headers leaked through\nsuspect = df[df[''country''].str.contains\\(''Total|Grand|Africa|Asia|Europe|Oceania|North America|South America|Caribbean|Unknown'', case=False, na=False\\)]\nprint\\(f''Suspect rows \\(should be 0\\): {len\\(suspect\\)}''\\)\nif len\\(suspect\\) > 0:\n    print\\(suspect[''country''].unique\\(\\)\\)\nprint\\(\\)\n\n# Year distribution\nprint\\(''Rows per fiscal year:''\\)\nprint\\(df.groupby\\(''fiscal_year''\\).size\\(\\).to_string\\(\\)\\)\n\")"
+      "Bash(python3 -c \"\nimport pandas as pd\ndf = pd.read_csv\\(''data/processed/visa_issuances_fy97-24.csv''\\)\n\nprint\\(''Shape:'', df.shape\\)\nprint\\(\\)\nprint\\(''Columns:''\\)\nprint\\(list\\(df.columns\\)\\)\nprint\\(\\)\nprint\\(''First 5 rows:''\\)\nprint\\(df.head\\(\\).to_string\\(\\)\\)\nprint\\(\\)\nprint\\(''Last 5 rows:''\\)\nprint\\(df.tail\\(\\).to_string\\(\\)\\)\nprint\\(\\)\n\n# Verify no region headers leaked through\nsuspect = df[df[''country''].str.contains\\(''Total|Grand|Africa|Asia|Europe|Oceania|North America|South America|Caribbean|Unknown'', case=False, na=False\\)]\nprint\\(f''Suspect rows \\(should be 0\\): {len\\(suspect\\)}''\\)\nif len\\(suspect\\) > 0:\n    print\\(suspect[''country''].unique\\(\\)\\)\nprint\\(\\)\n\n# Year distribution\nprint\\(''Rows per fiscal year:''\\)\nprint\\(df.groupby\\(''fiscal_year''\\).size\\(\\).to_string\\(\\)\\)\n\")",
+      "Bash(python3:*)"
     ]
   }
 }
