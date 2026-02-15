@@ -1,7 +1,8 @@
 """
-US Immigration Visa Dashboard — V5
+US Immigration Visa Dashboard — V6
 Interactive dashboard with client-side filtering, Bloomberg-terminal aesthetic,
-professional blue/emerald editorial palette, and embedded JSON data for instant chart updates.
+professional blue/emerald editorial palette, embedded JSON data, refusal grounds analysis,
+consular post rankings, and Country × Visa Type refusal heatmap.
 Outputs: docs/dashboard.html (GitHub Pages ready)
 """
 
@@ -130,6 +131,39 @@ def fetch_all_data():
         SELECT country, b_visa_issued, refusal_rate_pct, est_refused, est_applications
         FROM b_visa_workload_by_country WHERE b_visa_issued > 5000
         ORDER BY est_applications DESC LIMIT 20
+    """)
+
+    # --- Chart 7: Visa Ineligibility Grounds (refusal reasons) ---
+    data["df_refusal_grounds"] = q(con, """
+        SELECT ina_section, description, iv_finding, iv_overcome, niv_finding, niv_overcome
+        FROM visa_ineligibility_grounds
+        WHERE ina_section != 'TOTAL' AND niv_finding > 0
+        ORDER BY niv_finding DESC
+    """)
+
+    # --- Chart 8: Consular Posts (top 25 by NIV issued) ---
+    data["df_consular_posts"] = q(con, """
+        SELECT issuing_office, region, niv_issued, iv_issued, border_crossing_cards
+        FROM visas_by_consular_post
+        WHERE is_total = false AND niv_issued > 0
+        ORDER BY niv_issued DESC LIMIT 25
+    """)
+
+    # --- Chart 9: Country x Visa Type Heatmap data ---
+    data["df_heatmap"] = q(con, """
+        SELECT v.country,
+               v."B-1,2" as b12_issued,
+               v."H-1B" as h1b_issued,
+               v."F-1" as f1_issued,
+               v."L-1" as l1_issued,
+               v."J-1" as j1_issued,
+               v."Grand Total" as grand_total,
+               COALESCE(w.b_visa_refusal_rate, 0) as b_refusal_rate
+        FROM visa_issuances v
+        LEFT JOIN niv_workload_by_country w ON v.country = w.country
+        WHERE v.fiscal_year = 2024
+        ORDER BY v."Grand Total" DESC
+        LIMIT 25
     """)
 
     # --- Explorer data ---
@@ -345,6 +379,47 @@ def build_refusal_json(df):
     ])
 
 
+def build_refusal_grounds_json(df):
+    """Build JSON data for refusal grounds chart."""
+    return json.dumps([
+        {"ina": str(row["ina_section"]), "desc": str(row["description"]),
+         "niv_find": int(row["niv_finding"]), "niv_over": int(row["niv_overcome"]),
+         "iv_find": int(row["iv_finding"]), "iv_over": int(row["iv_overcome"])}
+        for _, row in df.iterrows()
+    ])
+
+
+def build_consular_json(df):
+    """Build JSON data for consular posts chart."""
+    return json.dumps([
+        {"office": str(row["issuing_office"]), "region": str(row["region"]),
+         "niv": int(row["niv_issued"]), "iv": int(row["iv_issued"]),
+         "bcc": int(row["border_crossing_cards"])}
+        for _, row in df.iterrows()
+    ])
+
+
+def build_heatmap_json(df):
+    """Build JSON data for Country x Visa Type heatmap."""
+    global_b_rate = 0.2776
+    visa_rates = {"B-1,2": 0.2776, "H-1B": 0.0279, "F-1": 0.4101, "L-1": 0.0390, "J-1": 0.1096}
+    result = []
+    for _, row in df.iterrows():
+        b_rate = row["b_refusal_rate"] / 100.0 if row["b_refusal_rate"] > 0 else global_b_rate
+        adj = b_rate / global_b_rate
+        rates = {}
+        for visa, g_rate in visa_rates.items():
+            rates[visa] = round(min(g_rate * adj * 100, 95.0), 1)
+        result.append({
+            "country": str(row["country"]),
+            "b12": rates["B-1,2"], "h1b": rates["H-1B"], "f1": rates["F-1"],
+            "l1": rates["L-1"], "j1": rates["J-1"],
+            "b12_issued": int(row["b12_issued"]), "h1b_issued": int(row["h1b_issued"]),
+            "f1_issued": int(row["f1_issued"]), "grand_total": int(row["grand_total"]),
+        })
+    return json.dumps(result)
+
+
 def build_html(data, charts):
     """Build the full HTML dashboard."""
     d = data
@@ -354,6 +429,9 @@ def build_html(data, charts):
     timeline_json = build_timeline_json(d["df_timeline"], d["df_timeline_countries"])
     fy24_json = build_fy24_json(d["df_fy24_multi"])
     refusal_json = build_refusal_json(d["df_refusal_all"])
+    grounds_json = build_refusal_grounds_json(d["df_refusal_grounds"])
+    consular_json = build_consular_json(d["df_consular_posts"])
+    heatmap_json = build_heatmap_json(d["df_heatmap"])
 
     # COVID annotation data for timeline
     covid_row = d["df_timeline"][d["df_timeline"]["fiscal_year"] == 2020]
@@ -504,6 +582,17 @@ body::before {{
 .ctrl select:focus {{ outline:none; border-color:{ACCENT}; box-shadow:0 0 0 3px rgba(59,130,246,0.15); }}
 .ctrl select[multiple] {{ min-height:120px; background-image:none; padding-right:14px; }}
 
+/* === Heatmap === */
+.heatmap-wrap {{ overflow-x:auto; }}
+.heatmap-table {{ border-collapse:collapse; width:100%; font-size:0.78rem; }}
+.heatmap-table th {{ padding:10px 12px; text-align:center; color:{ACCENT}; font-weight:600;
+  font-size:0.65rem; text-transform:uppercase; letter-spacing:1px; border-bottom:1px solid var(--grid); }}
+.heatmap-table th:first-child {{ text-align:left; }}
+.heatmap-table td {{ padding:8px 12px; text-align:center; border-bottom:1px solid rgba(39,39,42,0.5); }}
+.heatmap-table td:first-child {{ text-align:left; color:#fff; font-weight:600; font-size:0.82rem; }}
+.heatmap-table tr:hover {{ background:rgba(59,130,246,0.05); }}
+.hm-cell {{ display:inline-block; padding:4px 10px; border-radius:6px; font-weight:600; font-size:0.78rem; min-width:50px; }}
+
 /* === Pipeline Architecture === */
 .pipeline {{ margin:24px 0; }}
 .pipeline-layer {{ margin:8px 0; }}
@@ -553,7 +642,7 @@ body::before {{
 <div class="hero">
   <h1>US Immigration Visa Dashboard</h1>
   <p class="subtitle">28 years of nonimmigrant visa data from the U.S. Department of State — every visa, every country, every trend.</p>
-  <div class="version-badge">V5 Interactive</div>
+  <div class="version-badge">V6 Interactive</div>
 </div>
 
 <!-- ===== STATS ROW ===== -->
@@ -721,6 +810,69 @@ body::before {{
   <div class="chart-card">{charts['bvisa_wl']}</div>
 </div>
 
+<!-- ===== SECTION: Why Visas Get Denied ===== -->
+<div class="section">
+  <div class="section-header">
+    <div class="tag">Refusal Grounds</div>
+    <h2>Why Visas Get Denied: The Statutory Breakdown</h2>
+    <p>Every visa refusal cites a specific section of the Immigration and Nationality Act. Section 214(b) — "failure to establish entitlement to nonimmigrant status" — accounts for 77% of all NIV refusals. Translation: the consular officer didn't believe you'd return home.</p>
+  </div>
+  <div class="chart-card">
+    <div class="chart-controls">
+      <div class="chart-ctrl">
+        <label>View</label>
+        <select id="grounds-mode-select">
+          <option value="top15" selected>Top 15 NIV Refusal Grounds</option>
+          <option value="top15iv">Top 15 Immigrant Visa Grounds</option>
+          <option value="overcome">Highest Overcome Rates (NIV)</option>
+        </select>
+      </div>
+    </div>
+    <div id="grounds-chart" style="height:520px;"></div>
+    <div class="chart-note">Note: One application can be refused on multiple grounds — totals exceed the number of individual refusals. "Overcome" means the refusal was later waived or resolved. Source: Table XIX, State Dept Annual Report FY2024.</div>
+  </div>
+</div>
+
+<!-- ===== SECTION: Where Visas Are Issued ===== -->
+<div class="section">
+  <div class="section-header">
+    <div class="tag">Consular Geography</div>
+    <h2>Where Visas Are Issued: Busiest U.S. Embassies</h2>
+    <p>Not all consular posts are created equal. Monterrey, Mexico processes more NIVs than most countries' entire visa operations. India's five posts combined issued over 1.1 million visas in FY2024.</p>
+  </div>
+  <div class="chart-card">
+    <div id="consular-chart" style="height:620px;"></div>
+  </div>
+</div>
+
+<!-- ===== SECTION: Country x Visa Type Heatmap ===== -->
+<div class="section">
+  <div class="section-header">
+    <div class="tag">Refusal Heatmap</div>
+    <h2>Country &times; Visa Type: Estimated Refusal Rates</h2>
+    <p>Not all countries face the same odds. A Nigerian F-1 applicant faces an estimated 69% refusal rate vs a Romanian at 4%. Rates are estimated using each country's B-visa refusal rate as a proxy for overall consular scrutiny, applied to global per-visa-type rates.</p>
+  </div>
+  <div class="chart-card">
+    <div class="heatmap-wrap">
+      <table class="heatmap-table" id="heatmap-table">
+        <thead>
+          <tr>
+            <th>Country</th>
+            <th>B-1/B-2</th>
+            <th>H-1B</th>
+            <th>F-1</th>
+            <th>L-1</th>
+            <th>J-1</th>
+            <th>FY24 Total Issued</th>
+          </tr>
+        </thead>
+        <tbody id="heatmap-body"></tbody>
+      </table>
+    </div>
+    <div class="chart-note">Methodology: Each country's B-visa adjusted refusal rate (published by State Dept) is used as a scaling factor against global per-visa-type refusal rates. This assumes a country with 2x the average B-visa refusal rate will have roughly 2x the refusal rate for other visa types. This is an estimate — actual per-country per-visa refusal data is not publicly available.</div>
+  </div>
+</div>
+
 <!-- ===== SECTION: Fun Facts ===== -->
 <div class="section">
   <div class="section-header">
@@ -814,8 +966,8 @@ body::before {{
     </div>
     <div class="ai-stat-card">
       <div class="ai-label">Dashboard Versions</div>
-      <div class="ai-value">V1 &rarr; V2 &rarr; V3 &rarr; V4 &rarr; V5</div>
-      <div class="ai-detail">V1 (broken) &rarr; V2 (fixed) &rarr; V3 (storytelling) &rarr; V4 (interactive) &rarr; V5 (editorial)</div>
+      <div class="ai-value">V1 &rarr; V2 &rarr; V3 &rarr; V4 &rarr; V5 &rarr; V6</div>
+      <div class="ai-detail">V1 (broken) &rarr; V2 (fixed) &rarr; V3 (storytelling) &rarr; V4 (interactive) &rarr; V5 (editorial) &rarr; V6 (deep analysis)</div>
     </div>
     <div class="ai-stat-card">
       <div class="ai-label">Session</div>
@@ -939,6 +1091,9 @@ const TIMELINE_DATA = {timeline_json};
 const TIMELINE_COUNTRIES = {timeline_countries_list};
 const FY24_DATA = {fy24_json};
 const REFUSAL_DATA = {refusal_json};
+const GROUNDS_DATA = {grounds_json};
+const CONSULAR_DATA = {consular_json};
+const HEATMAP_DATA = {heatmap_json};
 const CHART_COLORS = {json.dumps(COLORS)};
 const CARD_BG = '{CARD}';
 const TEXT_COLOR = '{TEXT}';
@@ -1212,6 +1367,211 @@ const COVID_TOTAL = {covid_total};
 }})();
 </script>
 
+<!-- ===== REFUSAL GROUNDS CHART JS ===== -->
+<script>
+(function() {{
+  const modeSel = document.getElementById('grounds-mode-select');
+
+  function fmtK(v) {{
+    if (v >= 1000000) return (v/1000000).toFixed(1) + 'M';
+    if (v >= 1000) return (v/1000).toFixed(1) + 'K';
+    return v.toString();
+  }}
+
+  function renderGrounds() {{
+    const mode = modeSel.value;
+    let chartData, title, barColors, textLabels;
+
+    if (mode === 'top15') {{
+      chartData = GROUNDS_DATA.slice(0, 15).slice().reverse();
+      title = 'Top 15 NIV Refusal Grounds — FY2024';
+      const maxVal = Math.max(...chartData.map(d => d.niv_find), 1);
+      const logMax = Math.log10(maxVal);
+      barColors = chartData.map(d => {{
+        if (d.niv_find <= 0) return '#1E3A5F';
+        const norm = Math.log10(Math.max(d.niv_find, 1)) / logMax;
+        const r = Math.round(30 + norm * 66);
+        const g = Math.round(58 + norm * 107);
+        const b = Math.round(95 + norm * 155);
+        return 'rgb(' + r + ',' + g + ',' + b + ')';
+      }});
+      textLabels = chartData.map(d => fmtK(d.niv_find));
+
+      Plotly.newPlot('grounds-chart', [{{
+        x: chartData.map(d => d.niv_find),
+        y: chartData.map(d => d.ina.substring(0, 25) + (d.ina.length > 25 ? '...' : '')),
+        orientation: 'h', type: 'bar',
+        marker: {{color: barColors, line: {{width: 0}}}},
+        text: textLabels, textposition: 'outside',
+        textfont: {{color: TEXT_COLOR, size: 10}},
+        hovertemplate: chartData.map(d => '<b>' + d.ina + '</b><br>' + d.desc + '<br>Findings: ' + d.niv_find.toLocaleString() + '<br>Overcome: ' + d.niv_over.toLocaleString() + '<extra></extra>')
+      }}], {{
+        title: {{text: title, font: {{size: 16, color: TEXT_COLOR}}, x: 0.5}},
+        xaxis: {{title: 'NIV Ineligibility Findings', gridcolor: GRID_COLOR, color: TEXT_COLOR}},
+        yaxis: {{color: TEXT_COLOR, tickfont: {{size: 9}}}},
+        plot_bgcolor: CARD_BG, paper_bgcolor: 'rgba(0,0,0,0)',
+        font: {{color: TEXT_COLOR, family: 'Inter,system-ui,sans-serif'}},
+        height: 520, margin: {{l: 200, r: 70, t: 50, b: 45}}
+      }}, {{responsive: true, displayModeBar: false}});
+
+    }} else if (mode === 'top15iv') {{
+      chartData = GROUNDS_DATA.filter(d => d.iv_find > 0).sort((a,b) => b.iv_find - a.iv_find).slice(0, 15).reverse();
+      title = 'Top 15 Immigrant Visa Refusal Grounds — FY2024';
+      barColors = chartData.map(() => ACCENT2_COLOR);
+      textLabels = chartData.map(d => fmtK(d.iv_find));
+
+      Plotly.newPlot('grounds-chart', [{{
+        x: chartData.map(d => d.iv_find),
+        y: chartData.map(d => d.ina.substring(0, 25) + (d.ina.length > 25 ? '...' : '')),
+        orientation: 'h', type: 'bar',
+        marker: {{color: barColors, line: {{width: 0}}}},
+        text: textLabels, textposition: 'outside',
+        textfont: {{color: TEXT_COLOR, size: 10}},
+        hovertemplate: chartData.map(d => '<b>' + d.ina + '</b><br>' + d.desc + '<br>Findings: ' + d.iv_find.toLocaleString() + '<br>Overcome: ' + d.iv_over.toLocaleString() + '<extra></extra>')
+      }}], {{
+        title: {{text: title, font: {{size: 16, color: TEXT_COLOR}}, x: 0.5}},
+        xaxis: {{title: 'IV Ineligibility Findings', gridcolor: GRID_COLOR, color: TEXT_COLOR}},
+        yaxis: {{color: TEXT_COLOR, tickfont: {{size: 9}}}},
+        plot_bgcolor: CARD_BG, paper_bgcolor: 'rgba(0,0,0,0)',
+        font: {{color: TEXT_COLOR, family: 'Inter,system-ui,sans-serif'}},
+        height: 520, margin: {{l: 200, r: 70, t: 50, b: 45}}
+      }}, {{responsive: true, displayModeBar: false}});
+
+    }} else {{
+      // Overcome rates: NIV grounds with >100 findings, sorted by overcome %
+      chartData = GROUNDS_DATA.filter(d => d.niv_find >= 100).map(d => ({{
+        ...d, overcome_pct: d.niv_over / d.niv_find * 100
+      }})).sort((a,b) => b.overcome_pct - a.overcome_pct).slice(0, 15).reverse();
+      title = 'NIV Grounds with Highest Overcome Rate — FY2024';
+      barColors = chartData.map(d => {{
+        const t = d.overcome_pct / 100;
+        return 'rgb(' + Math.round(16 + t * 0) + ',' + Math.round(185 * t) + ',' + Math.round(129 * t) + ')';
+      }});
+      textLabels = chartData.map(d => d.overcome_pct.toFixed(1) + '%');
+
+      Plotly.newPlot('grounds-chart', [{{
+        x: chartData.map(d => d.overcome_pct),
+        y: chartData.map(d => d.ina.substring(0, 25) + (d.ina.length > 25 ? '...' : '')),
+        orientation: 'h', type: 'bar',
+        marker: {{color: barColors, line: {{width: 0}}}},
+        text: textLabels, textposition: 'outside',
+        textfont: {{color: TEXT_COLOR, size: 10}},
+        hovertemplate: chartData.map(d => '<b>' + d.ina + '</b><br>' + d.desc + '<br>Findings: ' + d.niv_find.toLocaleString() + '<br>Overcome: ' + d.niv_over.toLocaleString() + ' (' + d.overcome_pct.toFixed(1) + '%)<extra></extra>')
+      }}], {{
+        title: {{text: title, font: {{size: 16, color: TEXT_COLOR}}, x: 0.5}},
+        xaxis: {{title: 'Overcome Rate (%)', gridcolor: GRID_COLOR, color: TEXT_COLOR, ticksuffix: '%'}},
+        yaxis: {{color: TEXT_COLOR, tickfont: {{size: 9}}}},
+        plot_bgcolor: CARD_BG, paper_bgcolor: 'rgba(0,0,0,0)',
+        font: {{color: TEXT_COLOR, family: 'Inter,system-ui,sans-serif'}},
+        height: 520, margin: {{l: 200, r: 70, t: 50, b: 45}}
+      }}, {{responsive: true, displayModeBar: false}});
+    }}
+  }}
+
+  modeSel.addEventListener('change', renderGrounds);
+  renderGrounds();
+}})();
+</script>
+
+<!-- ===== CONSULAR POSTS CHART JS ===== -->
+<script>
+(function() {{
+  const data = CONSULAR_DATA;
+  const reversed = data.slice().reverse();
+
+  const regionColors = {{
+    'Africa': '#8B5CF6',
+    'East Asia and Pacific': '#06B6D4',
+    'Europe and Eurasia': ACCENT_COLOR,
+    'Near East': GOLD_COLOR,
+    'South and Central Asia': '#EC4899',
+    'Western Hemisphere': ACCENT2_COLOR,
+    'null': '#71717a'
+  }};
+
+  const colors = reversed.map(d => regionColors[d.region] || ACCENT_COLOR);
+
+  function fmtK(v) {{
+    if (v >= 1000000) return (v/1000000).toFixed(1) + 'M';
+    if (v >= 1000) return (v/1000).toFixed(1) + 'K';
+    return v.toString();
+  }}
+
+  Plotly.newPlot('consular-chart', [{{
+    x: reversed.map(d => d.niv),
+    y: reversed.map(d => d.office),
+    orientation: 'h', type: 'bar',
+    marker: {{color: colors, line: {{width: 0}}}},
+    text: reversed.map(d => fmtK(d.niv)),
+    textposition: 'outside',
+    textfont: {{color: TEXT_COLOR, size: 10}},
+    hovertemplate: reversed.map(d => '<b>' + d.office + '</b><br>Region: ' + d.region + '<br>NIV Issued: ' + d.niv.toLocaleString() + '<br>IV Issued: ' + d.iv.toLocaleString() + (d.bcc > 0 ? '<br>Border Cards: ' + d.bcc.toLocaleString() : '') + '<extra></extra>')
+  }}], {{
+    title: {{text: 'Top 25 Busiest U.S. Consular Posts — NIV Issuances FY2024', font: {{size: 16, color: TEXT_COLOR}}, x: 0.5}},
+    xaxis: {{title: 'Nonimmigrant Visas Issued', gridcolor: GRID_COLOR, color: TEXT_COLOR}},
+    yaxis: {{color: TEXT_COLOR, tickfont: {{size: 9}}}},
+    plot_bgcolor: CARD_BG, paper_bgcolor: 'rgba(0,0,0,0)',
+    font: {{color: TEXT_COLOR, family: 'Inter,system-ui,sans-serif'}},
+    height: 620, margin: {{l: 200, r: 70, t: 50, b: 45}}
+  }}, {{responsive: true, displayModeBar: false}});
+}})();
+</script>
+
+<!-- ===== HEATMAP TABLE JS ===== -->
+<script>
+(function() {{
+  const tbody = document.getElementById('heatmap-body');
+  const visaCols = ['b12', 'h1b', 'f1', 'l1', 'j1'];
+
+  function getColor(rate) {{
+    // Green (low) -> Yellow (mid) -> Red (high)
+    if (rate <= 10) {{
+      const t = rate / 10;
+      return 'rgba(16,185,129,' + (0.15 + t * 0.35) + ')';
+    }} else if (rate <= 30) {{
+      const t = (rate - 10) / 20;
+      return 'rgba(245,158,11,' + (0.2 + t * 0.4) + ')';
+    }} else {{
+      const t = Math.min((rate - 30) / 40, 1);
+      return 'rgba(239,68,68,' + (0.25 + t * 0.5) + ')';
+    }}
+  }}
+
+  function fmtK(v) {{
+    if (v >= 1000000) return (v/1000000).toFixed(1) + 'M';
+    if (v >= 1000) return Math.round(v/1000) + 'K';
+    return v.toString();
+  }}
+
+  HEATMAP_DATA.forEach(row => {{
+    const tr = document.createElement('tr');
+    // Country name
+    const tdName = document.createElement('td');
+    tdName.textContent = row.country;
+    tr.appendChild(tdName);
+    // Rate cells
+    visaCols.forEach(col => {{
+      const td = document.createElement('td');
+      const rate = row[col];
+      const span = document.createElement('span');
+      span.className = 'hm-cell';
+      span.style.background = getColor(rate);
+      span.style.color = rate > 40 ? '#fff' : (rate > 20 ? '#fff' : '#d4d4d8');
+      span.textContent = rate.toFixed(1) + '%';
+      td.appendChild(span);
+      tr.appendChild(td);
+    }});
+    // Total issued
+    const tdTotal = document.createElement('td');
+    tdTotal.style.color = '#d4d4d8';
+    tdTotal.style.fontWeight = '600';
+    tdTotal.textContent = fmtK(row.grand_total);
+    tr.appendChild(tdTotal);
+    tbody.appendChild(tr);
+  }});
+}})();
+</script>
+
 <!-- ===== EXPLORER JS ===== -->
 <script>
 (function() {{
@@ -1254,7 +1614,7 @@ const COVID_TOTAL = {covid_total};
 
 
 def main():
-    """Build V5 dashboard."""
+    """Build V6 dashboard."""
     print("Fetching data from DuckDB...")
     data = fetch_all_data()
 
@@ -1272,7 +1632,7 @@ def main():
     OUTPUT_PATH.write_text(html)
 
     size_kb = OUTPUT_PATH.stat().st_size / 1024
-    print(f"\nDashboard V5 saved to {OUTPUT_PATH}")
+    print(f"\nDashboard V6 saved to {OUTPUT_PATH}")
     print(f"File size: {size_kb:.0f} KB")
     print("Done.")
 

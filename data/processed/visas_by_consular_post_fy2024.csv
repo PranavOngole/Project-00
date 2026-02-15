@@ -1,0 +1,228 @@
+region,issuing_office,iv_issued,niv_issued,border_crossing_cards,is_total,fiscal_year
+,Department of State - Visa Office,0,9751,0,False,2024
+,U.S. - Domestic Renewal Pilot Program2,0,6036,0,False,2024
+,U.S. Mission to the United Nations,0,4979,0,False,2024
+Africa,"Angola, Luanda",282,5812,0,False,2024
+Africa,"Benin, Cotonou",937,2550,0,False,2024
+Africa,"Botswana, Gaborone",0,2383,0,False,2024
+Africa,"Burkina Faso, Ouagadougou",372,2624,0,False,2024
+Africa,"Burundi, Bujumbura",0,1228,0,False,2024
+Africa,"Cabo Verde, Praia",2153,3825,0,False,2024
+Africa,"Cameroon, Yaounde",5207,9014,0,False,2024
+Africa,"Chad, N'Djamena",0,1192,0,False,2024
+Africa,"Congo, Dem. Rep. of the, Kinshasa",1435,9486,0,False,2024
+Africa,"Congo, Rep. of the, Brazzaville",77,2531,0,False,2024
+Africa,"Cote d'Ivoire, Abidjan",1284,9905,0,False,2024
+Africa,"Djibouti, Djibouti",5541,500,0,False,2024
+Africa,"Equatorial Guinea, Malabo",0,1035,0,False,2024
+Africa,"Eritrea, Asmara",19,472,0,False,2024
+Africa,"Eswatini, Mbabane",0,2508,0,False,2024
+Africa,"Ethiopia, Addis Ababa",8739,23270,0,False,2024
+Africa,"Gabon, Libreville",90,1947,0,False,2024
+Africa,"Gambia, The, Banjul",0,1387,0,False,2024
+Africa,"Ghana, Accra",6265,26432,0,False,2024
+Africa,"Guinea, Conakry",0,1883,0,False,2024
+Africa,"Kenya, Nairobi",9753,22164,0,False,2024
+Africa,"Lesotho, Maseru",0,170,0,False,2024
+Africa,"Liberia, Monrovia",2452,2128,0,False,2024
+Africa,"Madagascar, Antananarivo",51,3145,0,False,2024
+Africa,"Malawi, Lilongwe",80,3006,0,False,2024
+Africa,"Mali, Bamako",0,2477,0,False,2024
+Africa,"Mauritania, Nouakchott",0,778,0,False,2024
+Africa,"Mauritius, Port Louis",0,3999,0,False,2024
+Africa,"Mozambique, Maputo",0,2427,0,False,2024
+Africa,"Namibia, Windhoek",0,2336,0,False,2024
+Africa,"Niger, Niamey",151,979,0,False,2024
+Africa,"Nigeria, Abuja",0,30222,0,False,2024
+Africa,Lagos,7308,33091,0,False,2024
+Africa,"Rwanda, Kigali",1415,4094,0,False,2024
+Africa,"Senegal, Dakar",3283,6281,0,False,2024
+Africa,"Sierra Leone, Freetown",1954,3000,0,False,2024
+Africa,"South Africa, Cape Town",0,27193,0,False,2024
+Africa,Durban,0,11086,0,False,2024
+Africa,Johannesburg,2059,39985,0,False,2024
+Africa,"South Sudan, Juba",0,324,0,False,2024
+Africa,"Tanzania, Dar es Salaam",408,8412,0,False,2024
+Africa,"Togo, Lome",1990,2570,0,False,2024
+Africa,"Uganda, Kampala",70,8548,0,False,2024
+Africa,"Zambia, Lusaka",186,3978,0,False,2024
+Africa,"Zimbabwe, Harare",926,10698,0,False,2024
+Africa,Region Total: Africa,64487,343075,0,True,2024
+East Asia and Pacific,"Australia, Melbourne",0,24068,0,False,2024
+East Asia and Pacific,Perth,0,5872,0,False,2024
+East Asia and Pacific,Sydney,1191,38045,0,False,2024
+East Asia and Pacific,"Brunei, Bandar Seri Begawan",0,760,0,False,2024
+East Asia and Pacific,"Burma, Rangoon",1452,6858,0,False,2024
+East Asia and Pacific,"Cambodia, Phnom Penh",2225,12879,0,False,2024
+East Asia and Pacific,"China, Beijing",0,251906,0,False,2024
+East Asia and Pacific,Guangzhou,25123,133661,0,False,2024
+East Asia and Pacific,Shanghai,0,219345,0,False,2024
+East Asia and Pacific,Shenyang,0,45335,0,False,2024
+East Asia and Pacific,Wuhan,0,46379,0,False,2024
+East Asia and Pacific,"Fiji, Suva",1292,5103,0,False,2024
+East Asia and Pacific,"Hong Kong S.A.R., Hong Kong",1468,82483,0,False,2024
+East Asia and Pacific,"Indonesia, Jakarta",624,68125,0,False,2024
+East Asia and Pacific,Surabaya,0,10252,0,False,2024
+East Asia and Pacific,"Japan, Naha",275,589,0,False,2024
+East Asia and Pacific,Osaka/Kobe,0,20653,0,False,2024
+East Asia and Pacific,Tokyo,1723,58763,0,False,2024
+East Asia and Pacific,"Korea, Seoul",5662,73167,0,False,2024
+East Asia and Pacific,"Laos, Vientiane",512,2110,0,False,2024
+East Asia and Pacific,"Malaysia, Kuala Lumpur",861,34100,0,False,2024
+East Asia and Pacific,"Marshall Islands, Majuro",0,272,0,False,2024
+East Asia and Pacific,"Micronesia, Federated States of, Kolonia",0,464,0,False,2024
+East Asia and Pacific,"Mongolia, Ulaanbaatar",287,18644,0,False,2024
+East Asia and Pacific,"New Zealand, Auckland",471,13322,0,False,2024
+East Asia and Pacific,"Palau, Koror",0,283,0,False,2024
+East Asia and Pacific,"Papua New Guinea, Port Moresby",16,2060,0,False,2024
+East Asia and Pacific,"Philippines, Manila",32104,266852,0,False,2024
+East Asia and Pacific,"Samoa, Apia",0,868,0,False,2024
+East Asia and Pacific,"Singapore, Singapore",516,37437,0,False,2024
+East Asia and Pacific,"Thailand, Bangkok",1981,61468,0,False,2024
+East Asia and Pacific,Chiang Mai,0,6503,0,False,2024
+East Asia and Pacific,"Timor-Leste, Dili",0,287,0,False,2024
+East Asia and Pacific,"Vietnam, Hanoi",49,39220,0,False,2024
+East Asia and Pacific,Ho Chi Minh City,32094,105754,0,False,2024
+East Asia and Pacific,Taipei3,2277,32144,0,False,2024
+East Asia and Pacific,Region Total: East Asia and Pacific,112203,1726031,0,True,2024
+Europe and Eurasia,"Albania, Tirana",7299,25731,0,False,2024
+Europe and Eurasia,"Armenia, Yerevan",5012,26570,0,False,2024
+Europe and Eurasia,"Austria, Vienna",379,12518,0,False,2024
+Europe and Eurasia,"Azerbaijan, Baku",0,11590,0,False,2024
+Europe and Eurasia,"Belgium, Brussels",242,18338,0,False,2024
+Europe and Eurasia,"Bermuda, Hamilton",47,1951,0,False,2024
+Europe and Eurasia,"Bosnia and Herzegovina, Sarajevo",144,5452,0,False,2024
+Europe and Eurasia,"Bulgaria, Sofia",437,19122,0,False,2024
+Europe and Eurasia,"Croatia, Zagreb",27,5064,0,False,2024
+Europe and Eurasia,"Cyprus, Nicosia",56,7271,0,False,2024
+Europe and Eurasia,"Czech Republic, Prague",165,11873,0,False,2024
+Europe and Eurasia,"Denmark, Copenhagen",0,12731,0,False,2024
+Europe and Eurasia,"Estonia, Tallinn",47,2876,0,False,2024
+Europe and Eurasia,"Finland, Helsinki",143,6366,0,False,2024
+Europe and Eurasia,"France, Paris",1206,61546,0,False,2024
+Europe and Eurasia,"Georgia, Tbilisi",2785,9520,0,False,2024
+Europe and Eurasia,"Germany, Berlin",0,31495,0,False,2024
+Europe and Eurasia,Frankfurt,9911,52850,0,False,2024
+Europe and Eurasia,Munich,0,23156,0,False,2024
+Europe and Eurasia,"Great Britain and Northern Ireland, Belfast",0,7380,0,False,2024
+Europe and Eurasia,London,4369,154518,0,False,2024
+Europe and Eurasia,"Greece, Athens",494,8425,0,False,2024
+Europe and Eurasia,"Hungary, Budapest",210,7812,0,False,2024
+Europe and Eurasia,"Iceland, Reykjavik",23,2348,0,False,2024
+Europe and Eurasia,"Ireland, Dublin",274,23908,0,False,2024
+Europe and Eurasia,"Italy, Florence",0,5673,0,False,2024
+Europe and Eurasia,Milan,0,21172,0,False,2024
+Europe and Eurasia,Naples,1105,6126,0,False,2024
+Europe and Eurasia,Rome,0,16469,0,False,2024
+Europe and Eurasia,"Kosovo, Pristina",649,6564,0,False,2024
+Europe and Eurasia,"Latvia, Riga",89,5520,0,False,2024
+Europe and Eurasia,"Lithuania, Vilnius",154,4717,0,False,2024
+Europe and Eurasia,"Luxembourg, Luxembourg",0,2979,0,False,2024
+Europe and Eurasia,"Malta, Valletta",0,1728,0,False,2024
+Europe and Eurasia,"Moldova, Chisinau",626,4250,0,False,2024
+Europe and Eurasia,"Montenegro, Podgorica",0,7394,0,False,2024
+Europe and Eurasia,"Netherlands, Amsterdam",313,22641,0,False,2024
+Europe and Eurasia,"North Macedonia, Skopje",573,5905,0,False,2024
+Europe and Eurasia,"Norway, Oslo",0,10193,0,False,2024
+Europe and Eurasia,"Poland, Krakow",0,11898,0,False,2024
+Europe and Eurasia,Warsaw,4814,27765,0,False,2024
+Europe and Eurasia,"Portugal, Lisbon",0,16103,0,False,2024
+Europe and Eurasia,"Romania, Bucharest",520,87975,0,False,2024
+Europe and Eurasia,"Russia, Moscow",8,1509,0,False,2024
+Europe and Eurasia,"Serbia, Belgrade",707,24204,0,False,2024
+Europe and Eurasia,"Slovakia, Bratislava",46,4561,0,False,2024
+Europe and Eurasia,"Slovenia, Ljubljana",9,1815,0,False,2024
+Europe and Eurasia,"Spain, Madrid",1119,61513,0,False,2024
+Europe and Eurasia,"Sweden, Stockholm",695,15802,0,False,2024
+Europe and Eurasia,"Switzerland, Bern",254,27758,0,False,2024
+Europe and Eurasia,"Turkey, Ankara",5418,39455,0,False,2024
+Europe and Eurasia,Istanbul,0,84886,0,False,2024
+Europe and Eurasia,"Ukraine, Kyiv",220,3923,0,False,2024
+Europe and Eurasia,Region Total: Europe and Eurasia,50589,1080909,0,True,2024
+Near East,"Algeria, Algiers",3381,19142,0,False,2024
+Near East,"Bahrain, Manama",367,10361,0,False,2024
+Near East,"Egypt, Cairo",7071,59217,0,False,2024
+Near East,"Iraq, Baghdad",1583,2339,0,False,2024
+Near East,Erbil,0,2422,0,False,2024
+Near East,"Israel, Jerusalem",1717,9523,0,False,2024
+Near East,Embassy Branch Office Tel Aviv,0,42780,0,False,2024
+Near East,"Jordan, Amman",6321,24822,0,False,2024
+Near East,"Kuwait, Kuwait",619,22625,0,False,2024
+Near East,"Lebanon, Beirut",3965,9849,0,False,2024
+Near East,"Morocco, Casablanca",4627,29738,0,False,2024
+Near East,"Oman, Muscat",587,11142,0,False,2024
+Near East,"Qatar, Doha",19311,42832,0,False,2024
+Near East,"Saudi Arabia, Dhahran",0,24113,0,False,2024
+Near East,Jeddah,0,26932,0,False,2024
+Near East,Riyadh,2637,51122,0,False,2024
+Near East,"Tunisia, Tunis",699,8750,0,False,2024
+Near East,"United Arab Emirates, Abu Dhabi",3373,44654,0,False,2024
+Near East,Dubai,0,70264,0,False,2024
+Near East,Region Total: Near East,56258,512627,0,True,2024
+South and Central Asia,"Bangladesh, Dhaka",12771,39889,0,False,2024
+South and Central Asia,"India, Chennai",0,326081,0,False,2024
+South and Central Asia,Hyderabad,0,176425,0,False,2024
+South and Central Asia,Kolkata,0,49370,0,False,2024
+South and Central Asia,Mumbai,25441,252346,0,False,2024
+South and Central Asia,New Delhi,411,308287,0,False,2024
+South and Central Asia,"Kazakhstan, Almaty",2665,16317,0,False,2024
+South and Central Asia,Astana,0,31236,0,False,2024
+South and Central Asia,"Kyrgyzstan, Bishkek",2238,12770,0,False,2024
+South and Central Asia,"Nepal, Kathmandu",8545,34892,0,False,2024
+South and Central Asia,"Pakistan, Islamabad",25981,27231,0,False,2024
+South and Central Asia,Karachi,0,59493,0,False,2024
+South and Central Asia,"Sri Lanka, Colombo",1043,9934,0,False,2024
+South and Central Asia,"Tajikistan, Dushanbe",1993,2539,0,False,2024
+South and Central Asia,"Turkmenistan, Ashgabat",528,2664,0,False,2024
+South and Central Asia,"Uzbekistan, Tashkent",4401,11413,0,False,2024
+South and Central Asia,Region Total: South and Central Asia,86017,1360887,0,True,2024
+Western Hemisphere,"Argentina, Buenos Aires",1082,289971,0,False,2024
+Western Hemisphere,"The Bahamas, Nassau",326,22132,0,False,2024
+Western Hemisphere,"Barbados, Bridgetown",1494,31207,0,False,2024
+Western Hemisphere,"Belize, Belmopan",281,10828,0,False,2024
+Western Hemisphere,"Bolivia, La Paz",739,31390,0,False,2024
+Western Hemisphere,"Brazil, Brasilia",0,162346,0,False,2024
+Western Hemisphere,Porto Alegre,0,124773,0,False,2024
+Western Hemisphere,Recife,0,85755,0,False,2024
+Western Hemisphere,Rio de Janeiro,5615,194060,0,False,2024
+Western Hemisphere,Sao Paulo,0,591507,0,False,2024
+Western Hemisphere,"Canada, Calgary",0,33171,0,False,2024
+Western Hemisphere,Halifax,0,4539,0,False,2024
+Western Hemisphere,Montreal,6406,1307,0,False,2024
+Western Hemisphere,Ottawa,0,35441,0,False,2024
+Western Hemisphere,Quebec,0,2175,0,False,2024
+Western Hemisphere,Toronto,0,97955,0,False,2024
+Western Hemisphere,Vancouver,0,75359,0,False,2024
+Western Hemisphere,"Chile, Santiago",631,35270,0,False,2024
+Western Hemisphere,"Colombia, Bogota",11945,461359,0,False,2024
+Western Hemisphere,"Costa Rica, San Jose",777,84613,0,False,2024
+Western Hemisphere,"Cuba, Havana",24570,3505,0,False,2024
+Western Hemisphere,"Curacao, Curacao",0,5250,0,False,2024
+Western Hemisphere,"Dominican Republic, Santo Domingo",54209,172153,0,False,2024
+Western Hemisphere,"Ecuador, Guayaquil",7001,121385,0,False,2024
+Western Hemisphere,Quito,0,118263,0,False,2024
+Western Hemisphere,"El Salvador, San Salvador",10024,62828,0,False,2024
+Western Hemisphere,"Guatemala, Guatemala",6127,99229,0,False,2024
+Western Hemisphere,"Guyana, Georgetown",2837,32547,0,False,2024
+Western Hemisphere,"Haiti, Port-au-Prince",3175,941,0,False,2024
+Western Hemisphere,"Honduras, Tegucigalpa",5253,76989,0,False,2024
+Western Hemisphere,"Jamaica, Kingston",17193,120866,0,False,2024
+Western Hemisphere,"Mexico, Ciudad Juarez",72432,167360,151135,False,2024
+Western Hemisphere,Guadalajara,0,419947,355979,False,2024
+Western Hemisphere,Hermosillo,0,107541,88485,False,2024
+Western Hemisphere,Matamoros,0,86746,63986,False,2024
+Western Hemisphere,Merida,0,39986,35373,False,2024
+Western Hemisphere,Mexico City,31,623896,541408,False,2024
+Western Hemisphere,Monterrey,0,681734,484678,False,2024
+Western Hemisphere,Nogales,0,35298,29797,False,2024
+Western Hemisphere,Nuevo Laredo,0,71459,47973,False,2024
+Western Hemisphere,Tijuana,0,182809,112938,False,2024
+Western Hemisphere,"Nicaragua, Managua",1836,16273,0,False,2024
+Western Hemisphere,"Panama, Panama",455,39722,0,False,2024
+Western Hemisphere,"Paraguay, Asuncion",169,18285,0,False,2024
+Western Hemisphere,"Peru, Lima",6652,149671,0,False,2024
+Western Hemisphere,"Suriname, Paramaribo",0,6743,0,False,2024
+Western Hemisphere,"Trinidad and Tobago, Port of Spain",1292,55991,0,False,2024
+Western Hemisphere,"Uruguay, Montevideo",152,33066,0,False,2024
+Western Hemisphere,Region Total: Western Hemisphere,242704,5925641,1911752,True,2024
+GRAND TOTAL,Grand Total,612258,10969936,1911752,True,2024
