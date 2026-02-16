@@ -1,5 +1,5 @@
 """
-US Immigration Visa Dashboard — V6
+US Immigration Visa Dashboard — V7
 Interactive dashboard with client-side filtering, Bloomberg-terminal aesthetic,
 professional blue/emerald editorial palette, embedded JSON data, refusal grounds analysis,
 consular post rankings, and Country × Visa Type refusal heatmap.
@@ -110,13 +110,12 @@ def fetch_all_data():
         FROM visa_issuances GROUP BY fiscal_year ORDER BY fiscal_year
     """)
 
-    # --- Timeline country data (top 30) for client-side interactivity ---
+    # --- Timeline country data (ALL countries) for master filter + client-side interactivity ---
     data["df_timeline_countries"] = q(con, """
-        WITH top AS (SELECT country, SUM("Grand Total") as t FROM visa_issuances GROUP BY country ORDER BY t DESC LIMIT 30)
-        SELECT v.fiscal_year, v.country, v."Grand Total" as grand_total, v."H-1B" as h1b,
-               v."F-1" as f1, v."B-1,2" as b12, v."L-1" as l1
-        FROM visa_issuances v JOIN top t ON v.country=t.country
-        ORDER BY v.country, v.fiscal_year
+        SELECT fiscal_year, country, "Grand Total" as grand_total, "H-1B" as h1b,
+               "F-1" as f1, "B-1,2" as b12, "L-1" as l1,
+               "J-1" as j1, "H-2A" as h2a, "H-2B" as h2b, "O-1" as o1
+        FROM visa_issuances ORDER BY country, fiscal_year
     """)
 
     # --- FY2024 bar chart data for multiple visa types (top 30) ---
@@ -131,6 +130,21 @@ def fetch_all_data():
         SELECT country, b_visa_issued, refusal_rate_pct, est_refused, est_applications
         FROM b_visa_workload_by_country WHERE b_visa_issued > 5000
         ORDER BY est_applications DESC LIMIT 20
+    """)
+
+    # --- Insight Panel: FY2024 + FY2019 + 5yr avg for all countries, 9 key visa types ---
+    KEY_VISA_COLS = '"H-1B","F-1","B-1,2","L-1","J-1","H-2A","H-2B","O-1","Grand Total"'
+    data["df_insight_fy24"] = q(con, f"""
+        SELECT country, {KEY_VISA_COLS} FROM visa_issuances WHERE fiscal_year=2024
+    """)
+    data["df_insight_fy19"] = q(con, f"""
+        SELECT country, {KEY_VISA_COLS} FROM visa_issuances WHERE fiscal_year=2019
+    """)
+    data["df_insight_avg5"] = q(con, """
+        SELECT country, AVG("H-1B") as h1b, AVG("F-1") as f1, AVG("B-1,2") as b12,
+               AVG("L-1") as l1, AVG("J-1") as j1, AVG("H-2A") as h2a, AVG("H-2B") as h2b,
+               AVG("O-1") as o1, AVG("Grand Total") as gt
+        FROM visa_issuances WHERE fiscal_year BETWEEN 2020 AND 2024 GROUP BY country
     """)
 
     # --- Chart 7: Visa Ineligibility Grounds (refusal reasons) ---
@@ -337,7 +351,7 @@ def build_timeline_json(df_global, df_countries):
     country_data = {}
     for c in df_countries["country"].unique():
         cd = df_countries[df_countries["country"] == c]
-        country_data[c] = {
+        entry = {
             "years": cd["fiscal_year"].tolist(),
             "grand_total": [int(x) for x in cd["grand_total"].tolist()],
             "h1b": [int(x) for x in cd["h1b"].tolist()],
@@ -345,6 +359,10 @@ def build_timeline_json(df_global, df_countries):
             "b12": [int(x) for x in cd["b12"].tolist()],
             "l1": [int(x) for x in cd["l1"].tolist()],
         }
+        for extra in ["j1", "h2a", "h2b", "o1"]:
+            if extra in cd.columns:
+                entry[extra] = [int(x) for x in cd[extra].tolist()]
+        country_data[c] = entry
     return json.dumps({"global": global_data, "countries": country_data})
 
 
@@ -377,6 +395,50 @@ def build_refusal_json(df):
         {"nationality": str(row["nationality"]), "rate": round(float(row["rate"]), 1)}
         for _, row in df.iterrows()
     ])
+
+
+def build_insight_json(df24, df19, df_avg5, df_bvr):
+    """Build INSIGHT_DATA: per-country snapshots for the master filter insight panel."""
+    KEY_MAP = {
+        'H-1B': 'h1b', 'F-1': 'f1', 'B-1,2': 'b12', 'L-1': 'l1',
+        'J-1': 'j1', 'H-2A': 'h2a', 'H-2B': 'h2b', 'O-1': 'o1', 'Grand Total': 'gt'
+    }
+    AVG_KEYS = ['h1b', 'f1', 'b12', 'l1', 'j1', 'h2a', 'h2b', 'o1', 'gt']
+
+    bvr = {str(r["nationality"]): round(float(r["rate"]), 1) for _, r in df_bvr.iterrows()}
+
+    # Global ranks per visa type
+    ranks = {}
+    for col, k in KEY_MAP.items():
+        sorted_c = df24.sort_values(col, ascending=False)["country"].tolist()
+        for i, c in enumerate(sorted_c):
+            ranks.setdefault(c, {})[k] = i + 1
+
+    df24_idx = df24.set_index("country")
+    df19_idx = df19.set_index("country")
+    df5_idx = df_avg5.set_index("country")
+
+    result = {}
+    for country in df24_idx.index:
+        r24 = df24_idx.loc[country]
+        fy24 = {k: int(r24[col]) for col, k in KEY_MAP.items()}
+
+        fy19 = {}
+        if country in df19_idx.index:
+            r19 = df19_idx.loc[country]
+            fy19 = {k: int(r19[col]) for col, k in KEY_MAP.items()}
+
+        avg5 = {}
+        if country in df5_idx.index:
+            r5 = df5_idx.loc[country]
+            avg5 = {k: int(r5[k]) for k in AVG_KEYS}
+
+        result[country] = {
+            'fy24': fy24, 'fy19': fy19, 'avg5': avg5,
+            'rank': ranks.get(country, {}),
+            'bvr': bvr.get(country, None)
+        }
+    return json.dumps(result, separators=(',', ':'))
 
 
 def build_refusal_grounds_json(df):
@@ -432,6 +494,8 @@ def build_html(data, charts):
     grounds_json = build_refusal_grounds_json(d["df_refusal_grounds"])
     consular_json = build_consular_json(d["df_consular_posts"])
     heatmap_json = build_heatmap_json(d["df_heatmap"])
+    insight_json = build_insight_json(d["df_insight_fy24"], d["df_insight_fy19"], d["df_insight_avg5"], d["df_refusal_all"])
+    all_countries_json = json.dumps(sorted(d["df_insight_fy24"]["country"].tolist()))
 
     # COVID annotation data for timeline
     covid_row = d["df_timeline"][d["df_timeline"]["fiscal_year"] == 2020]
@@ -454,7 +518,7 @@ def build_html(data, charts):
   --glass: rgba(21,25,33,0.8); --glass-border: rgba(100,116,139,0.12);
 }}
 * {{ margin:0; padding:0; box-sizing:border-box; }}
-html {{ scroll-behavior: smooth; }}
+html {{ scroll-behavior: smooth; scroll-padding-top: 70px; }}
 body {{ background:var(--bg); color:var(--text); font-family:'Inter',system-ui,sans-serif; overflow-x:hidden; }}
 
 /* === Subtle grid background === */
@@ -613,6 +677,63 @@ body::before {{
 .rel-card p {{ font-size:0.78rem; color:#7A8494; line-height:1.5; }}
 .rel-card code {{ font-size:0.72rem; color:{ACCENT}; background:rgba(100,116,139,0.08); padding:2px 6px; border-radius:4px; }}
 
+/* === Master Filter Bar === */
+.master-filter {{ position:sticky; top:0; z-index:100; background:rgba(12,15,20,0.92);
+  backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+  border-bottom:1px solid rgba(100,116,139,0.2); padding:12px 20px;
+  display:flex; align-items:center; gap:16px; flex-wrap:wrap; max-width:100%; }}
+.mf-label {{ font-size:0.6rem; text-transform:uppercase; letter-spacing:2px; color:var(--accent); font-weight:700; white-space:nowrap; }}
+.mf-ctrl {{ display:flex; flex-direction:column; gap:4px; flex:1; min-width:200px; max-width:360px; }}
+.mf-ctrl label {{ font-size:0.6rem; text-transform:uppercase; letter-spacing:1.5px; color:var(--accent); font-weight:600; }}
+.mf-ms {{ position:relative; }}
+.mf-ms-trigger {{ background:#1A1F2A; color:var(--text); border:1.5px solid rgba(100,116,139,0.35);
+  border-radius:8px; padding:8px 36px 8px 12px; font-size:0.85rem; font-family:inherit;
+  cursor:pointer; width:100%; text-align:left; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  transition:border-color 0.2s; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%2364748B' stroke-width='2' fill='none'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:right 12px center; background-size:12px; }}
+.mf-ms-trigger:hover,.mf-ms.open .mf-ms-trigger {{ border-color:var(--accent); box-shadow:0 0 0 3px rgba(100,116,139,0.15); }}
+.mf-dd {{ display:none; position:absolute; top:calc(100% + 4px); left:0; width:320px;
+  background:#1A1F2A; border:1.5px solid rgba(100,116,139,0.35); border-radius:10px;
+  z-index:200; box-shadow:0 16px 48px rgba(0,0,0,0.5); overflow:hidden; }}
+.mf-ms.open .mf-dd {{ display:block; }}
+.mf-dd-search {{ width:100%; background:#0C0F14; border:none; border-bottom:1px solid rgba(100,116,139,0.2);
+  padding:10px 14px; color:var(--text); font-family:inherit; font-size:0.85rem; outline:none; }}
+.mf-dd-list {{ max-height:280px; overflow-y:auto; }}
+.mf-dd-list::-webkit-scrollbar {{ width:4px; }}
+.mf-dd-list::-webkit-scrollbar-thumb {{ background:rgba(100,116,139,0.3); border-radius:2px; }}
+.mf-dd-item {{ padding:8px 14px; cursor:pointer; font-size:0.82rem; display:flex; align-items:center; gap:8px; transition:background 0.15s; }}
+.mf-dd-item:hover {{ background:rgba(100,116,139,0.1); }}
+.mf-dd-item.selected {{ color:var(--accent2); }}
+.mf-dd-item input[type=checkbox] {{ accent-color:var(--accent2); }}
+.mf-clear {{ background:rgba(184,112,112,0.1); border:1px solid rgba(184,112,112,0.3); color:var(--red);
+  border-radius:8px; padding:8px 16px; font-size:0.8rem; font-family:inherit; cursor:pointer; white-space:nowrap;
+  transition:background 0.2s; display:none; }}
+.mf-clear.visible {{ display:block; }}
+.mf-clear:hover {{ background:rgba(184,112,112,0.2); border-color:var(--red); }}
+
+/* === Personal Insight Panel === */
+.ip {{ display:none; max-width:1200px; margin:20px auto; padding:0 20px; }}
+.ip.active {{ display:block; }}
+.ip-card {{ background:linear-gradient(135deg,rgba(100,116,139,0.08),rgba(124,152,133,0.06));
+  border:1px solid rgba(100,116,139,0.25); border-radius:16px; padding:24px 28px; }}
+.ip-header {{ display:flex; align-items:baseline; gap:12px; margin-bottom:16px; flex-wrap:wrap; }}
+.ip-title {{ font-size:1.2rem; font-weight:700; color:#fff; }}
+.ip-sub {{ font-size:0.85rem; color:#7A8494; }}
+.ip-metrics {{ display:flex; gap:16px; flex-wrap:wrap; margin-bottom:16px; }}
+.ip-m {{ background:rgba(21,25,33,0.7); border:1px solid rgba(100,116,139,0.15); border-radius:10px; padding:14px 18px; min-width:140px; flex:1; }}
+.ip-m .v {{ font-size:1.4rem; font-weight:700; color:#fff; }}
+.ip-m .l {{ font-size:0.6rem; text-transform:uppercase; letter-spacing:1.5px; color:#5A6577; margin-top:4px; }}
+.ip-m .s {{ font-size:0.72rem; color:#7A8494; margin-top:4px; }}
+.trend-up {{ color:var(--accent2); }} .trend-down {{ color:var(--red); }} .trend-flat {{ color:var(--gold); }}
+.ip-table {{ width:100%; border-collapse:collapse; font-size:0.82rem; }}
+.ip-table th {{ font-size:0.6rem; text-transform:uppercase; letter-spacing:1.5px; color:var(--accent);
+  padding:8px 12px; text-align:right; border-bottom:1px solid var(--grid); }}
+.ip-table th:first-child {{ text-align:left; }}
+.ip-table td {{ padding:8px 12px; text-align:right; border-bottom:1px solid rgba(30,37,48,0.5); }}
+.ip-table td:first-child {{ text-align:left; color:#fff; font-weight:600; }}
+.ip-table tr:hover {{ background:rgba(100,116,139,0.05); }}
+.ip-note {{ font-size:0.75rem; color:#5A6577; margin-top:12px; line-height:1.5; }}
+
 /* === Footer === */
 .footer {{ text-align:center; padding:40px 20px; color:#1E2530; font-size:0.8rem; max-width:1200px; margin:0 auto;
   border-top:1px solid var(--grid); }}
@@ -631,6 +752,10 @@ body::before {{
   .ctrl select,.chart-ctrl select {{ min-width:100%; }}
   .layer-nodes {{ flex-direction:column; }}
   .p-node {{ max-width:100%; }}
+  .master-filter {{ flex-direction:column; align-items:stretch; }}
+  .mf-ctrl {{ max-width:100%; }}
+  .mf-dd {{ width:100%; }}
+  .ip-metrics {{ flex-direction:column; }}
 }}
 </style>
 </head>
@@ -642,7 +767,7 @@ body::before {{
 <div class="hero">
   <h1>US Immigration Visa Dashboard</h1>
   <p class="subtitle">28 years of nonimmigrant visa data from the U.S. Department of State — every visa, every country, every trend.</p>
-  <div class="version-badge">V6 Interactive</div>
+  <div class="version-badge">V7 Interactive</div>
 </div>
 
 <!-- ===== STATS ROW ===== -->
@@ -652,6 +777,49 @@ body::before {{
   <div class="stat-card"><div class="value">{fmt(d['fy24_issued'])}</div><div class="label">FY2024 Issued</div></div>
   <div class="stat-card"><div class="value">{fmt(d['fy24_refused'])}</div><div class="label">FY2024 Refused</div></div>
   <div class="stat-card"><div class="value">{d['countries']}</div><div class="label">Countries</div></div>
+</div>
+
+<!-- ===== MASTER FILTER BAR ===== -->
+<div class="master-filter" id="master-filter">
+  <span class="mf-label">Filter</span>
+  <div class="mf-ctrl">
+    <label>Country</label>
+    <div class="mf-ms" id="mf-cw">
+      <button class="mf-ms-trigger" id="mf-ct" type="button">All Countries</button>
+      <div class="mf-dd">
+        <input class="mf-dd-search" id="mf-cs" placeholder="Search countries..." type="text" autocomplete="off">
+        <div class="mf-dd-list" id="mf-cl"></div>
+      </div>
+    </div>
+  </div>
+  <div class="mf-ctrl">
+    <label>Visa Type</label>
+    <select class="mf-ms-trigger" id="mf-vs" style="appearance:none;-webkit-appearance:none;background-image:url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%2364748B' stroke-width='2' fill='none'/%3E%3C/svg%3E&quot;);background-repeat:no-repeat;background-position:right 12px center;background-size:12px;">
+      <option value="gt">Grand Total</option>
+      <option value="h1b">H-1B (Work)</option>
+      <option value="f1">F-1 (Student)</option>
+      <option value="b12">B-1/B-2 (Tourist/Business)</option>
+      <option value="l1">L-1 (Intracompany)</option>
+      <option value="j1">J-1 (Exchange)</option>
+      <option value="h2a">H-2A (Agricultural)</option>
+      <option value="h2b">H-2B (Temp Worker)</option>
+      <option value="o1">O-1 (Extraordinary)</option>
+    </select>
+  </div>
+  <button class="mf-clear" id="mf-clr" type="button">Clear</button>
+</div>
+
+<!-- ===== PERSONAL INSIGHT PANEL ===== -->
+<div class="ip" id="ip">
+  <div class="ip-card">
+    <div class="ip-header">
+      <span class="ip-title" id="ip-t"></span>
+      <span class="ip-sub" id="ip-s"></span>
+    </div>
+    <div class="ip-metrics" id="ip-m"></div>
+    <div id="ip-cmp" style="overflow-x:auto;"></div>
+    <div class="ip-note" id="ip-n"></div>
+  </div>
 </div>
 
 <!-- ===== INSIGHT BANNER ===== -->
@@ -966,8 +1134,8 @@ body::before {{
     </div>
     <div class="ai-stat-card">
       <div class="ai-label">Dashboard Versions</div>
-      <div class="ai-value">V1 &rarr; V2 &rarr; V3 &rarr; V4 &rarr; V5 &rarr; V6</div>
-      <div class="ai-detail">V1 (broken) &rarr; V2 (fixed) &rarr; V3 (storytelling) &rarr; V4 (interactive) &rarr; V5 (editorial) &rarr; V6 (deep analysis)</div>
+      <div class="ai-value">V1 &rarr; V2 &rarr; V3 &rarr; V4 &rarr; V5 &rarr; V6 &rarr; V7</div>
+      <div class="ai-detail">V1 (broken) &rarr; V2 (fixed) &rarr; V3 (storytelling) &rarr; V4 (interactive) &rarr; V5 (editorial) &rarr; V6 (deep analysis) &rarr; V7 (master filters)</div>
     </div>
     <div class="ai-stat-card">
       <div class="ai-label">Session</div>
@@ -1108,15 +1276,204 @@ const REFUSAL_DATA = {refusal_json};
 const GROUNDS_DATA = {grounds_json};
 const CONSULAR_DATA = {consular_json};
 const HEATMAP_DATA = {heatmap_json};
+const INSIGHT_DATA = {insight_json};
+const ALL_COUNTRIES = {all_countries_json};
 const CHART_COLORS = {json.dumps(COLORS)};
+const GOLD_COLOR = '{GOLD}';
 const CARD_BG = '{CARD}';
 const TEXT_COLOR = '{TEXT}';
 const GRID_COLOR = '{GRID}';
 const RED_COLOR = '{RED}';
 const ACCENT_COLOR = '{ACCENT}';
 const ACCENT2_COLOR = '{ACCENT2}';
-const GOLD_COLOR = '{GOLD}';
 const COVID_TOTAL = {covid_total};
+</script>
+
+<!-- ===== MASTER FILTER CONTROLLER ===== -->
+<script>
+(function() {{
+  const STATE = {{ countries: [], visaKey: 'gt' }};
+  const VK2LABEL = {{ gt:'Grand Total', h1b:'H-1B', f1:'F-1', b12:'B-1,2', l1:'L-1', j1:'J-1', h2a:'H-2A', h2b:'H-2B', o1:'O-1' }};
+
+  // --- Country multi-select widget ---
+  const list = document.getElementById('mf-cl');
+  const search = document.getElementById('mf-cs');
+  const trigger = document.getElementById('mf-ct');
+  const widget = document.getElementById('mf-cw');
+
+  ALL_COUNTRIES.forEach(c => {{
+    const item = document.createElement('div');
+    item.className = 'mf-dd-item';
+    item.dataset.country = c;
+    item.innerHTML = '<input type="checkbox" value="' + c + '"> ' + c;
+    item.addEventListener('click', function(e) {{
+      const cb = item.querySelector('input');
+      if (e.target.tagName !== 'INPUT') cb.checked = !cb.checked;
+      toggleCountry(c, cb.checked);
+      e.stopPropagation();
+    }});
+    list.appendChild(item);
+  }});
+
+  search.addEventListener('input', function() {{
+    const q = search.value.toLowerCase();
+    list.querySelectorAll('.mf-dd-item').forEach(function(item) {{
+      item.style.display = item.dataset.country.toLowerCase().includes(q) ? 'flex' : 'none';
+    }});
+  }});
+
+  trigger.addEventListener('click', function(e) {{
+    widget.classList.toggle('open');
+    if (widget.classList.contains('open')) search.focus();
+    e.stopPropagation();
+  }});
+
+  document.addEventListener('click', function(e) {{
+    if (!widget.contains(e.target)) widget.classList.remove('open');
+  }});
+
+  function updateLabel() {{
+    if (STATE.countries.length === 0) trigger.textContent = 'All Countries';
+    else if (STATE.countries.length === 1) trigger.textContent = STATE.countries[0];
+    else trigger.textContent = STATE.countries.length + ' countries selected';
+  }}
+
+  function toggleCountry(c, checked) {{
+    if (checked && !STATE.countries.includes(c)) STATE.countries.push(c);
+    else if (!checked) STATE.countries = STATE.countries.filter(function(x) {{ return x !== c; }});
+    const item = list.querySelector('[data-country="' + c + '"]');
+    if (item) item.classList.toggle('selected', checked);
+    updateLabel();
+    onFilterChange();
+  }}
+
+  function resetCountries() {{
+    STATE.countries = [];
+    list.querySelectorAll('input[type=checkbox]').forEach(function(cb) {{ cb.checked = false; }});
+    list.querySelectorAll('.mf-dd-item').forEach(function(i) {{ i.classList.remove('selected'); }});
+    updateLabel();
+  }}
+
+  // --- Visa type ---
+  const vs = document.getElementById('mf-vs');
+  vs.addEventListener('change', function() {{ STATE.visaKey = vs.value; onFilterChange(); }});
+
+  // --- Clear ---
+  const clr = document.getElementById('mf-clr');
+  clr.addEventListener('click', function() {{ resetCountries(); vs.value = 'gt'; STATE.visaKey = 'gt'; onFilterChange(); }});
+
+  // --- Filter change ---
+  function onFilterChange() {{
+    const active = STATE.countries.length > 0;
+    clr.classList.toggle('visible', active);
+    renderInsight();
+    if (window._mfChanged) window._mfChanged(STATE);
+  }}
+
+  // --- Format ---
+  function fmt(n) {{
+    if (n >= 1000000) return (n/1000000).toFixed(1) + 'M';
+    if (n >= 1000) return (n/1000).toFixed(1) + 'K';
+    return n.toLocaleString();
+  }}
+
+  function getTrend(v24, v19) {{
+    if (!v19 || v19 === 0) return {{ a:'\u2192', l:'No FY2019 data', c:'trend-flat', p:null }};
+    const p = ((v24 - v19) / v19 * 100);
+    if (p > 10) return {{ a:'\u2191', l:'Improving', c:'trend-up', p:p }};
+    if (p < -10) return {{ a:'\u2193', l:'Declining', c:'trend-down', p:p }};
+    return {{ a:'\u2192', l:'Stable', c:'trend-flat', p:p }};
+  }}
+
+  function addM(container, val, label, sub) {{
+    const d = document.createElement('div');
+    d.className = 'ip-m';
+    d.innerHTML = '<div class="v">' + val + '</div><div class="l">' + label + '</div>' + (sub ? '<div class="s">' + sub + '</div>' : '');
+    container.appendChild(d);
+  }}
+
+  function renderInsight() {{
+    const panel = document.getElementById('ip');
+    const active = STATE.countries.length > 0;
+    panel.classList.toggle('active', active);
+    if (!active) return;
+
+    const vk = STATE.visaKey;
+    const vLabel = VK2LABEL[vk];
+    const cs = STATE.countries;
+
+    document.getElementById('ip-t').textContent = cs.length === 1 ? cs[0] + ' \u2014 ' + vLabel : cs.length + ' Countries \u2014 ' + vLabel;
+    document.getElementById('ip-s').textContent = '';
+
+    const metricsDiv = document.getElementById('ip-m');
+    const cmpDiv = document.getElementById('ip-cmp');
+    const noteDiv = document.getElementById('ip-n');
+    metricsDiv.innerHTML = '';
+    cmpDiv.innerHTML = '';
+    noteDiv.textContent = '';
+
+    if (cs.length === 1) {{
+      const c = cs[0];
+      const cd = INSIGHT_DATA[c];
+      if (!cd) {{ metricsDiv.innerHTML = '<p style="color:#7A8494">No data for ' + c + '</p>'; return; }}
+      const v24 = cd.fy24[vk] || 0;
+      const v19 = cd.fy19[vk] || 0;
+      const avg = cd.avg5[vk] || 0;
+      const rank = cd.rank[vk] || 'N/A';
+      const bvr = cd.bvr;
+      const trend = getTrend(v24, v19);
+      const pctAvg = avg > 0 ? ((v24 - avg) / avg * 100) : null;
+
+      addM(metricsDiv, fmt(v24), 'FY2024 Issued', vLabel + ' visas');
+      addM(metricsDiv, '#' + rank, 'Global Rank', 'out of ' + ALL_COUNTRIES.length + ' countries');
+      addM(metricsDiv, '<span class="' + trend.c + '">' + trend.a + ' ' + trend.l + '</span>', 'Trend vs FY2019',
+        trend.p !== null ? (trend.p >= 0 ? '+' : '') + trend.p.toFixed(1) + '% since FY2019' : 'No baseline');
+      if (bvr !== null && bvr !== undefined) {{
+        addM(metricsDiv, bvr.toFixed(1) + '%', 'B-Visa Refusal Rate',
+          bvr < 15 ? 'Below average scrutiny' : bvr < 40 ? 'Moderate scrutiny' : 'High scrutiny');
+      }}
+      if (avg > 0) {{
+        addM(metricsDiv, fmt(avg), '5yr Avg (FY20\u201324)',
+          pctAvg !== null ? 'FY24 is ' + (pctAvg >= 0 ? '+' : '') + pctAvg.toFixed(1) + '% vs avg' : '');
+      }}
+      if (vk !== 'b12' && vk !== 'gt') {{
+        noteDiv.textContent = 'Note: Per-country refusal rates are only published for B-visa (B-1/B-2). The rate shown is a proxy for overall consular scrutiny and may not directly reflect ' + vLabel + ' approval odds.';
+      }}
+    }} else {{
+      // Multi-country comparison table
+      document.getElementById('ip-s').textContent = 'Comparison';
+      const tbl = document.createElement('table');
+      tbl.className = 'ip-table';
+      tbl.innerHTML = '<thead><tr><th>Country</th><th>FY2024</th><th>Rank</th><th>vs FY2019</th><th>5yr Avg</th><th>B-Visa Refusal</th></tr></thead><tbody></tbody>';
+      const tb = tbl.querySelector('tbody');
+      cs.forEach(function(c) {{
+        const cd = INSIGHT_DATA[c];
+        if (!cd) return;
+        const v24 = cd.fy24[vk] || 0;
+        const v19 = cd.fy19[vk] || 0;
+        const avg = cd.avg5[vk] || 0;
+        const rank = cd.rank[vk] || '\u2014';
+        const bvr = cd.bvr;
+        const trend = getTrend(v24, v19);
+        const tr = document.createElement('tr');
+        tr.innerHTML = '<td>' + c + '</td><td>' + fmt(v24) + '</td><td>#' + rank + '</td>' +
+          '<td class="' + trend.c + '">' + trend.a + ' ' + (trend.p !== null ? (trend.p >= 0 ? '+' : '') + trend.p.toFixed(1) + '%' : '\u2014') + '</td>' +
+          '<td>' + (avg > 0 ? fmt(avg) : '\u2014') + '</td>' +
+          '<td>' + (bvr !== null ? bvr.toFixed(1) + '%' : '\u2014') + '</td>';
+        tb.appendChild(tr);
+      }});
+      cmpDiv.appendChild(tbl);
+    }}
+  }}
+
+  // Expose to chart syncs
+  window._mfState = STATE;
+  window._mfChanged = null;
+  window._mfOnChange = function(fn) {{
+    const prev = window._mfChanged;
+    window._mfChanged = function(s) {{ if (prev) prev(s); fn(s); }};
+  }};
+}})();
 </script>
 
 <!-- ===== TIMELINE CHART JS ===== -->
@@ -1212,6 +1569,16 @@ const COVID_TOTAL = {covid_total};
 
   sel.addEventListener('change', renderTimeline);
   renderTimeline();
+
+  // Master filter sync
+  window._mfOnChange && window._mfOnChange(function(s) {{
+    if (s.countries.length > 0) {{
+      Array.from(sel.options).forEach(function(o) {{
+        o.selected = s.countries.includes(o.value);
+      }});
+      renderTimeline();
+    }}
+  }});
 }})();
 </script>
 
@@ -1254,6 +1621,13 @@ const COVID_TOTAL = {covid_total};
       }}
       return 'rgb(' + r + ',' + g + ',' + b + ')';
     }});
+    // Master filter highlight
+    if (window._mfState && window._mfState.countries.length > 0) {{
+      const mc = window._mfState.countries;
+      for (let i = 0; i < countries.length; i++) {{
+        if (mc.includes(countries[i])) colors[i] = GOLD_COLOR;
+      }}
+    }}
 
     const mx = maxVal;
     let step;
@@ -1289,6 +1663,13 @@ const COVID_TOTAL = {covid_total};
 
   sel.addEventListener('change', renderFY24);
   renderFY24();
+
+  // Master filter sync
+  window._mfOnChange && window._mfOnChange(function(s) {{
+    const vtMap = {{ gt:'Grand Total', h1b:'H-1B', f1:'F-1', b12:'B-1,2', l1:'L-1', j1:'J-1', h2a:'H-2A', h2b:'H-2B', o1:'O-1' }};
+    sel.value = vtMap[s.visaKey] || 'Grand Total';
+    renderFY24();
+  }});
 }})();
 </script>
 
@@ -1355,6 +1736,14 @@ const COVID_TOTAL = {covid_total};
 
     const textLabels = chartData.map(d => d.rate.toFixed(1) + '%');
 
+    // Master filter highlight
+    if (window._mfState && window._mfState.countries.length > 0) {{
+      const mc = window._mfState.countries;
+      for (let i = 0; i < chartData.length; i++) {{
+        barColors[i] = mc.includes(chartData[i].nationality) ? GOLD_COLOR : 'rgba(100,116,139,0.2)';
+      }}
+    }}
+
     Plotly.newPlot('refusal-chart', [{{
       x: chartData.map(d => d.rate),
       y: chartData.map(d => d.nationality),
@@ -1378,6 +1767,9 @@ const COVID_TOTAL = {covid_total};
   modeSel.addEventListener('change', renderRefusal);
   countrySel.addEventListener('change', renderRefusal);
   renderRefusal();
+
+  // Master filter sync
+  window._mfOnChange && window._mfOnChange(function() {{ renderRefusal(); }});
 }})();
 </script>
 
@@ -1583,6 +1975,24 @@ const COVID_TOTAL = {covid_total};
     tr.appendChild(tdTotal);
     tbody.appendChild(tr);
   }});
+
+  // Master filter sync: highlight matching rows
+  window._mfOnChange && window._mfOnChange(function(s) {{
+    const rows = document.querySelectorAll('#heatmap-body tr');
+    const active = s.countries.length > 0;
+    rows.forEach(function(row) {{
+      const td = row.querySelector('td:first-child');
+      if (!td) return;
+      const rc = td.textContent.trim();
+      if (active && s.countries.includes(rc)) {{
+        row.style.background = 'rgba(100,116,139,0.12)';
+        row.style.outline = '1px solid rgba(124,152,133,0.4)';
+      }} else {{
+        row.style.background = '';
+        row.style.outline = '';
+      }}
+    }});
+  }});
 }})();
 </script>
 
@@ -1619,6 +2029,18 @@ const COVID_TOTAL = {covid_total};
     }},{{responsive:true,displayModeBar:false}});
   }}
   vs.addEventListener('change',render); cs.addEventListener('change',render); render();
+
+  // Master filter sync
+  window._mfOnChange && window._mfOnChange(function(s) {{
+    const vtDBMap = {{ gt:'Grand Total', h1b:'H-1B', f1:'F-1', b12:'B-1,2', l1:'L-1', j1:'J-1', h2a:'H-2A', h2b:'H-2B', o1:'O-1' }};
+    vs.value = vtDBMap[s.visaKey] || 'H-1B';
+    if (s.countries.length > 0) {{
+      Array.from(cs.options).forEach(function(o) {{
+        o.selected = s.countries.includes(o.value);
+      }});
+    }}
+    render();
+  }});
 }})();
 </script>
 
@@ -1628,7 +2050,7 @@ const COVID_TOTAL = {covid_total};
 
 
 def main():
-    """Build V6 dashboard."""
+    """Build V7 dashboard."""
     print("Fetching data from DuckDB...")
     data = fetch_all_data()
 
@@ -1646,7 +2068,7 @@ def main():
     OUTPUT_PATH.write_text(html)
 
     size_kb = OUTPUT_PATH.stat().st_size / 1024
-    print(f"\nDashboard V6 saved to {OUTPUT_PATH}")
+    print(f"\nDashboard V7 saved to {OUTPUT_PATH}")
     print(f"File size: {size_kb:.0f} KB")
     print("Done.")
 
