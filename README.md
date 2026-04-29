@@ -196,4 +196,4 @@ The export materializes `h1b_public_wage_fact`, a denormalized worksite-level wa
 
 ---
 
-*Built by [Sai Pranav Ongole](https://www.linkedin.com/in/pranavo/) — Part of the DataForge365 series*
+*Built by [Sai Pranav Ongole](https://www.linkedin.com/in/pranavo/) *
