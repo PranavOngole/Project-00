@@ -8,7 +8,7 @@
 <script type="importmap">
 {
   "imports": {
-    "apache-arrow": "./data/wasm/duckdb/apache-arrow.mjs"
+    "apache-arrow": "https://cdn.jsdelivr.net/npm/apache-arrow@17.0.0/+esm"
   }
 }
 </script>
@@ -492,7 +492,7 @@ td.red { color:var(--red); font-family:var(--mono); }
 //  DuckDB-WASM init + query engine
 // ────────────────────────────────────────────────────────────────
 const PARQUET_URL = new URL('./data/wasm/h1b_lca_fy2026_q1.parquet', location.href).href;
-const DUCKDB_BASE_URL = new URL('./data/wasm/duckdb/', location.href).href;
+const DUCKDB_BASE_URL = 'https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.29.0/dist/';
 const DEFAULT_SELECTED = 120141;
 const LIVE_QUERY_URL = 'https://pranavongole.github.io/Project-00/h1b_query.html';
 
@@ -542,11 +542,11 @@ async function initDuckDB() {
 
   let duckdb;
   try {
-    duckdb = await import(new URL('duckdb-browser-bundled.mjs', DUCKDB_BASE_URL).href);
+    duckdb = await import(new URL('duckdb-browser.mjs', DUCKDB_BASE_URL).href);
   } catch(e) {
     showRichError(`
       <strong>Failed to load DuckDB-WASM.</strong><br>
-      The dashboard could not load its local browser database engine from <code>data/wasm/duckdb/</code>. Refresh the hosted page, or check that the DuckDB runtime files deployed with the site.
+      The dashboard could not load the browser database engine from jsDelivr. Refresh the hosted page or check your browser/network access.
       <div style="margin-top:8px;color:var(--muted);">Browser detail: <code>${escHtml(e.message || e)}</code></div>
       <div class="error-actions"><a href="${LIVE_QUERY_URL}">Open the live dashboard</a></div>
     `);
