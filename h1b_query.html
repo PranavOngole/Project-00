@@ -5,6 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>H-1B LCA Query | FY2026 Q1 | DataForge365</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script type="importmap">
+{
+  "imports": {
+    "apache-arrow": "./data/wasm/duckdb/apache-arrow.mjs"
+  }
+}
+</script>
 <style>
 :root {
   --bg:       #09090b;
@@ -485,6 +492,7 @@ td.red { color:var(--red); font-family:var(--mono); }
 //  DuckDB-WASM init + query engine
 // ────────────────────────────────────────────────────────────────
 const PARQUET_URL = new URL('./data/wasm/h1b_lca_fy2026_q1.parquet', location.href).href;
+const DUCKDB_BASE_URL = new URL('./data/wasm/duckdb/', location.href).href;
 const DEFAULT_SELECTED = 120141;
 const LIVE_QUERY_URL = 'https://pranavongole.github.io/Project-00/h1b_query.html';
 
@@ -534,25 +542,22 @@ async function initDuckDB() {
 
   let duckdb;
   try {
-    duckdb = await import('https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.29.0/dist/duckdb-browser.mjs');
+    duckdb = await import(new URL('duckdb-browser-bundled.mjs', DUCKDB_BASE_URL).href);
   } catch(e) {
-    // Fallback to older version
-    try {
-      duckdb = await import('https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.28.0/dist/duckdb-browser.mjs');
-    } catch(e2) {
-      showRichError(`
-        <strong>Failed to load DuckDB-WASM.</strong><br>
-        Try the hosted dashboard, refresh the page, or use a modern browser with network access to jsDelivr.
-        <div class="error-actions"><a href="${LIVE_QUERY_URL}">Open the live dashboard</a></div>
-      `);
-      return;
-    }
+    showRichError(`
+      <strong>Failed to load DuckDB-WASM.</strong><br>
+      The dashboard could not load its local browser database engine from <code>data/wasm/duckdb/</code>. Refresh the hosted page, or check that the DuckDB runtime files deployed with the site.
+      <div style="margin-top:8px;color:var(--muted);">Browser detail: <code>${escHtml(e.message || e)}</code></div>
+      <div class="error-actions"><a href="${LIVE_QUERY_URL}">Open the live dashboard</a></div>
+    `);
+    return;
   }
 
   setProgress(20, 'selecting WASM bundle…');
-  const BUNDLES = duckdb.getJsDelivrBundles();
-  // Force MVP bundle (no COOP/COEP required)
-  const bundle = BUNDLES.mvp;
+  const bundle = {
+    mainModule: new URL('duckdb-mvp.wasm', DUCKDB_BASE_URL).href,
+    mainWorker: new URL('duckdb-browser-mvp.worker.js', DUCKDB_BASE_URL).href,
+  };
 
   setProgress(30, 'creating worker…');
   const workerUrl = URL.createObjectURL(
