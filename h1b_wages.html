@@ -3,336 +3,382 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>H-1B Wage Intelligence | FY2026 Q1 | DataForge365</title>
+<title>H-1B Wage Analytics | FY2026 Q1 | DataForge365</title>
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #09090b; --card: #18181b; --text: #d4d4d8; --grid: #27272a;
-  --accent: #3B82F6; --accent2: #10B981; --red: #EF4444; --gold: #F59E0B;
-  --purple: #8B5CF6; --orange: #F97316;
-  --glass: rgba(24,24,27,0.8); --glass-border: rgba(59,130,246,0.12);
+  --bg:       #09090b;
+  --surface:  #0f0f13;
+  --surface2: #13131a;
+  --border:   #1c1c28;
+  --border2:  #252535;
+  --text:     #d9d9e0;
+  --muted:    #50506a;
+  --dim:      #38384e;
+  --amber:    #f0b429;
+  --green:    #22c55e;
+  --red:      #f87171;
+  --blue:     #60a5fa;
+  --mono: 'JetBrains Mono', monospace;
 }
 * { margin:0; padding:0; box-sizing:border-box; }
-html { scroll-behavior: smooth; }
-body { background:var(--bg); color:var(--text); font-family:'Inter',system-ui,sans-serif; overflow-x:hidden; }
+body { background:var(--bg); color:var(--text);
+       font-family:'Inter',system-ui,sans-serif; overflow-x:hidden; }
 
-body::before {
-  content:''; position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0;
-  background-image:
-    linear-gradient(rgba(39,39,42,0.3) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(39,39,42,0.3) 1px, transparent 1px);
-  background-size: 60px 60px;
-  opacity: 0.4;
-}
-
-.content { position:relative; z-index:1; }
-
-/* Nav */
-.nav { display:flex; align-items:center; justify-content:space-between; padding:16px 32px; border-bottom:1px solid var(--grid); }
-.nav-brand { font-size:0.75rem; font-weight:700; color:#52525b; text-transform:uppercase; letter-spacing:2px; }
+/* ── Nav ── */
+.nav { display:flex; align-items:center; justify-content:space-between;
+       padding:14px 32px; border-bottom:1px solid var(--border); }
+.nav-brand { font-size:0.7rem; font-weight:700; color:var(--muted);
+             text-transform:uppercase; letter-spacing:2px; }
 .nav-links { display:flex; gap:20px; }
-.nav-links a { font-size:0.8rem; color:#71717a; text-decoration:none; font-weight:500; transition:color 0.2s; }
-.nav-links a:hover { color:var(--accent); }
-.nav-links a.active { color:var(--accent); }
+.nav-links a { font-size:0.78rem; color:var(--muted); text-decoration:none;
+               font-weight:500; transition:color 0.15s; }
+.nav-links a:hover, .nav-links a.active { color:var(--text); }
 
-/* Hero */
-.hero { text-align:center; padding:60px 20px 40px; }
-.hero h1 { font-size:2.8rem; font-weight:900; letter-spacing:-1.5px;
-  background:linear-gradient(135deg,#fff 0%,#8B5CF6 50%,#3B82F6 100%);
-  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
-.hero .subtitle { font-size:1.05rem; color:#71717a; margin-top:10px; font-weight:300; max-width:700px; margin-left:auto; margin-right:auto; }
-.hero .badge-row { display:flex; justify-content:center; gap:10px; flex-wrap:wrap; margin-top:14px; }
-.badge { display:inline-block; background:rgba(59,130,246,0.1); border:1px solid rgba(59,130,246,0.25);
-  border-radius:20px; padding:4px 14px; font-size:0.68rem; font-weight:600; color:#3B82F6; letter-spacing:1px; text-transform:uppercase; }
-.badge.green { background:rgba(16,185,129,0.1); border-color:rgba(16,185,129,0.25); color:#10B981; }
-.badge.purple { background:rgba(139,92,246,0.1); border-color:rgba(139,92,246,0.25); color:#8B5CF6; }
+/* ── Hero ── */
+.hero { padding:44px 32px 0; max-width:1400px; margin:0 auto; }
+.hero-top { display:flex; align-items:flex-start; justify-content:space-between;
+            gap:24px; flex-wrap:wrap; }
+.hero h1 { font-size:1.8rem; font-weight:700; color:#fff; letter-spacing:-0.5px; line-height:1.15; }
+.hero .tagline { font-size:0.88rem; color:var(--muted); margin-top:6px; max-width:560px; line-height:1.6; }
+.badge-row { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
+.badge { display:inline-block; padding:2px 10px; border-radius:3px; font-size:0.62rem;
+         font-weight:600; text-transform:uppercase; letter-spacing:1.5px; }
+.badge-amber { background:rgba(240,180,41,0.08); border:1px solid rgba(240,180,41,0.2); color:var(--amber); }
+.badge-neutral { background:rgba(255,255,255,0.04); border:1px solid var(--border2); color:var(--muted); }
+.cta-query { display:inline-flex; align-items:center; gap:6px; padding:8px 16px;
+             background:var(--surface2); border:1px solid var(--border2); border-radius:4px;
+             color:var(--text); text-decoration:none; font-size:0.78rem; font-weight:600;
+             transition:all 0.15s; white-space:nowrap; }
+.cta-query:hover { border-color:var(--amber); color:var(--amber); }
 
-/* Stats row */
-.stats-row { display:flex; justify-content:center; gap:16px; padding:20px; flex-wrap:wrap; max-width:1200px; margin:0 auto; }
-.stat-card { background:var(--glass); border:1px solid var(--glass-border); border-radius:16px;
-  padding:18px 24px; text-align:center; min-width:130px; flex:1; max-width:180px;
-  transition:transform 0.3s ease, border-color 0.3s ease; }
-.stat-card:hover { transform:translateY(-4px); border-color:var(--accent); }
-.stat-card .value { font-size:1.8rem; font-weight:800;
-  background:linear-gradient(135deg,#8B5CF6,#3B82F6);
-  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
-.stat-card .label { font-size:0.65rem; color:#52525b; text-transform:uppercase; letter-spacing:1.5px; margin-top:4px; font-weight:600; }
+/* ── Key stats ── */
+.stats-row { max-width:1400px; margin:28px auto 0; padding:0 32px;
+             display:flex; gap:12px; flex-wrap:wrap; }
+.stat-card { flex:1; min-width:120px; background:var(--surface);
+             border:1px solid var(--border); border-radius:8px; padding:16px 20px; }
+.stat-val { font-size:1.6rem; font-weight:700; color:#fff; letter-spacing:-0.5px;
+            line-height:1; font-variant-numeric:tabular-nums; }
+.stat-val.amber { color:var(--amber); }
+.stat-lbl { font-size:0.6rem; font-weight:600; text-transform:uppercase; letter-spacing:1.5px;
+            color:var(--muted); margin-top:6px; }
+.stat-ctx { font-size:0.68rem; color:var(--dim); margin-top:3px; }
 
-/* Insight banner */
-.insight { max-width:1200px; margin:24px auto; padding:0 20px; }
-.insight-card { background:linear-gradient(135deg,rgba(139,92,246,0.06),rgba(59,130,246,0.04));
-  border:1px solid rgba(139,92,246,0.15); border-radius:16px; padding:22px 28px;
-  display:flex; align-items:flex-start; gap:18px; flex-wrap:wrap; }
-.insight-icon { font-size:2.2rem; }
-.insight-body { flex:1; min-width:200px; }
-.insight-body h3 { font-size:1.05rem; font-weight:700; color:#fff; margin-bottom:6px; }
-.insight-body p { font-size:0.88rem; color:#71717a; line-height:1.6; }
-.insight-body strong { color:#8B5CF6; }
-.insight-pills { display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
-.insight-pill { background:rgba(139,92,246,0.08); border:1px solid rgba(139,92,246,0.15);
-  border-radius:20px; padding:6px 16px; text-align:center; min-width:90px; }
-.insight-pill .pv { font-size:1rem; font-weight:700; color:#fff; }
-.insight-pill .pl { font-size:0.58rem; color:#52525b; text-transform:uppercase; letter-spacing:1px; margin-top:2px; }
+/* ── Context box ── */
+.context-box { max-width:1400px; margin:20px auto 0; padding:0 32px; }
+.context-inner { background:var(--surface); border:1px solid var(--border); border-radius:8px;
+                 padding:18px 24px; display:flex; gap:32px; flex-wrap:wrap; }
+.ctx-item { flex:1; min-width:200px; }
+.ctx-label { font-size:0.6rem; font-weight:600; text-transform:uppercase; letter-spacing:1.5px;
+             color:var(--muted); margin-bottom:6px; }
+.ctx-text { font-size:0.8rem; color:var(--text); line-height:1.55; }
+.ctx-text strong { color:var(--amber); font-weight:600; }
 
-/* Section */
-.section { max-width:1200px; margin:0 auto; padding:0 20px; }
-.section-header { padding:40px 0 16px; }
-.section-header .tag { font-size:0.62rem; text-transform:uppercase; letter-spacing:2.5px; color:#8B5CF6; font-weight:700; }
-.section-header h2 { font-size:1.5rem; font-weight:700; color:#fff; margin-top:4px; }
-.section-header p { font-size:0.88rem; color:#71717a; margin-top:4px; max-width:700px; }
+/* ── Section ── */
+.section { max-width:1400px; margin:0 auto; padding:0 32px; }
+.sec-head { padding:36px 0 14px; }
+.sec-tag { font-size:0.6rem; font-weight:700; text-transform:uppercase; letter-spacing:2.5px;
+           color:var(--amber); }
+.sec-title { font-size:1.1rem; font-weight:600; color:#fff; margin-top:4px; }
+.sec-sub { font-size:0.78rem; color:var(--muted); margin-top:3px; max-width:700px; }
 
-/* Chart card */
-.chart-card { background:var(--glass); border:1px solid var(--glass-border); border-radius:16px;
-  padding:24px; margin-bottom:24px; transition:border-color 0.3s ease; }
-.chart-card:hover { border-color:rgba(139,92,246,0.2); }
-.chart-title { font-size:1rem; font-weight:600; color:#fff; margin-bottom:4px; }
-.chart-sub { font-size:0.78rem; color:#71717a; margin-bottom:16px; }
+/* ── Chart card ── */
+.chart-card { background:var(--surface); border:1px solid var(--border); border-radius:8px;
+              padding:20px; margin-bottom:20px; }
+.chart-card:hover { border-color:var(--border2); }
+.chart-title { font-size:0.85rem; font-weight:600; color:var(--text); margin-bottom:2px; }
+.chart-sub { font-size:0.72rem; color:var(--muted); margin-bottom:14px; }
+.chart-note { font-size:0.68rem; color:var(--dim); margin-top:10px; }
 
-/* Two-col grid */
-.grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:24px; }
-@media(max-width:768px) { .grid-2 { grid-template-columns:1fr; } }
+/* ── Grid ── */
+.grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:20px; }
+@media(max-width:840px) { .grid-2 { grid-template-columns:1fr; } }
+.grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:20px; margin-bottom:20px; }
+@media(max-width:1100px) { .grid-3 { grid-template-columns:1fr 1fr; } }
+@media(max-width:640px)  { .grid-3 { grid-template-columns:1fr; } }
 
-/* Wage level legend */
-.wl-legend { display:flex; gap:16px; flex-wrap:wrap; margin-bottom:16px; }
-.wl-item { display:flex; align-items:center; gap:6px; font-size:0.75rem; color:#71717a; }
-.wl-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+/* ── Drill-down callout ── */
+.drill-callout { display:flex; align-items:center; gap:10px; margin-top:10px;
+                 padding:8px 12px; background:rgba(240,180,41,0.05);
+                 border:1px solid rgba(240,180,41,0.12); border-radius:6px; }
+.drill-callout p { font-size:0.72rem; color:var(--muted); }
+.drill-callout a { color:var(--amber); text-decoration:none; font-weight:600; font-size:0.72rem; }
+.drill-callout a:hover { text-decoration:underline; }
 
-/* Source footer */
-.source-section { max-width:1200px; margin:0 auto; padding:0 20px 60px; }
-.source-card { background:var(--glass); border:1px solid var(--glass-border); border-radius:16px; padding:28px 32px; }
-.source-card h3 { font-size:1rem; font-weight:600; color:#fff; margin-bottom:12px; }
-.source-card p { font-size:0.82rem; color:#71717a; line-height:1.7; margin-bottom:8px; }
-.source-card a { color:var(--accent); text-decoration:none; }
+/* ── Wage level legend ── */
+.wl-legend { display:flex; gap:16px; flex-wrap:wrap; margin-bottom:14px; }
+.wl-item { display:flex; align-items:center; gap:6px; font-size:0.72rem; color:var(--muted); }
+.wl-dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+
+/* ── Source section ── */
+.source-section { max-width:1400px; margin:28px auto 0; padding:0 32px 60px; }
+.source-card { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:24px 28px; }
+.source-card h3 { font-size:0.9rem; font-weight:600; color:#fff; margin-bottom:12px; }
+.source-card p  { font-size:0.78rem; color:var(--muted); line-height:1.7; margin-bottom:6px; }
+.source-card a  { color:var(--blue); text-decoration:none; }
 .source-card a:hover { text-decoration:underline; }
-.cta-back { display:inline-flex; align-items:center; gap:8px; margin-top:16px; padding:10px 20px;
-  background:rgba(59,130,246,0.1); border:1px solid rgba(59,130,246,0.25); border-radius:8px;
-  color:var(--accent); text-decoration:none; font-size:0.82rem; font-weight:600; transition:all 0.2s; }
-.cta-back:hover { background:rgba(59,130,246,0.2); }
 </style>
 </head>
 <body>
-<div class="content">
 
 <!-- Nav -->
 <nav class="nav">
-  <span class="nav-brand">DataForge365 / Project-00</span>
+  <span class="nav-brand">DataForge365 &mdash; Project 00</span>
   <div class="nav-links">
     <a href="dashboard.html">Visa Overview</a>
-    <a href="h1b_wages.html" class="active">H-1B Wages</a>
+    <a href="h1b_wages.html" class="active">H-1B Analytics</a>
+    <a href="h1b_query.html">Live Query</a>
     <a href="https://github.com/PranavOngole/Project-00" target="_blank">GitHub</a>
   </div>
 </nav>
 
 <!-- Hero -->
 <div class="hero">
-  <h1>H-1B Wage Intelligence</h1>
-  <p class="subtitle">DOL Labor Condition Application disclosures — FY2026 Q1 (Oct 2025 – Dec 2025). Every certified filing, every wage level, every lottery weight point.</p>
-  <div class="badge-row">
-    <span class="badge">FY2026 Q1</span>
-    <span class="badge green">120,532 LCA Records</span>
-    <span class="badge purple">4 Wage Levels</span>
+  <div class="hero-top">
+    <div>
+      <h1>H-1B Wage Analytics</h1>
+      <p class="tagline">DOL Labor Condition Application disclosures &mdash; FY2026 Q1 (Oct&ndash;Dec 2025).
+        Every certified LCA filing, every wage level, every lottery weight point.</p>
+      <div class="badge-row">
+        <span class="badge badge-amber">FY2026 Q1 Only</span>
+        <span class="badge badge-neutral">120,532 LCA Records</span>
+        <span class="badge badge-neutral">Source: DOL OFLC</span>
+      </div>
+    </div>
+    <a href="h1b_query.html" class="cta-query">&#9654;&nbsp; Live Query Tool &rarr;</a>
   </div>
 </div>
 
 <!-- Stats -->
 <div class="stats-row">
   <div class="stat-card">
-    <div class="value">71.7K</div>
-    <div class="label">LCA Filings</div>
+    <div class="stat-val">71.7K</div>
+    <div class="stat-lbl">Unique LCA Filings</div>
+    <div class="stat-ctx">Distinct case numbers, certified</div>
   </div>
   <div class="stat-card">
-    <div class="value">206.7K</div>
-    <div class="label">Jobs Requested</div>
+    <div class="stat-val">206.7K</div>
+    <div class="stat-lbl">Worker Positions Requested</div>
+    <div class="stat-ctx">Not lottery registrations &mdash; see note below</div>
   </div>
   <div class="stat-card">
-    <div class="value">$133.5K</div>
-    <div class="label">Median Wage</div>
+    <div class="stat-val amber">$133.5K</div>
+    <div class="stat-lbl">Median Offered Wage</div>
+    <div class="stat-ctx">Annual, certified + plausible filings</div>
   </div>
   <div class="stat-card">
-    <div class="value">+27.9%</div>
-    <div class="label">Avg vs Prevailing</div>
+    <div class="stat-val">+27.9%</div>
+    <div class="stat-lbl">Avg Premium Over Prevailing</div>
+    <div class="stat-ctx">DOL wage vs employer offer</div>
   </div>
   <div class="stat-card">
-    <div class="value">435K</div>
-    <div class="label">Lottery Weight Pts</div>
+    <div class="stat-val">435K</div>
+    <div class="stat-lbl">Lottery Weight Points</div>
+    <div class="stat-ctx">FY2026 wage-based lottery currency</div>
   </div>
 </div>
 
-<!-- Insight banner -->
-<div class="insight">
-  <div class="insight-card">
-    <div class="insight-icon">&#127919;</div>
-    <div class="insight-body">
-      <h3>The Wage Level Story: Level II dominates, but Level I over-pays</h3>
-      <p>
-        <strong>69,075 jobs</strong> — a third of all positions — sit at Level II (qualified worker). But the real surprise is Level I:
-        employers are paying <strong>82.9% above</strong> the prevailing wage for entry-level slots. That's not altruism — it's cap-season strategy.
-        Higher offers = higher lottery weight = better odds. The lottery doesn't care about your experience tier.
-      </p>
-      <div class="insight-pills">
-        <div class="insight-pill"><div class="pv">Level I</div><div class="pl">82.9% premium</div></div>
-        <div class="insight-pill"><div class="pv">Level II</div><div class="pl">22.0% premium</div></div>
-        <div class="insight-pill"><div class="pv">Level III</div><div class="pl">15.3% premium</div></div>
-        <div class="insight-pill"><div class="pv">Level IV</div><div class="pl">17.6% premium</div></div>
+<!-- What is 206K? Context box -->
+<div class="context-box">
+  <div class="context-inner">
+    <div class="ctx-item">
+      <div class="ctx-label">What is the 206,730 number?</div>
+      <div class="ctx-text">
+        This is the total <strong>worker positions requested</strong> across all certified LCA filings in Q1.
+        Each LCA can cover multiple workers at the same employer/worksite. It is <em>not</em> the lottery count.
+        USCIS separately reported ~120,141 registrations entered the FY2026 lottery across all cap-subject petitions.
+        One employer may file one LCA covering 10 workers, contributing 10 to the 206K but only some of those workers may have
+        entered the lottery.
+      </div>
+    </div>
+    <div class="ctx-item">
+      <div class="ctx-label">Data period &amp; completeness</div>
+      <div class="ctx-text">
+        This dataset covers <strong>FY2026 Q1 only</strong> (Oct&ndash;Dec 2025). No prior years are in the current database.
+        When additional quarters are added, a year/quarter filter will appear in the Live Query tool.
+        LCAs are a prerequisite for H-1B petitions but not all LCAs result in a filed petition.
+      </div>
+    </div>
+    <div class="ctx-item">
+      <div class="ctx-label">Lottery weight explained</div>
+      <div class="ctx-text">
+        Under the FY2026 wage-based lottery, each H-1B registration earns points based on how far the
+        offered wage exceeds the DOL prevailing wage. <strong>Higher offer = more weight = better lottery odds.</strong>
+        The 435K weighted entries shown here correspond to cap-proxy filings only;
+        non-cap and cap-exempt filings carry 0 weight in the lottery.
       </div>
     </div>
   </div>
 </div>
 
-<!-- Section 1: Wage Level Distribution -->
+<!-- Section 1: Wage Levels -->
 <div class="section">
-  <div class="section-header">
-    <div class="tag">Wage Levels</div>
-    <h2>Jobs &amp; Lottery Weight by Wage Level</h2>
-    <p>DOL assigns one of four prevailing wage levels (I–IV) based on skill and experience. Higher levels = higher prevailing wage floor. Most H-1B jobs cluster in Level II.</p>
+  <div class="sec-head">
+    <div class="sec-tag">Wage Levels</div>
+    <div class="sec-title">Jobs &amp; Lottery Weight by DOL Wage Level</div>
+    <div class="sec-sub">Levels I&ndash;IV reflect experience tiers relative to the OES wage distribution for each occupation/area. Level I = entry (&lt;17th pctile); Level IV = fully competent (&gt;50th pctile).</div>
   </div>
   <div class="grid-2">
     <div class="chart-card">
-      <div class="chart-title">Jobs Requested by Wage Level</div>
-      <div class="chart-sub">Certified + plausible LCA filings only</div>
-      <div id="chart-wl-jobs" style="height:320px;"></div>
+      <div class="chart-title">Jobs by Wage Level</div>
+      <div class="chart-sub">Certified + plausible filings. Level II holds the most positions by far.</div>
+      <div id="chart-wl-jobs" style="height:300px;"></div>
     </div>
     <div class="chart-card">
-      <div class="chart-title">Lottery Weight Points by Wage Level</div>
-      <div class="chart-sub">Weighted entries — the currency of the H-1B lottery</div>
-      <div id="chart-wl-weight" style="height:320px;"></div>
+      <div class="chart-title">Median Wage &amp; Premium Over Prevailing by Level</div>
+      <div class="chart-sub">Left: offered wage. Right (dashed): how far above the DOL floor employers are paying.</div>
+      <div id="chart-wl-wage" style="height:300px;"></div>
     </div>
   </div>
   <div class="chart-card">
-    <div class="chart-title">Median Wage vs. Avg Premium Over Prevailing — by Level</div>
-    <div class="chart-sub">Left axis: median offered salary. Right axis: how far above the DOL prevailing wage employers are paying.</div>
-    <div id="chart-wl-wage" style="height:380px;"></div>
+    <div class="chart-title">Lottery Weight Points by Wage Level</div>
+    <div class="chart-sub">Cap-proxy filings only. Level II earns the most aggregate weight — mass volume beats high-level premiums in aggregate.</div>
+    <div id="chart-wl-weight" style="height:260px;"></div>
+    <div class="chart-note">&#9432;&nbsp; Level I employers pay 82.9% above prevailing on average &mdash; not generosity, but lottery strategy. Higher offer price buys more weight per registration.</div>
+  </div>
+  <div class="drill-callout">
+    <p>Want to filter by wage level? &rarr;</p>
+    <a href="h1b_query.html">Open Live Query Tool with Wage Level filter</a>
   </div>
 </div>
 
-<!-- Section 2: Salary Bands -->
+<!-- Section 2: Salary Distribution -->
 <div class="section">
-  <div class="section-header">
-    <div class="tag">Salary Distribution</div>
-    <h2>Where Do H-1B Salaries Actually Land?</h2>
-    <p>Breaking 206,730 jobs into $25K–$50K salary buckets. The $150K–$200K band is the single largest concentration.</p>
+  <div class="sec-head">
+    <div class="sec-tag">Salary Distribution</div>
+    <div class="sec-title">Where Do H-1B Salaries Actually Land?</div>
+    <div class="sec-sub">$150K&ndash;$200K is the single largest band. The curve is right-skewed — tech hubs and senior roles pull the mean above the median.</div>
   </div>
   <div class="chart-card">
-    <div class="chart-title">Jobs by Salary Band</div>
-    <div class="chart-sub">Annual wage (from) — certified + plausible filings</div>
-    <div id="chart-salary-band" style="height:400px;"></div>
+    <div class="chart-title">Jobs by Annual Salary Band</div>
+    <div class="chart-sub">Certified + plausible filings. Annual wage (offered, from).</div>
+    <div id="chart-salary-band" style="height:340px;"></div>
+    <div class="drill-callout" style="margin-top:12px;margin-bottom:0;">
+      <p>Drill into a specific band &rarr;</p>
+      <a href="h1b_query.html">Filter by salary band in the Live Query Tool</a>
+    </div>
   </div>
 </div>
 
-<!-- Section 3: Top Employers -->
+<!-- Section 3: Employers -->
 <div class="section">
-  <div class="section-header">
-    <div class="tag">Employers</div>
-    <h2>Top 25 H-1B Employers</h2>
-    <p>By total jobs requested. Qualcomm's 29,882 positions — nearly 15% of all certified LCA jobs — is a data point that warrants a double-take. It's not an error.</p>
+  <div class="sec-head">
+    <div class="sec-tag">Employers</div>
+    <div class="sec-title">Top 25 H-1B Employers by Jobs Requested</div>
+    <div class="sec-sub">Qualcomm's 29,882 positions — 14.5% of all certified LCA jobs — is not a display error. Three Qualcomm entities (Technologies, Atheros, Innovation Center, Incorporated) together account for ~18,000+ additional positions.</div>
   </div>
   <div class="chart-card">
-    <div class="chart-title">Top 25 Employers by Jobs Requested</div>
-    <div class="chart-sub">Bar = jobs. Dot = median annual wage offer.</div>
+    <div class="chart-title">Top 25 Employers &mdash; Positions vs. Median Wage</div>
+    <div class="chart-sub">Bar = jobs (left axis). Diamond = median annual wage (top axis). Click any bar to drill into that employer in the query tool.</div>
     <div id="chart-employers" style="height:680px;"></div>
+    <div class="chart-note" id="emp-click-note" style="display:none;">
+      &#9654;&nbsp; <a id="emp-click-link" href="#" target="_blank" style="color:var(--amber);text-decoration:none;font-size:0.72rem;"></a>
+    </div>
+    <div class="drill-callout" style="margin-top:12px;margin-bottom:0;">
+      <p>Search any employer &rarr;</p>
+      <a href="h1b_query.html">Use Employer field in the Live Query Tool</a>
+    </div>
   </div>
 </div>
 
 <!-- Section 4: Occupations -->
 <div class="section">
-  <div class="section-header">
-    <div class="tag">Occupations</div>
-    <h2>Top 20 H-1B Occupations</h2>
-    <p>Software Developers alone account for 73,905 jobs — 36% of certified positions. The gap between #1 and #2 is larger than most companies' entire H-1B footprint.</p>
+  <div class="sec-head">
+    <div class="sec-tag">Occupations</div>
+    <div class="sec-title">Top 20 Occupations by Jobs</div>
+    <div class="sec-sub">Software Developers = 73,905 jobs (36% of certified positions). The gap between #1 and #2 is larger than most companies' entire H-1B footprint.</div>
   </div>
   <div class="chart-card">
-    <div class="chart-title">Top 20 Occupations by Jobs (SOC Title)</div>
-    <div class="chart-sub">Bar = jobs. Dot = median wage.</div>
+    <div class="chart-title">Top 20 SOC Titles &mdash; Positions vs. Median Wage</div>
+    <div class="chart-sub">Click any bar to search that occupation in the query tool.</div>
     <div id="chart-occ" style="height:580px;"></div>
+    <div class="chart-note" id="occ-click-note" style="display:none;">
+      &#9654;&nbsp; <a id="occ-click-link" href="#" target="_blank" style="color:var(--amber);text-decoration:none;font-size:0.72rem;"></a>
+    </div>
   </div>
 </div>
 
 <!-- Section 5: Geography -->
 <div class="section">
-  <div class="section-header">
-    <div class="tag">Geography</div>
-    <h2>Where H-1B Workers Are Going</h2>
-    <p>California's 66,638 jobs and $176K median wage are in a league of their own. Texas is a distant second. Illinois is the surprise — outsized Level I concentration.</p>
+  <div class="sec-head">
+    <div class="sec-tag">Geography</div>
+    <div class="sec-title">Where H-1B Workers Are Going</div>
+    <div class="sec-sub">California's 66,638 jobs and $176K median are in their own tier. San Diego is #1 city — almost entirely due to Qualcomm.</div>
   </div>
   <div class="grid-2">
     <div class="chart-card">
-      <div class="chart-title">Top 15 States by Jobs</div>
-      <div class="chart-sub">Bar = jobs. Dot = median wage.</div>
-      <div id="chart-states" style="height:460px;"></div>
+      <div class="chart-title">Top 15 States &mdash; Jobs &amp; Median Wage</div>
+      <div class="chart-sub">Bar = jobs. Diamond = median wage.</div>
+      <div id="chart-states" style="height:440px;"></div>
     </div>
     <div class="chart-card">
-      <div class="chart-title">Top 15 Cities by Jobs</div>
-      <div class="chart-sub">Bar = jobs. Dot = median wage.</div>
-      <div id="chart-cities" style="height:460px;"></div>
+      <div class="chart-title">Top 15 Cities &mdash; Jobs &amp; Median Wage</div>
+      <div class="chart-sub">Bar = jobs. Diamond = median wage. San Diego skewed by Qualcomm campus concentration.</div>
+      <div id="chart-cities" style="height:440px;"></div>
     </div>
   </div>
   <div class="chart-card">
-    <div class="chart-title">Wage Level Mix — Top 10 States</div>
-    <div class="chart-sub">Stacked bars show how each state's jobs break down across wage levels. Illinois's Level I spike is visible here.</div>
-    <div id="chart-wl-state" style="height:420px;"></div>
+    <div class="chart-title">Wage Level Mix by State &mdash; Top 10 States</div>
+    <div class="chart-sub">Illinois's Level I spike is visible and notable: staffing/consulting firms drive unusually high entry-level volume out of Chicago.</div>
+    <div id="chart-wl-state" style="height:380px;"></div>
   </div>
 </div>
 
-<!-- Section 6: Cap Proxy Analysis -->
+<!-- Section 6: Cap Season -->
 <div class="section">
-  <div class="section-header">
-    <div class="tag">Lottery Strategy</div>
-    <h2>Cap Season vs. Year-Round: Wage Behavior</h2>
-    <p>Cap-season proxy filings (submitted during the April registration window) show different wage patterns — especially at Level III and IV where employers bid up wages to maximize lottery weight.</p>
+  <div class="sec-head">
+    <div class="sec-tag">Lottery Strategy</div>
+    <div class="sec-title">Cap Season vs. Year-Round: Do Employers Pay More in April?</div>
+    <div class="sec-sub">Cap-season proxy filings (estimated April registration window) show higher median wages at Level III and IV. The wage premium at senior levels is a deliberate bid for lottery weight.</div>
   </div>
   <div class="chart-card">
-    <div class="chart-title">Median Wage by Wage Level — Cap Season vs. Year-Round</div>
-    <div class="chart-sub">Cap-season proxy = filed during the April H-1B registration window. Year-round = cap-exempt or non-cap amendments.</div>
-    <div id="chart-cap" style="height:380px;"></div>
+    <div class="chart-title">Median Wage by Level &mdash; Cap Season vs. Year-Round</div>
+    <div class="chart-sub">Cap-season = estimated April H-1B registration window (heuristic). At Level IV, cap-season employers pay ~$15K more at median.</div>
+    <div id="chart-cap" style="height:340px;"></div>
+    <div class="chart-note">&#9432;&nbsp; Cap-proxy flag is a heuristic (begin date Oct 1, filed Jan&ndash;Mar 2025). Not official USCIS data.</div>
   </div>
 </div>
 
-<!-- Source / Methodology -->
-<div class="section" style="padding-top:20px;">
-  <div class="section-header">
-    <div class="tag">Methodology</div>
-    <h2>Data &amp; Pipeline</h2>
+<!-- Source -->
+<div class="section" style="padding-top:8px;">
+  <div class="sec-head" style="padding-top:28px;">
+    <div class="sec-tag">Methodology</div>
+    <div class="sec-title">Data &amp; Definitions</div>
   </div>
 </div>
 <div class="source-section">
   <div class="source-card">
-    <h3>Source &amp; Definitions</h3>
-    <p><strong>Source:</strong> DOL Office of Foreign Labor Certification — <a href="https://www.dol.gov/agencies/eta/foreign-labor/performance" target="_blank">LCA Disclosure Data FY2026 Q1</a> (cases received Oct–Dec 2025, released April 2026). Two files: case-level and worksite-level, joined on case number + worksite sequence.</p>
-    <p><strong>Filtered universe:</strong> 108,529 certified + wage-plausible records out of 120,532 total (excluding withdrawn/denied and statistical outliers flagged by a plausibility check: offered wage &lt;50% or &gt;500% of prevailing wage).</p>
-    <p><strong>Wage level:</strong> DOL prevailing wage levels I–IV correspond to entry (below 17th pctile), qualified (17th–34th), experienced (34th–50th), and fully competent (above 50th) relative to the OES wage distribution for the occupation/geography.</p>
-    <p><strong>Lottery weight:</strong> Under the FY2026 wage-based lottery, each registration earns points proportional to how far the offered wage exceeds the prevailing wage. Higher-level filings at higher wages accumulate more lottery weight, improving selection odds.</p>
-    <p><strong>Cap proxy flag:</strong> Heuristic identifying LCA filings that likely correspond to cap-subject H-1B registrations (begin date Oct 1 2025, filed Jan–Mar 2025). Not official USCIS data.</p>
-    <p><strong>Pipeline:</strong> Python + pandas for ETL · DuckDB as analytics engine · Plotly.js for charts · GitHub Pages for hosting</p>
-    <a href="dashboard.html" class="cta-back">&#8592; Back to Visa Overview</a>
+    <h3>Source, Definitions &amp; Caveats</h3>
+    <p><strong>Source:</strong> DOL OFLC — <a href="https://www.dol.gov/agencies/eta/foreign-labor/performance" target="_blank">LCA Disclosure Data FY2026 Q1</a> (cases received Oct–Dec 2025). Two files joined on case number + worksite sequence.</p>
+    <p><strong>Filtered universe:</strong> 108,529 certified + plausible records (of 120,532 total). Excluded: non-certified cases, and statistical outliers where offered wage &lt;50% or &gt;500% of prevailing (wage_plausibility_flag = 'IMPLAUSIBLE').</p>
+    <p><strong>206K "worker positions":</strong> Each LCA filing specifies how many workers it covers at a given worksite. This is an employer intention, not a headcount of lottery entrants. USCIS registered ~120,141 cap-subject registrations for FY2026; those two numbers measure different things.</p>
+    <p><strong>Wage level:</strong> DOL assigns Level I–IV based on OES percentile for the occupation/geography. Higher level = higher DOL floor.</p>
+    <p><strong>Lottery weight &amp; premium:</strong> Under FY2026 rules, each registration earns weight proportional to the wage-over-prevailing ratio. Higher wage offer → more weight → better lottery odds.</p>
+    <p><strong>Pipeline:</strong> Python + pandas for ETL · DuckDB as the query engine · DuckDB-WASM for browser-side live queries · Plotly.js for charts · GitHub Pages</p>
   </div>
 </div>
 
-</div><!-- /content -->
-
 <script>
-// ── Embedded data ──────────────────────────────────────────────
-const WL_DATA = [
-  {level:"Level I",  jobs:31858, weight:31842,  median:87000,  premium:82.9},
-  {level:"Level II", jobs:69075, weight:137950, median:113000, premium:22.0},
-  {level:"Level III",jobs:43542, weight:130533, median:141898, premium:15.3},
-  {level:"Level IV", jobs:33815, weight:135064, median:170248, premium:17.6},
-  {level:"Unknown",  jobs:28440, weight:0,      median:149691, premium:34.3}
+// ── Data ─────────────────────────────────────────────────────────
+const WL = [
+  {level:"Level I",   jobs:31858, weight:31842,  median:87000,  premium:82.9},
+  {level:"Level II",  jobs:69075, weight:137950, median:113000, premium:22.0},
+  {level:"Level III", jobs:43542, weight:130533, median:141898, premium:15.3},
+  {level:"Level IV",  jobs:33815, weight:135064, median:170248, premium:17.6}
 ];
-
 const SALARY_BANDS = [
   {band:"<$50K",       jobs:870},
-  {band:"$50K-$75K",  jobs:21442},
-  {band:"$75K-$100K", jobs:26577},
-  {band:"$100K-$125K",jobs:35934},
-  {band:"$125K-$150K",jobs:43072},
-  {band:"$150K-$200K",jobs:56236},
-  {band:"$200K-$250K",jobs:16088},
-  {band:"$250K-$300K",jobs:4426},
-  {band:"$300K+",     jobs:2085}
+  {band:"$50K-$75K",   jobs:21442},
+  {band:"$75K-$100K",  jobs:26577},
+  {band:"$100K-$125K", jobs:35934},
+  {band:"$125K-$150K", jobs:43072},
+  {band:"$150K-$200K", jobs:56236},
+  {band:"$200K-$250K", jobs:16088},
+  {band:"$250K-$300K", jobs:4426},
+  {band:"$300K+",      jobs:2085}
 ];
-
-const TOP_EMPLOYERS = [
+const EMPLOYERS = [
   {name:"QUALCOMM TECHNOLOGIES, INC.",          jobs:29882, median:156853},
   {name:"GRANDISON MANAGEMENT, INC.",           jobs:15680, median:71968},
   {name:"AMAZON.COM SERVICES LLC",              jobs:10371, median:159610},
@@ -357,70 +403,58 @@ const TOP_EMPLOYERS = [
   {name:"GOOGLE LLC",                          jobs:1201,  median:194630},
   {name:"APPLE INC.",                          jobs:1196,  median:181532},
   {name:"COMPUNNEL SOFTWARE GROUP, INC",       jobs:1165,  median:115000},
-  {name:"FIDELITY TECHNOLOGY GROUP, LLC D/B/A FIDELITY INVESTMENTS",jobs:1076,median:125119}
+  {name:"FIDELITY TECHNOLOGY GROUP, LLC",      jobs:1076,  median:125119}
 ];
-
-const TOP_SOC = [
-  {title:"Software Developers",                         jobs:73905, median:145000},
-  {title:"Electronics Engineers, Except Computer",      jobs:24365, median:161179},
-  {title:"Occupational Therapists",                     jobs:9770,  median:71968},
-  {title:"Information Technology Project Managers",     jobs:8091,  median:139443},
-  {title:"Software Quality Assurance Analysts",         jobs:7119,  median:110364},
-  {title:"Physical Therapists",                         jobs:6213,  median:87360},
-  {title:"Computer And Information Systems Managers",   jobs:5402,  median:204000},
-  {title:"Data Scientists",                             jobs:4822,  median:140000},
-  {title:"Computer Systems Engineers/Architects",       jobs:4335,  median:111800},
-  {title:"Business Intelligence Analysts",              jobs:3504,  median:130000},
-  {title:"Computer Systems Analysts",                   jobs:3090,  median:116500},
-  {title:"Computer Programmers",                        jobs:3004,  median:98301},
-  {title:"Mechanical Engineers",                        jobs:2060,  median:112975},
-  {title:"Operations Research Analysts",                jobs:1936,  median:137700},
-  {title:"Project Management Specialists",              jobs:1933,  median:133183},
-  {title:"Network And Computer Systems Administrators", jobs:1795,  median:105301},
-  {title:"Computer And Information Research Scientists",jobs:1742,  median:191250},
-  {title:"Financial And Investment Analysts",           jobs:1665,  median:155000},
-  {title:"Civil Engineers",                             jobs:1579,  median:105000},
-  {title:"Database Administrators",                     jobs:1575,  median:122402}
+const SOC = [
+  {title:"Software Developers",                        jobs:73905, median:145000},
+  {title:"Electronics Engineers, Except Computer",     jobs:24365, median:161179},
+  {title:"Occupational Therapists",                    jobs:9770,  median:71968},
+  {title:"IT Project Managers",                        jobs:8091,  median:139443},
+  {title:"Software QA Analysts & Testers",             jobs:7119,  median:110364},
+  {title:"Physical Therapists",                        jobs:6213,  median:87360},
+  {title:"Computer & Info Systems Managers",           jobs:5402,  median:204000},
+  {title:"Data Scientists",                            jobs:4822,  median:140000},
+  {title:"Computer Systems Engineers/Architects",      jobs:4335,  median:111800},
+  {title:"Business Intelligence Analysts",             jobs:3504,  median:130000},
+  {title:"Computer Systems Analysts",                  jobs:3090,  median:116500},
+  {title:"Computer Programmers",                       jobs:3004,  median:98301},
+  {title:"Mechanical Engineers",                       jobs:2060,  median:112975},
+  {title:"Operations Research Analysts",               jobs:1936,  median:137700},
+  {title:"Project Management Specialists",             jobs:1933,  median:133183},
+  {title:"Network & Computer Systems Admins",          jobs:1795,  median:105301},
+  {title:"Computer & Info Research Scientists",        jobs:1742,  median:191250},
+  {title:"Financial & Investment Analysts",            jobs:1665,  median:155000},
+  {title:"Civil Engineers",                            jobs:1579,  median:105000},
+  {title:"Database Administrators",                    jobs:1575,  median:122402}
 ];
-
-const TOP_STATES = [
-  {state:"CA", jobs:66638, median:176016},
-  {state:"TX", jobs:26802, median:122000},
-  {state:"WA", jobs:14667, median:166835},
-  {state:"IL", jobs:12831, median:121066},
-  {state:"NY", jobs:12293, median:145000},
-  {state:"NJ", jobs:7845,  median:137280},
-  {state:"NC", jobs:7025,  median:124237},
-  {state:"MA", jobs:5884,  median:133000},
-  {state:"GA", jobs:5183,  median:126443},
-  {state:"MI", jobs:4656,  median:115000},
-  {state:"PA", jobs:4526,  median:114608},
-  {state:"VA", jobs:4140,  median:126090},
-  {state:"FL", jobs:3829,  median:123000},
-  {state:"OH", jobs:3384,  median:115000},
-  {state:"MD", jobs:2745,  median:125000}
+const STATES = [
+  {state:"CA",jobs:66638,median:176016},{state:"TX",jobs:26802,median:122000},
+  {state:"WA",jobs:14667,median:166835},{state:"IL",jobs:12831,median:121066},
+  {state:"NY",jobs:12293,median:145000},{state:"NJ",jobs:7845, median:137280},
+  {state:"NC",jobs:7025, median:124237},{state:"MA",jobs:5884, median:133000},
+  {state:"GA",jobs:5183, median:126443},{state:"MI",jobs:4656, median:115000},
+  {state:"PA",jobs:4526, median:114608},{state:"VA",jobs:4140, median:126090},
+  {state:"FL",jobs:3829, median:123000},{state:"OH",jobs:3384, median:115000},
+  {state:"MD",jobs:2745, median:125000}
 ];
-
-const TOP_CITIES = [
-  {city:"San Diego, CA",    jobs:21078, median:152479},
-  {city:"Santa Clara, CA",  jobs:18225, median:186472},
-  {city:"Seattle, WA",      jobs:7323,  median:161000},
-  {city:"New York, NY",     jobs:7069,  median:160805},
-  {city:"Austin, TX",       jobs:6530,  median:139152},
-  {city:"Sunnyvale, CA",    jobs:4723,  median:186472},
-  {city:"San Francisco, CA",jobs:3880,  median:190000},
-  {city:"Bellevue, WA",     jobs:3659,  median:165000},
-  {city:"San Jose, CA",     jobs:3234,  median:187741},
-  {city:"Chicago, IL",      jobs:2898,  median:125000},
-  {city:"Dallas, TX",       jobs:2587,  median:125000},
-  {city:"Irving, TX",       jobs:2422,  median:120000},
-  {city:"Boston, MA",       jobs:2194,  median:131525},
-  {city:"Atlanta, GA",      jobs:2180,  median:129061},
-  {city:"Charlotte, NC",    jobs:2040,  median:122060}
+const CITIES = [
+  {city:"San Diego, CA",   jobs:21078,median:152479},
+  {city:"Santa Clara, CA", jobs:18225,median:186472},
+  {city:"Seattle, WA",     jobs:7323, median:161000},
+  {city:"New York, NY",    jobs:7069, median:160805},
+  {city:"Austin, TX",      jobs:6530, median:139152},
+  {city:"Sunnyvale, CA",   jobs:4723, median:186472},
+  {city:"San Francisco, CA",jobs:3880,median:190000},
+  {city:"Bellevue, WA",    jobs:3659, median:165000},
+  {city:"San Jose, CA",    jobs:3234, median:187741},
+  {city:"Chicago, IL",     jobs:2898, median:125000},
+  {city:"Dallas, TX",      jobs:2587, median:125000},
+  {city:"Irving, TX",      jobs:2422, median:120000},
+  {city:"Boston, MA",      jobs:2194, median:131525},
+  {city:"Atlanta, GA",     jobs:2180, median:129061},
+  {city:"Charlotte, NC",   jobs:2040, median:122060}
 ];
-
-// Wage level by state (top 10 states)
-const WL_STATE_RAW = [
+const WL_STATE = [
   ["CA","Level I",2353],["CA","Level II",18570],["CA","Level III",13860],["CA","Level IV",12938],
   ["GA","Level I",369], ["GA","Level II",2243], ["GA","Level III",1248], ["GA","Level IV",1033],
   ["IL","Level I",8325],["IL","Level II",1869], ["IL","Level III",1196], ["IL","Level IV",1095],
@@ -432,322 +466,267 @@ const WL_STATE_RAW = [
   ["TX","Level I",2913],["TX","Level II",11980],["TX","Level III",6095], ["TX","Level IV",4586],
   ["WA","Level I",1333],["WA","Level II",5319], ["WA","Level III",3955], ["WA","Level IV",1871]
 ];
-
-const CAP_DATA = [
-  {cap:false, level:"Level I",   jobs:31081, median:87772},
-  {cap:false, level:"Level II",  jobs:57391, median:113000},
-  {cap:false, level:"Level III", jobs:34069, median:141750},
-  {cap:false, level:"Level IV",  jobs:27990, median:170000},
-  {cap:true,  level:"Level I",   jobs:777,   median:70955},
-  {cap:true,  level:"Level II",  jobs:11684, median:112923},
-  {cap:true,  level:"Level III", jobs:9473,  median:152506},
-  {cap:true,  level:"Level IV",  jobs:5825,  median:184974}
+const CAP = [
+  {cap:false,level:"Level I",  median:87772},
+  {cap:false,level:"Level II", median:113000},
+  {cap:false,level:"Level III",median:141750},
+  {cap:false,level:"Level IV", median:170000},
+  {cap:true, level:"Level I",  median:70955},
+  {cap:true, level:"Level II", median:112923},
+  {cap:true, level:"Level III",median:152506},
+  {cap:true, level:"Level IV", median:184974}
 ];
 
-// ── Plotting constants ─────────────────────────────────────────
-const ACCENT  = "#8B5CF6";
-const ACCENT2 = "#3B82F6";
-const GREEN   = "#10B981";
-const GOLD    = "#F59E0B";
-const RED     = "#EF4444";
-const ORANGE  = "#F97316";
-const WL_COLORS = {"Level I":ACCENT2,"Level II":ACCENT,"Level III":GREEN,"Level IV":GOLD,"Unknown":"#52525b"};
+// ── Colors ───────────────────────────────────────────────────────
+const C_AMBER = "#f0b429";
+const C_GREEN = "#22c55e";
+const C_BLUE  = "#60a5fa";
+const C_RED   = "#f87171";
+const C_MUTED = "#50506a";
+const C_DIM   = "#38384e";
+const WL_COLORS = ["#60a5fa","#f0b429","#22c55e","#f87171"];
 
-const BASE_LAYOUT = {
+const BASE = {
   paper_bgcolor:"rgba(0,0,0,0)",
-  plot_bgcolor:"#18181b",
-  font:{color:"#d4d4d8",family:"Inter, system-ui, sans-serif"},
-  margin:{l:20,r:20,t:20,b:20},
-  xaxis:{gridcolor:"#27272a",color:"#71717a",zerolinecolor:"#27272a"},
-  yaxis:{gridcolor:"#27272a",color:"#71717a",zerolinecolor:"#27272a"},
-  legend:{bgcolor:"rgba(24,24,27,0.9)",bordercolor:"#27272a",borderwidth:1,font:{size:11}},
-  hoverlabel:{bgcolor:"#18181b",bordercolor:"#27272a",font:{color:"#fff",family:"Inter, system-ui"}}
+  plot_bgcolor:"#0f0f13",
+  font:{color:"#d9d9e0",family:"Inter, system-ui, sans-serif",size:12},
+  margin:{l:20,r:20,t:20,b:30},
+  hoverlabel:{bgcolor:"#1c1c28",bordercolor:"#252535",font:{color:"#fff",family:"Inter, system-ui",size:12}},
+  xaxis:{gridcolor:"#1c1c28",color:"#50506a",zerolinecolor:"#1c1c28",linecolor:"#1c1c28"},
+  yaxis:{gridcolor:"#1c1c28",color:"#50506a",zerolinecolor:"#1c1c28",linecolor:"#1c1c28"},
 };
+function L(o) { return {...BASE,...o,
+  xaxis:{...BASE.xaxis,...(o.xaxis||{})},
+  yaxis:{...BASE.yaxis,...(o.yaxis||{})},
+  xaxis2:o.xaxis2 ? {...BASE.xaxis,...o.xaxis2} : undefined,
+  yaxis2:o.yaxis2 ? {...BASE.yaxis,...o.yaxis2} : undefined,
+}; }
 
-function layout(overrides) { return Object.assign({}, BASE_LAYOUT, overrides); }
+// ── Chart 1: WL Jobs donut ───────────────────────────────────────
+Plotly.newPlot("chart-wl-jobs",[{
+  type:"pie", values:WL.map(d=>d.jobs), labels:WL.map(d=>d.level),
+  marker:{colors:WL_COLORS}, hole:0.55,
+  textinfo:"label+percent", textfont:{size:11,color:"#fff"},
+  hovertemplate:"%{label}<br>Jobs: %{value:,}<br>%{percent}<extra></extra>"
+}],{...BASE,
+  showlegend:true,
+  legend:{orientation:"h",yanchor:"bottom",y:-0.12,xanchor:"center",x:0.5,
+          bgcolor:"rgba(0,0,0,0)",borderwidth:0,font:{size:10}},
+  margin:{l:10,r:10,t:10,b:40},
+  annotations:[{text:"<b>206K</b><br><span style='font-size:10px;fill:#50506a'>positions</span>",
+    x:0.5,y:0.5,font:{size:15,color:"#fff"},showarrow:false}]
+},{responsive:true});
 
-// ── Chart 1: WL Jobs (donut) ──────────────────────────────────
+// ── Chart 2: Median Wage + Premium ──────────────────────────────
+Plotly.newPlot("chart-wl-wage",[
+  {type:"bar",name:"Median Wage",x:WL.map(d=>d.level),y:WL.map(d=>d.median),
+   marker:{color:WL_COLORS},
+   hovertemplate:"%{x}<br>Median: $%{y:,.0f}<extra></extra>",yaxis:"y"},
+  {type:"scatter",mode:"lines+markers",name:"Avg Premium %",
+   x:WL.map(d=>d.level),y:WL.map(d=>d.premium),
+   marker:{color:C_RED,size:8,symbol:"circle"},
+   line:{color:C_RED,width:2,dash:"dot"},
+   hovertemplate:"%{x}<br>Premium: %{y:.1f}%<extra></extra>",yaxis:"y2"}
+],L({
+  barmode:"group",
+  xaxis:{title:{text:"Wage Level"},gridcolor:"#1c1c28",color:"#50506a"},
+  yaxis:{title:{text:"Median Wage ($)"},tickformat:"$,.0f",gridcolor:"#1c1c28",color:"#50506a"},
+  yaxis2:{overlaying:"y",side:"right",title:{text:"Premium (%)"},tickformat:".0f",ticksuffix:"%",
+          color:"#50506a",gridcolor:"transparent"},
+  margin:{l:70,r:60,t:20,b:50},
+  showlegend:true,
+  legend:{orientation:"h",yanchor:"top",y:1.14,xanchor:"center",x:0.5,
+          bgcolor:"rgba(0,0,0,0)",borderwidth:0,font:{size:10}}
+}),{responsive:true});
+
+// ── Chart 3: Lottery Weight ──────────────────────────────────────
+Plotly.newPlot("chart-wl-weight",[{
+  type:"bar",x:WL.map(d=>d.level),y:WL.map(d=>d.weight),
+  marker:{color:WL_COLORS,opacity:0.85},
+  text:WL.map(d=>(d.weight/1000).toFixed(0)+"K"),textposition:"outside",textfont:{size:11},
+  hovertemplate:"%{x}<br>Weight: %{y:,}<extra></extra>"
+}],L({
+  xaxis:{title:{text:"Wage Level"}},
+  yaxis:{title:{text:"Lottery Weight Points"},tickformat:".2s"},
+  margin:{l:70,r:20,t:30,b:50},showlegend:false
+}),{responsive:true});
+
+// ── Chart 4: Salary Band ─────────────────────────────────────────
+Plotly.newPlot("chart-salary-band",[{
+  type:"bar",x:SALARY_BANDS.map(d=>d.band),y:SALARY_BANDS.map(d=>d.jobs),
+  marker:{color:SALARY_BANDS.map((d,i)=>{
+    const colors=["#3f4a6b","#4a5a7e","#536a91","#5c7aa4","#648ab7","#6e9aca","#78aade","#82baf2","#8ccaff"];
+    return colors[i]||C_BLUE;
+  })},
+  text:SALARY_BANDS.map(d=>d.jobs.toLocaleString()),textposition:"outside",textfont:{size:10},
+  hovertemplate:"%{x}<br>Jobs: %{y:,}<extra></extra>"
+}],L({
+  xaxis:{title:{text:"Annual Salary Band (Offered)"},tickangle:-20},
+  yaxis:{title:{text:"Jobs Requested"},tickformat:","},
+  margin:{l:70,r:20,t:30,b:80},showlegend:false
+}),{responsive:true});
+
+// ── Chart 5: Top Employers ───────────────────────────────────────
 (function(){
-  const filtered = WL_DATA.filter(d => d.level !== "Unknown");
-  Plotly.newPlot("chart-wl-jobs", [{
-    type:"pie",
-    values: filtered.map(d => d.jobs),
-    labels: filtered.map(d => d.level),
-    marker:{colors:[ACCENT2, ACCENT, GREEN, GOLD]},
-    hole:0.55,
-    textinfo:"label+percent",
-    textfont:{size:12,color:"#fff"},
-    hovertemplate:"%{label}<br>Jobs: %{value:,}<br>Share: %{percent}<extra></extra>"
-  }], layout({
-    showlegend:true,
-    legend:{orientation:"h",yanchor:"bottom",y:-0.15,xanchor:"center",x:0.5,
-            bgcolor:"rgba(0,0,0,0)",borderwidth:0,font:{size:11}},
-    margin:{l:10,r:10,t:10,b:40},
-    annotations:[{text:"<b>206K</b><br><span style='font-size:11px'>jobs</span>",
-      x:0.5,y:0.5,font:{size:16,color:"#fff"},showarrow:false}]
-  }), {responsive:true});
-})();
+  const data=[...EMPLOYERS].reverse();
+  const names=data.map(d=>d.name.replace("TECHNOLOGIES AND SOLUTIONS INC.","TECH & SOLUTIONS").replace(", LLC D/B/A FIDELITY INVESTMENTS","").replace(" CORPORATION","").replace(", INC.","").replace(", INC","").replace(", LLC","").replace(" LLC","").replace(" LIMITED","").replace(" LLP","").replace(" U.S. LLP",""));
+  const barColors=data.map(d=>d.name.includes("QUALCOMM")?C_AMBER:d.name.includes("AMAZON")?C_GREEN:C_BLUE);
+  const el=document.getElementById("chart-employers");
 
-// ── Chart 2: WL Lottery Weight (bar) ─────────────────────────
-(function(){
-  const filtered = WL_DATA.filter(d => d.level !== "Unknown" && d.weight > 0);
-  Plotly.newPlot("chart-wl-weight", [{
-    type:"bar",
-    x: filtered.map(d => d.level),
-    y: filtered.map(d => d.weight),
-    marker:{color:[ACCENT2, ACCENT, GREEN, GOLD]},
-    hovertemplate:"%{x}<br>Lottery Weight: %{y:,}<extra></extra>",
-    text: filtered.map(d => (d.weight/1000).toFixed(0)+"K"),
-    textposition:"outside",
-    textfont:{size:12,color:"#d4d4d8"}
-  }], layout({
-    xaxis:{...BASE_LAYOUT.xaxis, title:{text:"Wage Level"}},
-    yaxis:{...BASE_LAYOUT.yaxis, title:{text:"Lottery Weight Points"},tickformat:".2s"},
-    margin:{l:55,r:20,t:20,b:50},
-    showlegend:false
-  }), {responsive:true});
-})();
+  Plotly.newPlot("chart-employers",[
+    {type:"bar",orientation:"h",name:"Jobs",y:names,x:data.map(d=>d.jobs),
+     marker:{color:barColors,opacity:0.85},
+     hovertemplate:"%{y}<br>Jobs: %{x:,}<extra></extra>",xaxis:"x"},
+    {type:"scatter",mode:"markers",name:"Median Wage",y:names,x:data.map(d=>d.median),
+     marker:{color:C_RED,size:7,symbol:"diamond"},
+     hovertemplate:"%{y}<br>Median: $%{x:,.0f}<extra></extra>",xaxis:"x2"}
+  ],L({
+    yaxis:{tickfont:{size:10.5},automargin:true,color:"#50506a"},
+    xaxis:{title:{text:"Jobs Requested"},tickformat:",",domain:[0,0.68],color:"#50506a"},
+    xaxis2:{overlaying:"x",side:"top",title:{text:"Median Wage ($)"},
+            tickformat:"$,.0f",color:"#50506a",gridcolor:"transparent",domain:[0,0.68]},
+    margin:{l:250,r:20,t:50,b:40},showlegend:true,
+    legend:{orientation:"h",yanchor:"bottom",y:1.04,xanchor:"left",x:0,
+            bgcolor:"rgba(0,0,0,0)",borderwidth:0,font:{size:10}}
+  }),{responsive:true});
 
-// ── Chart 3: Median Wage + Premium by Level ───────────────────
-(function(){
-  const filtered = WL_DATA.filter(d => d.level !== "Unknown");
-  Plotly.newPlot("chart-wl-wage", [
-    {
-      type:"bar", name:"Median Wage",
-      x: filtered.map(d => d.level),
-      y: filtered.map(d => d.median),
-      marker:{color:[ACCENT2, ACCENT, GREEN, GOLD]},
-      hovertemplate:"%{x}<br>Median Wage: $%{y:,.0f}<extra></extra>",
-      yaxis:"y"
-    },
-    {
-      type:"scatter", mode:"lines+markers", name:"Avg Premium %",
-      x: filtered.map(d => d.level),
-      y: filtered.map(d => d.premium),
-      marker:{color:RED, size:10, symbol:"circle"},
-      line:{color:RED, width:2.5, dash:"dash"},
-      hovertemplate:"%{x}<br>Avg Premium: %{y:.1f}%<extra></extra>",
-      yaxis:"y2"
-    }
-  ], layout({
-    xaxis:{...BASE_LAYOUT.xaxis, title:{text:"Wage Level"}},
-    yaxis:{...BASE_LAYOUT.yaxis, title:{text:"Median Annual Wage ($)"},tickformat:"$,.0f"},
-    yaxis2:{overlaying:"y", side:"right", title:{text:"Avg Premium over Prevailing (%)"},
-            color:"#71717a", gridcolor:"transparent", tickformat:".1f",
-            ticksuffix:"%"},
-    margin:{l:80,r:80,t:20,b:50},
-    showlegend:true,
-    legend:{orientation:"h",yanchor:"top",y:1.12,xanchor:"center",x:0.5,bgcolor:"rgba(0,0,0,0)",borderwidth:0}
-  }), {responsive:true});
-})();
-
-// ── Chart 4: Salary Bands ─────────────────────────────────────
-(function(){
-  const bandColors = SALARY_BANDS.map((d,i) => {
-    const pct = i / (SALARY_BANDS.length - 1);
-    return `hsl(${240 + pct*60}, 70%, ${45+pct*20}%)`;
+  el.on('plotly_click', e => {
+    if (!e.points || !e.points[0]) return;
+    const name = data[data.length-1-e.points[0].pointIndex]?.name || '';
+    const url = 'h1b_query.html#' + encodeURIComponent(name);
+    const note = document.getElementById('emp-click-note');
+    const link = document.getElementById('emp-click-link');
+    note.style.display='flex';
+    link.href = 'h1b_query.html';
+    link.textContent = 'Search "' + name + '" in the Live Query Tool →';
+    link.onclick = () => { sessionStorage.setItem('qf_employer', name); };
   });
-  Plotly.newPlot("chart-salary-band", [{
-    type:"bar",
-    x: SALARY_BANDS.map(d => d.band),
-    y: SALARY_BANDS.map(d => d.jobs),
-    marker:{color:bandColors},
-    hovertemplate:"%{x}<br>Jobs: %{y:,}<extra></extra>",
-    text: SALARY_BANDS.map(d => d.jobs.toLocaleString()),
-    textposition:"outside",
-    textfont:{size:11,color:"#d4d4d8"}
-  }], layout({
-    xaxis:{...BASE_LAYOUT.xaxis, title:{text:"Salary Band (Annual Wage Offered)"}},
-    yaxis:{...BASE_LAYOUT.yaxis, title:{text:"Jobs Requested"},tickformat:","},
-    margin:{l:70,r:20,t:30,b:60},
-    showlegend:false
-  }), {responsive:true});
 })();
 
-// ── Chart 5: Top Employers ────────────────────────────────────
+// ── Chart 6: Occupations ─────────────────────────────────────────
 (function(){
-  const data = [...TOP_EMPLOYERS].reverse();
-  // Shorten employer names
-  const names = data.map(d => d.name.replace("D/B/A FIDELITY INVESTMENTS","(Fidelity)").replace("TECHNOLOGIES AND SOLUTIONS INC.","TECH").replace(" CORPORATION","").replace(", INC.","").replace(", INC","").replace(", LLC","").replace(" LLC","").replace(" LIMITED","").replace(" LLP","").replace(" U.S. LLP",""));
-  const isQualcomm = data.map(d => d.name.includes("QUALCOMM"));
-  const barColors = data.map(d => d.name.includes("QUALCOMM") ? GOLD : d.name.includes("AMAZON") ? GREEN : ACCENT);
+  const data=[...SOC].reverse();
+  const el=document.getElementById("chart-occ");
 
-  Plotly.newPlot("chart-employers", [
-    {
-      type:"bar", orientation:"h", name:"Jobs",
-      y: names,
-      x: data.map(d => d.jobs),
-      marker:{color:barColors},
-      hovertemplate:"%{y}<br>Jobs: %{x:,}<extra></extra>",
-      xaxis:"x"
-    },
-    {
-      type:"scatter", mode:"markers", name:"Median Wage",
-      y: names,
-      x: data.map(d => d.median),
-      marker:{color:RED, size:8, symbol:"diamond"},
-      hovertemplate:"%{y}<br>Median Wage: $%{x:,.0f}<extra></extra>",
-      xaxis:"x2"
-    }
-  ], layout({
-    barmode:"overlay",
-    yaxis:{...BASE_LAYOUT.yaxis, tickfont:{size:10.5}, automargin:true},
-    xaxis:{...BASE_LAYOUT.xaxis, title:{text:"Jobs Requested"},tickformat:",",domain:[0,0.7]},
-    xaxis2:{overlaying:"x", side:"top", title:{text:"Median Wage ($)"},color:"#71717a",
-            gridcolor:"transparent",tickformat:"$,.0f", domain:[0,0.7]},
-    margin:{l:260,r:20,t:50,b:50},
-    showlegend:true,
-    legend:{orientation:"h",yanchor:"bottom",y:1.04,xanchor:"left",x:0,bgcolor:"rgba(0,0,0,0)",borderwidth:0}
-  }), {responsive:true});
+  Plotly.newPlot("chart-occ",[
+    {type:"bar",orientation:"h",name:"Jobs",y:data.map(d=>d.title),x:data.map(d=>d.jobs),
+     marker:{color:data.map((_,i)=>i===data.length-1?C_AMBER:C_BLUE),opacity:0.85},
+     hovertemplate:"%{y}<br>Jobs: %{x:,}<extra></extra>",xaxis:"x"},
+    {type:"scatter",mode:"markers",name:"Median Wage",y:data.map(d=>d.title),x:data.map(d=>d.median),
+     marker:{color:C_RED,size:7,symbol:"diamond"},
+     hovertemplate:"%{y}<br>Median: $%{x:,.0f}<extra></extra>",xaxis:"x2"}
+  ],L({
+    yaxis:{tickfont:{size:10.5},automargin:true,color:"#50506a"},
+    xaxis:{title:{text:"Jobs Requested"},tickformat:",",domain:[0,0.72],color:"#50506a"},
+    xaxis2:{overlaying:"x",side:"top",title:{text:"Median Wage ($)"},
+            tickformat:"$,.0f",color:"#50506a",gridcolor:"transparent",domain:[0,0.72]},
+    margin:{l:270,r:20,t:50,b:40},showlegend:true,
+    legend:{orientation:"h",yanchor:"bottom",y:1.05,xanchor:"left",x:0,
+            bgcolor:"rgba(0,0,0,0)",borderwidth:0,font:{size:10}}
+  }),{responsive:true});
+
+  el.on('plotly_click', e => {
+    if (!e.points || !e.points[0]) return;
+    const title = data[data.length-1-e.points[0].pointIndex]?.title || '';
+    const fullTitle = SOC.find(s=>s.title===title);
+    const note = document.getElementById('occ-click-note');
+    const link = document.getElementById('occ-click-link');
+    note.style.display='flex';
+    link.href = 'h1b_query.html';
+    link.textContent = 'Search "' + title + '" in the Live Query Tool →';
+    link.onclick = () => { sessionStorage.setItem('qf_occupation', title); };
+  });
 })();
 
-// ── Chart 6: Top Occupations ──────────────────────────────────
+// ── Chart 7: States ──────────────────────────────────────────────
 (function(){
-  const data = [...TOP_SOC].reverse();
-  Plotly.newPlot("chart-occ", [
-    {
-      type:"bar", orientation:"h", name:"Jobs",
-      y: data.map(d => d.title),
-      x: data.map(d => d.jobs),
-      marker:{color:data.map((d,i) => i===data.length-1 ? GOLD : ACCENT)},
-      hovertemplate:"%{y}<br>Jobs: %{x:,}<extra></extra>",
-      xaxis:"x"
-    },
-    {
-      type:"scatter", mode:"markers", name:"Median Wage",
-      y: data.map(d => d.title),
-      x: data.map(d => d.median),
-      marker:{color:RED, size:8, symbol:"diamond"},
-      hovertemplate:"%{y}<br>Median Wage: $%{x:,.0f}<extra></extra>",
-      xaxis:"x2"
-    }
-  ], layout({
-    yaxis:{...BASE_LAYOUT.yaxis, tickfont:{size:10.5}, automargin:true},
-    xaxis:{...BASE_LAYOUT.xaxis, title:{text:"Jobs Requested"},tickformat:",",domain:[0,0.72]},
-    xaxis2:{overlaying:"x", side:"top", title:{text:"Median Wage ($)"},color:"#71717a",
-            gridcolor:"transparent",tickformat:"$,.0f", domain:[0,0.72]},
-    margin:{l:290,r:20,t:50,b:50},
-    showlegend:true,
-    legend:{orientation:"h",yanchor:"bottom",y:1.05,xanchor:"left",x:0,bgcolor:"rgba(0,0,0,0)",borderwidth:0}
-  }), {responsive:true});
+  const data=[...STATES].reverse();
+  Plotly.newPlot("chart-states",[
+    {type:"bar",orientation:"h",name:"Jobs",y:data.map(d=>d.state),x:data.map(d=>d.jobs),
+     marker:{color:data.map(d=>d.state==="CA"?C_AMBER:C_BLUE),opacity:0.85},
+     hovertemplate:"%{y}<br>Jobs: %{x:,}<extra></extra>",xaxis:"x"},
+    {type:"scatter",mode:"markers",name:"Median Wage",y:data.map(d=>d.state),x:data.map(d=>d.median),
+     marker:{color:C_RED,size:8,symbol:"diamond"},
+     hovertemplate:"%{y}<br>Median: $%{x:,.0f}<extra></extra>",xaxis:"x2"}
+  ],L({
+    yaxis:{tickfont:{size:11},color:"#50506a"},
+    xaxis:{title:{text:"Jobs"},tickformat:",",domain:[0,0.60],color:"#50506a"},
+    xaxis2:{overlaying:"x",side:"top",title:{text:"Median ($)"},
+            tickformat:"$,.0f",color:"#50506a",gridcolor:"transparent",domain:[0,0.60]},
+    margin:{l:40,r:20,t:50,b:50},showlegend:true,
+    legend:{orientation:"h",yanchor:"bottom",y:1.05,xanchor:"left",x:0,
+            bgcolor:"rgba(0,0,0,0)",borderwidth:0,font:{size:10}}
+  }),{responsive:true});
 })();
 
-// ── Chart 7: Top States ───────────────────────────────────────
+// ── Chart 8: Cities ──────────────────────────────────────────────
 (function(){
-  const data = [...TOP_STATES].reverse();
-  Plotly.newPlot("chart-states", [
-    {
-      type:"bar", orientation:"h", name:"Jobs",
-      y: data.map(d => d.state),
-      x: data.map(d => d.jobs),
-      marker:{color:data.map(d => d.state==="CA" ? GOLD : ACCENT)},
-      hovertemplate:"%{y}<br>Jobs: %{x:,}<extra></extra>",
-      xaxis:"x"
-    },
-    {
-      type:"scatter", mode:"markers", name:"Median Wage",
-      y: data.map(d => d.state),
-      x: data.map(d => d.median),
-      marker:{color:RED, size:9, symbol:"diamond"},
-      hovertemplate:"%{y}<br>Median Wage: $%{x:,.0f}<extra></extra>",
-      xaxis:"x2"
-    }
-  ], layout({
-    yaxis:{...BASE_LAYOUT.yaxis, tickfont:{size:12}},
-    xaxis:{...BASE_LAYOUT.xaxis, title:{text:"Jobs"},tickformat:",",domain:[0,0.65]},
-    xaxis2:{overlaying:"x", side:"top", title:{text:"Median ($)"},color:"#71717a",
-            gridcolor:"transparent",tickformat:"$,.0f", domain:[0,0.65]},
-    margin:{l:45,r:20,t:50,b:50},
-    showlegend:true,
-    legend:{orientation:"h",yanchor:"bottom",y:1.05,xanchor:"left",x:0,bgcolor:"rgba(0,0,0,0)",borderwidth:0}
-  }), {responsive:true});
+  const data=[...CITIES].reverse();
+  Plotly.newPlot("chart-cities",[
+    {type:"bar",orientation:"h",name:"Jobs",y:data.map(d=>d.city),x:data.map(d=>d.jobs),
+     marker:{color:data.map(d=>d.city.includes("San Diego")?C_AMBER:C_GREEN),opacity:0.85},
+     hovertemplate:"%{y}<br>Jobs: %{x:,}<extra></extra>",xaxis:"x"},
+    {type:"scatter",mode:"markers",name:"Median Wage",y:data.map(d=>d.city),x:data.map(d=>d.median),
+     marker:{color:C_RED,size:8,symbol:"diamond"},
+     hovertemplate:"%{y}<br>Median: $%{x:,.0f}<extra></extra>",xaxis:"x2"}
+  ],L({
+    yaxis:{tickfont:{size:10.5},automargin:true,color:"#50506a"},
+    xaxis:{title:{text:"Jobs"},tickformat:",",domain:[0,0.57],color:"#50506a"},
+    xaxis2:{overlaying:"x",side:"top",title:{text:"Median ($)"},
+            tickformat:"$,.0f",color:"#50506a",gridcolor:"transparent",domain:[0,0.57]},
+    margin:{l:130,r:20,t:50,b:50},showlegend:true,
+    legend:{orientation:"h",yanchor:"bottom",y:1.05,xanchor:"left",x:0,
+            bgcolor:"rgba(0,0,0,0)",borderwidth:0,font:{size:10}}
+  }),{responsive:true});
 })();
 
-// ── Chart 8: Top Cities ───────────────────────────────────────
+// ── Chart 9: Wage Level by State ─────────────────────────────────
 (function(){
-  const data = [...TOP_CITIES].reverse();
-  Plotly.newPlot("chart-cities", [
-    {
-      type:"bar", orientation:"h", name:"Jobs",
-      y: data.map(d => d.city),
-      x: data.map(d => d.jobs),
-      marker:{color:data.map(d => d.city.includes("San Diego") ? GOLD : GREEN)},
-      hovertemplate:"%{y}<br>Jobs: %{x:,}<extra></extra>",
-      xaxis:"x"
-    },
-    {
-      type:"scatter", mode:"markers", name:"Median Wage",
-      y: data.map(d => d.city),
-      x: data.map(d => d.median),
-      marker:{color:RED, size:9, symbol:"diamond"},
-      hovertemplate:"%{y}<br>Median Wage: $%{x:,.0f}<extra></extra>",
-      xaxis:"x2"
-    }
-  ], layout({
-    yaxis:{...BASE_LAYOUT.yaxis, tickfont:{size:10.5}, automargin:true},
-    xaxis:{...BASE_LAYOUT.xaxis, title:{text:"Jobs"},tickformat:",",domain:[0,0.60]},
-    xaxis2:{overlaying:"x", side:"top", title:{text:"Median ($)"},color:"#71717a",
-            gridcolor:"transparent",tickformat:"$,.0f", domain:[0,0.60]},
-    margin:{l:135,r:20,t:50,b:50},
-    showlegend:true,
-    legend:{orientation:"h",yanchor:"bottom",y:1.05,xanchor:"left",x:0,bgcolor:"rgba(0,0,0,0)",borderwidth:0}
-  }), {responsive:true});
-})();
-
-// ── Chart 9: Wage Level by State (stacked) ───────────────────
-(function(){
-  const states = [...new Set(WL_STATE_RAW.map(r => r[0]))];
-  const levels = ["Level I","Level II","Level III","Level IV"];
-  const levelColors = [ACCENT2, ACCENT, GREEN, GOLD];
-
-  const traces = levels.map((lv, i) => {
-    const x = states.map(st => {
-      const row = WL_STATE_RAW.find(r => r[0]===st && r[1]===lv);
-      return row ? row[2] : 0;
-    });
-    return {
-      type:"bar", name:lv, x:states, y:x,
-      marker:{color:levelColors[i]},
+  const states=[...new Set(WL_STATE.map(r=>r[0]))];
+  const levels=["Level I","Level II","Level III","Level IV"];
+  Plotly.newPlot("chart-wl-state",
+    levels.map((lv,i)=>({
+      type:"bar",name:lv,x:states,
+      y:states.map(st=>{ const r=WL_STATE.find(r=>r[0]===st&&r[1]===lv); return r?r[2]:0; }),
+      marker:{color:WL_COLORS[i]},
       hovertemplate:`${lv}<br>%{x}: %{y:,} jobs<extra></extra>`
-    };
-  });
-
-  Plotly.newPlot("chart-wl-state", traces, layout({
-    barmode:"stack",
-    xaxis:{...BASE_LAYOUT.xaxis, title:{text:"State"}},
-    yaxis:{...BASE_LAYOUT.yaxis, title:{text:"Jobs"},tickformat:","},
-    margin:{l:60,r:20,t:30,b:50},
-    showlegend:true,
-    legend:{orientation:"h",yanchor:"bottom",y:1.02,xanchor:"center",x:0.5,bgcolor:"rgba(0,0,0,0)",borderwidth:0}
-  }), {responsive:true});
+    })),
+    L({barmode:"stack",
+      xaxis:{title:{text:"State"}},
+      yaxis:{title:{text:"Jobs"},tickformat:","},
+      margin:{l:60,r:20,t:30,b:50},showlegend:true,
+      legend:{orientation:"h",yanchor:"bottom",y:1.03,xanchor:"center",x:0.5,
+              bgcolor:"rgba(0,0,0,0)",borderwidth:0,font:{size:10}}
+    }),{responsive:true});
 })();
 
-// ── Chart 10: Cap Season vs Year-Round ───────────────────────
+// ── Chart 10: Cap vs Year-Round ───────────────────────────────────
 (function(){
-  const levels = ["Level I","Level II","Level III","Level IV"];
-  const capY    = levels.map(lv => { const r=CAP_DATA.find(d=>d.cap===true&&d.level===lv); return r?r.median:0; });
-  const nonCapY = levels.map(lv => { const r=CAP_DATA.find(d=>d.cap===false&&d.level===lv); return r?r.median:0; });
-
-  Plotly.newPlot("chart-cap", [
-    {
-      type:"bar", name:"Year-Round (non-cap)", x:levels, y:nonCapY,
-      marker:{color:ACCENT, opacity:0.85},
-      hovertemplate:"%{x} (Year-Round)<br>Median: $%{y:,.0f}<extra></extra>"
-    },
-    {
-      type:"bar", name:"Cap Season (April window)", x:levels, y:capY,
-      marker:{color:GOLD, opacity:0.9},
-      hovertemplate:"%{x} (Cap Season)<br>Median: $%{y:,.0f}<extra></extra>"
-    }
-  ], layout({
+  const levels=["Level I","Level II","Level III","Level IV"];
+  Plotly.newPlot("chart-cap",[
+    {type:"bar",name:"Year-Round",x:levels,
+     y:levels.map(lv=>{ const r=CAP.find(d=>!d.cap&&d.level===lv); return r?r.median:0; }),
+     marker:{color:C_BLUE,opacity:0.8},
+     hovertemplate:"%{x} (Year-Round)<br>Median: $%{y:,.0f}<extra></extra>"},
+    {type:"bar",name:"Cap Season",x:levels,
+     y:levels.map(lv=>{ const r=CAP.find(d=>d.cap&&d.level===lv); return r?r.median:0; }),
+     marker:{color:C_AMBER,opacity:0.85},
+     hovertemplate:"%{x} (Cap Season)<br>Median: $%{y:,.0f}<extra></extra>"}
+  ],L({
     barmode:"group",
-    xaxis:{...BASE_LAYOUT.xaxis, title:{text:"Wage Level"}},
-    yaxis:{...BASE_LAYOUT.yaxis, title:{text:"Median Annual Wage ($)"},tickformat:"$,.0f"},
-    margin:{l:80,r:20,t:20,b:50},
-    showlegend:true,
-    legend:{orientation:"h",yanchor:"bottom",y:1.04,xanchor:"center",x:0.5,bgcolor:"rgba(0,0,0,0)",borderwidth:0}
-  }), {responsive:true});
+    xaxis:{title:{text:"Wage Level"}},
+    yaxis:{title:{text:"Median Annual Wage ($)"},tickformat:"$,.0f"},
+    margin:{l:80,r:20,t:20,b:50},showlegend:true,
+    legend:{orientation:"h",yanchor:"bottom",y:1.04,xanchor:"center",x:0.5,
+            bgcolor:"rgba(0,0,0,0)",borderwidth:0,font:{size:10}}
+  }),{responsive:true});
 })();
+
+// ── SessionStorage passthrough for drill-downs ───────────────────
+window.addEventListener('load', () => {
+  // If returning from a click, pre-fill the query page
+  // (query page reads sessionStorage on load)
+});
 </script>
 </body>
 </html>

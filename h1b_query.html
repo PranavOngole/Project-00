@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>H-1B LCA Query | FY2026 Q1 | DataForge365</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #09090b;
+  --surface:  #0f0f13;
+  --surface2: #14141a;
+  --border:   #1c1c28;
+  --border2:  #252535;
+  --text:     #d9d9e0;
+  --muted:    #50506a;
+  --dim:      #38384e;
+  --amber:    #f0b429;
+  --green:    #22c55e;
+  --red:      #f87171;
+  --blue:     #60a5fa;
+  --mono: 'JetBrains Mono', 'Fira Code', monospace;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html { font-size:14px; }
+body { background:var(--bg); color:var(--text); font-family:'Inter',system-ui,sans-serif;
+       min-height:100vh; font-size:0.9rem; }
+
+/* ── Nav ── */
+.nav { display:flex; align-items:center; justify-content:space-between;
+       padding:14px 32px; border-bottom:1px solid var(--border); }
+.nav-brand { font-size:0.7rem; font-weight:700; color:var(--muted);
+             text-transform:uppercase; letter-spacing:2px; }
+.nav-links { display:flex; gap:20px; }
+.nav-links a { font-size:0.78rem; color:var(--muted); text-decoration:none;
+               font-weight:500; transition:color 0.15s; }
+.nav-links a:hover, .nav-links a.active { color:var(--text); }
+
+/* ── Page header ── */
+.page-header { padding:28px 32px 0; max-width:1400px; margin:0 auto; }
+.page-header h1 { font-size:1.4rem; font-weight:700; color:#fff; letter-spacing:-0.3px; }
+.page-header p { font-size:0.78rem; color:var(--muted); margin-top:4px; }
+.period-badge { display:inline-flex; align-items:center; gap:6px; margin-top:8px;
+  padding:3px 10px; background:rgba(240,180,41,0.08); border:1px solid rgba(240,180,41,0.2);
+  border-radius:4px; font-size:0.65rem; font-weight:600; color:var(--amber);
+  text-transform:uppercase; letter-spacing:1.5px; }
+
+/* ── Filter panel ── */
+.filter-panel { max-width:1400px; margin:20px auto 0; padding:0 32px; }
+.filter-box { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:20px; }
+.filter-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(160px, 1fr)); gap:12px; }
+.filter-field { display:flex; flex-direction:column; gap:4px; }
+.filter-label { font-size:0.62rem; font-weight:600; text-transform:uppercase;
+                letter-spacing:1.5px; color:var(--muted); }
+input[type=text], input[type=number], select {
+  background:var(--bg); border:1px solid var(--border2); border-radius:4px;
+  color:var(--text); font-family:inherit; font-size:0.82rem; padding:6px 8px;
+  outline:none; transition:border-color 0.15s; width:100%;
+  -webkit-appearance:none; appearance:none;
+}
+input[type=text]::placeholder, input[type=number]::placeholder { color:var(--dim); }
+input[type=text]:focus, input[type=number]:focus, select:focus { border-color:var(--border2); color:var(--text); }
+select { background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%2350506a' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+         background-repeat:no-repeat; background-position:right 8px center; padding-right:24px; cursor:pointer; }
+select option { background:#1a1a24; }
+
+.filter-checks { display:flex; flex-direction:column; gap:6px; padding-top:2px; }
+.check-row { display:flex; align-items:center; gap:6px; cursor:pointer; }
+.check-row input[type=checkbox] { width:14px; height:14px; accent-color:var(--amber); cursor:pointer; flex-shrink:0; }
+.check-row span { font-size:0.75rem; color:var(--muted); user-select:none; }
+.check-row:hover span { color:var(--text); }
+
+.filter-actions { display:flex; gap:10px; align-items:flex-end; }
+.btn { padding:7px 18px; border-radius:4px; font-size:0.8rem; font-weight:600;
+       cursor:pointer; border:1px solid transparent; transition:all 0.15s; }
+.btn-primary { background:var(--amber); color:#0a0a0b; border-color:var(--amber); }
+.btn-primary:hover { background:#e0a828; }
+.btn-primary:disabled { background:#3a3020; color:#6b5e30; border-color:#3a3020; cursor:not-allowed; }
+.btn-ghost { background:transparent; color:var(--muted); border-color:var(--border2); }
+.btn-ghost:hover { color:var(--text); border-color:var(--dim); }
+
+.selected-total-row { display:flex; align-items:center; gap:8px; margin-top:12px; }
+.selected-total-row label { font-size:0.65rem; font-weight:600; text-transform:uppercase;
+                             letter-spacing:1.5px; color:var(--muted); white-space:nowrap; }
+.selected-total-row input { width:110px; }
+.selected-total-hint { font-size:0.65rem; color:var(--dim); }
+
+/* ── Init / loading ── */
+.init-bar { max-width:1400px; margin:20px auto 0; padding:0 32px; }
+.init-box { background:var(--surface); border:1px solid var(--border); border-radius:8px;
+            padding:20px; display:flex; align-items:center; gap:16px; }
+.init-spinner { width:20px; height:20px; border:2px solid var(--border2);
+                border-top-color:var(--amber); border-radius:50%; animation:spin 0.8s linear infinite; flex-shrink:0; }
+@keyframes spin { to { transform:rotate(360deg); } }
+.init-text { font-size:0.82rem; color:var(--muted); }
+.init-text strong { color:var(--text); }
+.progress-bar-track { flex:1; height:3px; background:var(--border2); border-radius:2px; overflow:hidden; }
+.progress-bar-fill { height:100%; background:var(--amber); border-radius:2px;
+                     width:0%; transition:width 0.3s ease; }
+
+/* ── Stats ── */
+.stats-section { max-width:1400px; margin:20px auto 0; padding:0 32px; display:none; }
+.stats-row { display:flex; gap:12px; flex-wrap:wrap; }
+.stat-box { flex:1; min-width:120px; background:var(--surface); border:1px solid var(--border);
+            border-radius:8px; padding:14px 16px; }
+.stat-val { font-size:1.5rem; font-weight:700; color:#fff; font-variant-numeric:tabular-nums;
+            letter-spacing:-0.5px; line-height:1; }
+.stat-val.amber { color:var(--amber); }
+.stat-val.green { color:var(--green); }
+.stat-lbl { font-size:0.6rem; font-weight:600; text-transform:uppercase; letter-spacing:1.5px;
+            color:var(--muted); margin-top:4px; }
+.stat-sub { font-size:0.65rem; color:var(--dim); margin-top:2px; }
+
+/* ── Sections ── */
+.data-section { max-width:1400px; margin:20px auto 0; padding:0 32px 8px; display:none; }
+.section-head { display:flex; align-items:center; justify-content:space-between;
+                margin-bottom:12px; gap:12px; flex-wrap:wrap; }
+.section-title { font-size:0.85rem; font-weight:600; color:var(--text); }
+.section-controls { display:flex; align-items:center; gap:8px; }
+.section-controls select { padding:4px 24px 4px 8px; font-size:0.75rem; }
+
+/* ── Tables ── */
+.table-wrap { border:1px solid var(--border); border-radius:8px; overflow:hidden; overflow-x:auto; }
+table { width:100%; border-collapse:collapse; font-size:0.8rem; }
+thead tr { background:var(--surface2); border-bottom:1px solid var(--border); }
+thead th { padding:8px 12px; text-align:left; font-size:0.6rem; font-weight:600;
+           text-transform:uppercase; letter-spacing:1.5px; color:var(--muted);
+           white-space:nowrap; cursor:pointer; user-select:none; }
+thead th:hover { color:var(--text); }
+thead th.sorted { color:var(--amber); }
+thead th .sort-arrow { font-size:0.6rem; margin-left:3px; opacity:0.5; }
+thead th.sorted .sort-arrow { opacity:1; color:var(--amber); }
+tbody tr { border-bottom:1px solid var(--border); transition:background 0.1s; }
+tbody tr:last-child { border-bottom:none; }
+tbody tr:hover { background:rgba(255,255,255,0.025); }
+tbody tr:nth-child(even) { background:rgba(255,255,255,0.015); }
+tbody tr:nth-child(even):hover { background:rgba(255,255,255,0.03); }
+td { padding:7px 12px; color:var(--text); white-space:nowrap; }
+td.num { font-family:var(--mono); font-size:0.78rem; font-variant-numeric:tabular-nums; text-align:right; }
+td.mono { font-family:var(--mono); font-size:0.75rem; }
+td.muted { color:var(--muted); }
+td.amber { color:var(--amber); font-family:var(--mono); }
+td.green { color:var(--green); font-family:var(--mono); }
+td.red { color:var(--red); font-family:var(--mono); }
+.badge-cap { display:inline-block; padding:1px 6px; border-radius:3px; font-size:0.6rem;
+             font-weight:600; text-transform:uppercase; letter-spacing:0.5px; }
+.badge-yes { background:rgba(240,180,41,0.12); color:var(--amber); border:1px solid rgba(240,180,41,0.2); }
+.badge-no  { background:rgba(255,255,255,0.04); color:var(--muted); border:1px solid var(--border); }
+
+/* ── Pagination ── */
+.pagination { display:flex; align-items:center; gap:8px; margin-top:12px; justify-content:flex-end; }
+.pagination button { padding:4px 10px; background:var(--surface); border:1px solid var(--border2);
+                     border-radius:4px; color:var(--muted); font-size:0.75rem; cursor:pointer;
+                     transition:all 0.15s; font-family:inherit; }
+.pagination button:hover:not(:disabled) { color:var(--text); border-color:var(--dim); }
+.pagination button:disabled { opacity:0.3; cursor:not-allowed; }
+.pagination .page-info { font-size:0.72rem; color:var(--muted); font-variant-numeric:tabular-nums; }
+
+/* ── Empty / error states ── */
+.empty-row td { text-align:center; padding:32px; color:var(--muted); }
+.error-banner { background:rgba(248,113,113,0.06); border:1px solid rgba(248,113,113,0.15);
+                border-radius:6px; padding:12px 16px; font-size:0.8rem; color:var(--red);
+                margin-bottom:12px; display:none; }
+
+/* ── Footer ── */
+.footer { max-width:1400px; margin:32px auto 0; padding:20px 32px 40px;
+          border-top:1px solid var(--border); display:flex; align-items:center;
+          justify-content:space-between; flex-wrap:wrap; gap:12px; }
+.footer p { font-size:0.72rem; color:var(--dim); }
+.footer a { color:var(--muted); text-decoration:none; font-size:0.72rem; }
+.footer a:hover { color:var(--text); }
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="nav">
+  <span class="nav-brand">DataForge365 &mdash; Project 00</span>
+  <div class="nav-links">
+    <a href="dashboard.html">Visa Overview</a>
+    <a href="h1b_wages.html">H-1B Analytics</a>
+    <a href="h1b_query.html" class="active">Live Query</a>
+    <a href="https://github.com/PranavOngole/Project-00" target="_blank">GitHub</a>
+  </div>
+</nav>
+
+<!-- Page header -->
+<div class="page-header">
+  <h1>H-1B LCA Query</h1>
+  <p>Filter the DOL LCA disclosure dataset without writing SQL. Public offered wages and worksite records &mdash; not exact lottery winners or payroll data.</p>
+  <div class="period-badge">&#9679;&nbsp; FY2026 Q1 &mdash; Oct&ndash;Dec 2025 &mdash; 120,532 Records</div>
+</div>
+
+<!-- Filter panel -->
+<div class="filter-panel">
+  <div class="filter-box">
+    <div class="filter-grid">
+      <div class="filter-field" style="min-width:200px;">
+        <label class="filter-label" for="f-employer">Employer</label>
+        <input type="text" id="f-employer" placeholder="e.g. Google, Amazon…">
+      </div>
+      <div class="filter-field" style="min-width:200px;">
+        <label class="filter-label" for="f-occupation">Occupation / SOC Title</label>
+        <input type="text" id="f-occupation" placeholder="e.g. Software Developers">
+      </div>
+      <div class="filter-field">
+        <label class="filter-label" for="f-soc">SOC Code</label>
+        <input type="text" id="f-soc" placeholder="15-1252.00">
+      </div>
+      <div class="filter-field">
+        <label class="filter-label" for="f-case">Case Number</label>
+        <input type="text" id="f-case" placeholder="I-200-…">
+      </div>
+      <div class="filter-field">
+        <label class="filter-label" for="f-state">State</label>
+        <select id="f-state">
+          <option value="">All states</option>
+          <option>AK</option><option>AL</option><option>AR</option><option>AZ</option>
+          <option>CA</option><option>CO</option><option>CT</option><option>DC</option>
+          <option>DE</option><option>FL</option><option>GA</option><option>HI</option>
+          <option>IA</option><option>ID</option><option>IL</option><option>IN</option>
+          <option>KS</option><option>KY</option><option>LA</option><option>MA</option>
+          <option>MD</option><option>ME</option><option>MI</option><option>MN</option>
+          <option>MO</option><option>MS</option><option>MT</option><option>NC</option>
+          <option>ND</option><option>NE</option><option>NH</option><option>NJ</option>
+          <option>NM</option><option>NV</option><option>NY</option><option>OH</option>
+          <option>OK</option><option>OR</option><option>PA</option><option>PR</option>
+          <option>RI</option><option>SC</option><option>SD</option><option>TN</option>
+          <option>TX</option><option>UT</option><option>VA</option><option>VT</option>
+          <option>WA</option><option>WI</option><option>WV</option><option>WY</option>
+        </select>
+      </div>
+      <div class="filter-field">
+        <label class="filter-label" for="f-city">City</label>
+        <input type="text" id="f-city" placeholder="San Jose">
+      </div>
+      <div class="filter-field">
+        <label class="filter-label" for="f-wagelevel">Wage Level</label>
+        <select id="f-wagelevel">
+          <option value="">All levels</option>
+          <option>Level I</option>
+          <option>Level II</option>
+          <option>Level III</option>
+          <option>Level IV</option>
+        </select>
+      </div>
+      <div class="filter-field">
+        <label class="filter-label" for="f-status">Case Status</label>
+        <select id="f-status">
+          <option value="Certified">Certified</option>
+          <option value="">All statuses</option>
+          <option value="Certified - Withdrawn">Certified - Withdrawn</option>
+          <option value="Denied">Denied</option>
+          <option value="Withdrawn">Withdrawn</option>
+        </select>
+      </div>
+      <div class="filter-field">
+        <label class="filter-label" for="f-band">Salary Band</label>
+        <select id="f-band">
+          <option value="">All bands</option>
+          <option>&lt;$50K</option>
+          <option>$50K-$75K</option>
+          <option>$75K-$100K</option>
+          <option>$100K-$125K</option>
+          <option>$125K-$150K</option>
+          <option>$150K-$200K</option>
+          <option>$200K-$250K</option>
+          <option>$250K-$300K</option>
+          <option>$300K+</option>
+        </select>
+      </div>
+      <div class="filter-field">
+        <label class="filter-label" for="f-minwage">Min Annual Wage</label>
+        <input type="number" id="f-minwage" placeholder="100000" min="0" step="1000">
+      </div>
+      <div class="filter-field">
+        <label class="filter-label" for="f-maxwage">Max Annual Wage</label>
+        <input type="number" id="f-maxwage" placeholder="250000" min="0" step="1000">
+      </div>
+      <div class="filter-field">
+        <label class="filter-label">Options</label>
+        <div class="filter-checks">
+          <label class="check-row">
+            <input type="checkbox" id="f-plausible" checked>
+            <span>Plausible wages only</span>
+          </label>
+          <label class="check-row">
+            <input type="checkbox" id="f-cap">
+            <span>Cap proxy only</span>
+          </label>
+        </div>
+      </div>
+      <div class="filter-field">
+        <label class="filter-label" for="f-sort">Sort By</label>
+        <select id="f-sort">
+          <option value="worker_positions">Worker positions</option>
+          <option value="annual_wage_from">Wage (from)</option>
+          <option value="wage_premium_pct">Wage premium</option>
+          <option value="weighted_entries">Lottery weight</option>
+          <option value="employer_name">Employer</option>
+          <option value="soc_title">Occupation</option>
+          <option value="worksite_state">State</option>
+          <option value="begin_date">Begin date</option>
+        </select>
+      </div>
+      <div class="filter-field">
+        <label class="filter-label" for="f-dir">Direction</label>
+        <select id="f-dir">
+          <option value="DESC">Descending</option>
+          <option value="ASC">Ascending</option>
+        </select>
+      </div>
+      <div class="filter-field">
+        <label class="filter-label" for="f-limit">Rows</label>
+        <select id="f-limit">
+          <option value="50">50</option>
+          <option value="100" selected>100</option>
+          <option value="250">250</option>
+          <option value="500">500</option>
+        </select>
+      </div>
+      <div class="filter-field filter-actions">
+        <label class="filter-label" style="visibility:hidden">Go</label>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-primary" id="btn-search" disabled onclick="runSearch()">Search</button>
+          <button class="btn btn-ghost" onclick="resetFilters()">Reset</button>
+        </div>
+      </div>
+    </div>
+    <div class="selected-total-row">
+      <label for="f-selected">Estimated lottery selections:</label>
+      <input type="number" id="f-selected" value="120141" min="1" max="5000000" step="100" style="width:110px;">
+      <span class="selected-total-hint">USCIS FY2026 registered cap figure. Adjust to re-estimate your pick probability.</span>
+    </div>
+  </div>
+</div>
+
+<!-- Init / loading bar -->
+<div class="init-bar" id="init-bar">
+  <div class="init-box">
+    <div class="init-spinner" id="init-spinner"></div>
+    <div class="init-text"><strong>Loading query engine</strong> &mdash; <span id="init-status">initializing DuckDB-WASM…</span></div>
+    <div class="progress-bar-track"><div class="progress-bar-fill" id="prog-fill"></div></div>
+  </div>
+</div>
+
+<!-- Error banner -->
+<div class="filter-panel"><div class="error-banner" id="err-banner"></div></div>
+
+<!-- Stats -->
+<div class="stats-section" id="stats-section">
+  <div class="stats-row">
+    <div class="stat-box">
+      <div class="stat-val" id="s-rows">—</div>
+      <div class="stat-lbl">Matching Rows</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-val" id="s-filings">—</div>
+      <div class="stat-lbl">LCA Filings</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-val" id="s-jobs">—</div>
+      <div class="stat-lbl">Jobs Requested</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-val" id="s-weight">—</div>
+      <div class="stat-lbl">Lottery Weight</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-val amber" id="s-median">—</div>
+      <div class="stat-lbl">Median Wage</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-val green" id="s-premium">—</div>
+      <div class="stat-lbl">Avg Premium</div>
+      <div class="stat-sub">vs. prevailing wage</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-val" id="s-picks">—</div>
+      <div class="stat-lbl">Est. Selections</div>
+      <div class="stat-sub" id="s-pickrate"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Grouped summary table -->
+<div class="data-section" id="grouped-section">
+  <div class="section-head">
+    <span class="section-title">Grouped Summary</span>
+    <div class="section-controls">
+      <select id="g-dim" onchange="runSearch()">
+        <option value="employer">Employer</option>
+        <option value="occupation">Occupation</option>
+        <option value="location">City + State</option>
+        <option value="state">State</option>
+        <option value="wage_level">Wage Level</option>
+        <option value="salary_band">Salary Band</option>
+      </select>
+      <select id="g-limit" onchange="runSearch()">
+        <option value="25">25</option>
+        <option value="50" selected>50</option>
+        <option value="100">100</option>
+      </select>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table id="grouped-table">
+      <thead>
+        <tr>
+          <th id="gh-label">Employer</th>
+          <th class="sorted">Positions <span class="sort-arrow">↓</span></th>
+          <th>Weighted Entries</th>
+          <th>Cases</th>
+          <th>Median Wage</th>
+          <th>Avg Premium</th>
+          <th>Cap Proxy Pos.</th>
+          <th>Est. Selections</th>
+        </tr>
+      </thead>
+      <tbody id="grouped-body">
+        <tr><td colspan="8" class="empty-row muted">Run a search to see grouped results.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Row-level results -->
+<div class="data-section" id="results-section">
+  <div class="section-head">
+    <span class="section-title">Matching LCA Worksite Wage Rows</span>
+    <span class="section-title muted" style="font-size:0.72rem;" id="results-pagination-info"></span>
+  </div>
+  <div class="table-wrap">
+    <table id="results-table">
+      <thead>
+        <tr>
+          <th>Case</th>
+          <th>Employer</th>
+          <th>Occupation</th>
+          <th>SOC</th>
+          <th>City</th>
+          <th>State</th>
+          <th>Level</th>
+          <th class="num">Positions</th>
+          <th class="num">Weighted</th>
+          <th class="num">Wage From</th>
+          <th class="num">Wage To</th>
+          <th class="num">Prevailing</th>
+          <th class="num">Premium</th>
+          <th>Band</th>
+          <th>Begin</th>
+          <th>Cap Proxy</th>
+        </tr>
+      </thead>
+      <tbody id="results-body">
+        <tr><td colspan="16" class="empty-row muted">Run a search to see row-level results.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="pagination" id="pagination">
+    <button id="btn-prev" onclick="prevPage()" disabled>&#8592; Prev</button>
+    <span class="page-info" id="page-info"></span>
+    <button id="btn-next" onclick="nextPage()">Next &#8594;</button>
+  </div>
+</div>
+
+<div class="footer">
+  <p>Source: DOL OFLC LCA Disclosure Data FY2026 Q1 &mdash; Certified filings only; wages may differ from actual payroll</p>
+  <div style="display:flex;gap:16px;">
+    <a href="h1b_wages.html">&#8592; Analytics</a>
+    <a href="https://github.com/PranavOngole/Project-00" target="_blank">GitHub</a>
+  </div>
+</div>
+
+<script type="module">
+// ────────────────────────────────────────────────────────────────
+//  DuckDB-WASM init + query engine
+// ────────────────────────────────────────────────────────────────
+const PARQUET_URL = new URL('./data/wasm/h1b_lca_fy2026_q1.parquet', location.href).href;
+const DEFAULT_SELECTED = 120141;
+
+let conn = null;
+let currentRows = [];
+let currentPage = 0;
+let rowsPerPage = 100;
+let universeWeight = 0;
+
+const $ = id => document.getElementById(id);
+const setProgress = (pct, msg) => {
+  $('prog-fill').style.width = pct + '%';
+  $('init-status').textContent = msg;
+};
+
+function showError(msg) {
+  const b = $('err-banner');
+  b.textContent = msg;
+  b.style.display = 'block';
+}
+
+// ── Initialize DuckDB-WASM ───────────────────────────────────────
+async function initDuckDB() {
+  setProgress(5, 'loading DuckDB-WASM module…');
+
+  let duckdb;
+  try {
+    duckdb = await import('https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.29.0/dist/duckdb-browser.mjs');
+  } catch(e) {
+    // Fallback to older version
+    try {
+      duckdb = await import('https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.28.0/dist/duckdb-browser.mjs');
+    } catch(e2) {
+      showError('Failed to load DuckDB-WASM. Please try a modern browser (Chrome/Firefox/Safari/Edge).');
+      return;
+    }
+  }
+
+  setProgress(20, 'selecting WASM bundle…');
+  const BUNDLES = duckdb.getJsDelivrBundles();
+  // Force MVP bundle (no COOP/COEP required)
+  const bundle = BUNDLES.mvp;
+
+  setProgress(30, 'creating worker…');
+  const workerUrl = URL.createObjectURL(
+    new Blob([`importScripts("${bundle.mainWorker}");`], { type: 'text/javascript' })
+  );
+  const worker = new Worker(workerUrl);
+  const logger = new duckdb.ConsoleLogger(duckdb.LogLevel.WARNING);
+  const db = new duckdb.AsyncDuckDB(logger, worker);
+
+  setProgress(40, 'instantiating DuckDB…');
+  await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
+  URL.revokeObjectURL(workerUrl);
+
+  setProgress(60, `downloading LCA data (${PARQUET_URL.split('/').pop()})…`);
+  let parquetBuf;
+  try {
+    const resp = await fetch(PARQUET_URL);
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    parquetBuf = await resp.arrayBuffer();
+  } catch(e) {
+    showError(`Failed to load LCA data: ${e.message}. Make sure you are accessing this page via HTTPS.`);
+    return;
+  }
+
+  setProgress(80, 'registering parquet…');
+  await db.registerFileBuffer('h1b.parquet', new Uint8Array(parquetBuf));
+
+  setProgress(90, 'creating view…');
+  conn = await db.connect();
+  await conn.query("CREATE VIEW lca AS SELECT * FROM read_parquet('h1b.parquet')");
+
+  setProgress(100, 'ready');
+  $('init-bar').style.display = 'none';
+  $('btn-search').disabled = false;
+  $('stats-section').style.display = 'block';
+  $('grouped-section').style.display = 'block';
+  $('results-section').style.display = 'block';
+
+  // Auto-run default search
+  await runSearch();
+}
+
+// ── Query helpers ────────────────────────────────────────────────
+function arrowToRows(table) {
+  const fields = table.schema.fields.map(f => f.name);
+  const rows = [];
+  for (let i = 0; i < table.numRows; i++) {
+    const row = {};
+    for (const f of fields) {
+      const col = table.getChildAt(table.schema.fields.findIndex(ff => ff.name === f));
+      row[f] = col ? col.get(i) : null;
+    }
+    rows.push(row);
+  }
+  return rows;
+}
+
+function buildWhere(includeSearch = true) {
+  const clauses = [];
+  const vals = [];
+
+  if (includeSearch) {
+    const employer  = $('f-employer').value.trim();
+    const occ       = $('f-occupation').value.trim();
+    const soc       = $('f-soc').value.trim();
+    const caseNum   = $('f-case').value.trim();
+    const city      = $('f-city').value.trim();
+    const state     = $('f-state').value;
+    const wageLevel = $('f-wagelevel').value;
+    const band      = $('f-band').value;
+    const minWage   = parseFloat($('f-minwage').value) || null;
+    const maxWage   = parseFloat($('f-maxwage').value) || null;
+
+    if (employer)  { clauses.push(`employer_name ILIKE '%${esc(employer)}%'`); }
+    if (occ)       { clauses.push(`soc_title ILIKE '%${esc(occ)}%'`); }
+    if (soc)       { clauses.push(`soc_code ILIKE '%${esc(soc)}%'`); }
+    if (caseNum)   { clauses.push(`case_number ILIKE '%${esc(caseNum)}%'`); }
+    if (city)      { clauses.push(`worksite_city ILIKE '%${esc(city)}%'`); }
+    if (state)     { clauses.push(`worksite_state = '${esc(state)}'`); }
+    if (wageLevel) { clauses.push(`wage_level = '${esc(wageLevel)}'`); }
+    if (band)      { clauses.push(`salary_band = '${esc(band)}'`); }
+    if (minWage !== null) { clauses.push(`annual_wage_from >= ${minWage}`); }
+    if (maxWage !== null) { clauses.push(`annual_wage_from <= ${maxWage}`); }
+  }
+
+  const status = $('f-status').value;
+  if (status)  { clauses.push(`case_status = '${esc(status)}'`); }
+
+  if ($('f-plausible').checked) { clauses.push(`wage_plausibility_flag = 'PLAUSIBLE'`); }
+  if ($('f-cap').checked)       { clauses.push(`cap_season_proxy_flag = true`); }
+
+  return clauses.length ? 'WHERE ' + clauses.join(' AND ') : '';
+}
+
+function esc(s) { return String(s).replace(/'/g, "''"); }
+
+function fmtNum(n, decimals=0) {
+  if (n === null || n === undefined) return '—';
+  return Number(n).toLocaleString('en-US', {maximumFractionDigits:decimals});
+}
+function fmtDollar(n) {
+  if (n === null || n === undefined) return '—';
+  return '$' + Number(n).toLocaleString('en-US', {maximumFractionDigits:0});
+}
+function fmtPct(n) {
+  if (n === null || n === undefined) return '—';
+  return Number(n).toFixed(1) + '%';
+}
+
+// ── Main search ──────────────────────────────────────────────────
+window.runSearch = async function() {
+  if (!conn) return;
+  $('btn-search').disabled = true;
+  $('btn-search').textContent = 'Running…';
+
+  try {
+    const where = buildWhere(true);
+    const whereUniverse = buildWhere(false);
+    const limit = parseInt($('f-limit').value) || 100;
+    const sort  = $('f-sort').value;
+    const dir   = $('f-dir').value === 'ASC' ? 'ASC' : 'DESC';
+    const selected = parseInt($('f-selected').value) || DEFAULT_SELECTED;
+
+    // 1. Universe weight (for pick rate denominator)
+    const univRes = await conn.query(`
+      SELECT COALESCE(SUM(weighted_entries), 0) AS w FROM lca ${whereUniverse}
+    `);
+    universeWeight = Number(arrowToRows(univRes)[0].w) || 0;
+
+    // 2. Summary stats
+    const summRes = await conn.query(`
+      SELECT
+        COUNT(*) AS rows,
+        COUNT(DISTINCT case_number) AS filings,
+        COALESCE(SUM(worker_positions), 0) AS jobs,
+        COALESCE(SUM(weighted_entries), 0) AS weight,
+        QUANTILE_CONT(annual_wage_from, 0.5) AS median_wage,
+        AVG(wage_premium_pct) AS avg_premium
+      FROM lca ${where}
+    `);
+    const summ = arrowToRows(summRes)[0];
+    const weight = Number(summ.weight) || 0;
+    const jobs   = Number(summ.jobs) || 0;
+    const estPicks = universeWeight > 0 ? (selected * weight / universeWeight) : null;
+    const pickRate = estPicks && jobs > 0 ? (estPicks / jobs * 100) : null;
+
+    $('s-rows').textContent    = fmtNum(summ.rows);
+    $('s-filings').textContent = fmtNum(summ.filings);
+    $('s-jobs').textContent    = fmtNum(jobs);
+    $('s-weight').textContent  = fmtNum(weight);
+    $('s-median').textContent  = fmtDollar(summ.median_wage);
+    $('s-premium').textContent = summ.avg_premium !== null ? '+' + fmtPct(summ.avg_premium) : '—';
+    $('s-picks').textContent   = estPicks ? fmtNum(estPicks, 0) : '—';
+    $('s-pickrate').textContent= pickRate ? fmtPct(pickRate) + ' pick rate' : '';
+
+    // 3. Grouped summary
+    await renderGrouped(where, selected);
+
+    // 4. Row results
+    const rowRes = await conn.query(`
+      SELECT
+        case_number, employer_name, soc_title, soc_code,
+        worksite_city, worksite_state, wage_level,
+        worker_positions, weighted_entries,
+        annual_wage_from, annual_wage_to, annual_prevailing_wage,
+        wage_premium_pct, salary_band, begin_date,
+        cap_season_proxy_flag, h1b_dependent, secondary_entity_business_name
+      FROM lca ${where}
+      ORDER BY ${sort} ${dir} NULLS LAST, employer_name ASC
+      LIMIT ${limit}
+    `);
+    currentRows = arrowToRows(rowRes);
+    rowsPerPage = Math.min(100, limit);
+    currentPage = 0;
+    renderResults();
+    $('results-pagination-info').textContent =
+      `Tip: use Case Number for an exact LCA lookup.`;
+
+  } catch(e) {
+    showError('Query error: ' + e.message);
+    console.error(e);
+  } finally {
+    $('btn-search').disabled = false;
+    $('btn-search').textContent = 'Search';
+  }
+};
+
+async function renderGrouped(where, selected) {
+  const dim = $('g-dim').value;
+  const glimit = parseInt($('g-limit').value) || 50;
+  const dimMap = {
+    employer:   "COALESCE(employer_name, 'Unknown')",
+    occupation: "COALESCE(soc_title, 'Unknown')",
+    location:   "COALESCE(worksite_city || ', ' || worksite_state, 'Unknown')",
+    state:      "COALESCE(worksite_state, 'Unknown')",
+    wage_level: "COALESCE(wage_level, 'Unknown')",
+    salary_band:"COALESCE(salary_band, 'Unknown')"
+  };
+  const dimLabels = {
+    employer:"Employer", occupation:"Occupation", location:"City + State",
+    state:"State", wage_level:"Wage Level", salary_band:"Salary Band"
+  };
+  $('gh-label').textContent = dimLabels[dim] || 'Group';
+
+  const expr = dimMap[dim];
+  const res = await conn.query(`
+    SELECT
+      ${expr} AS group_label,
+      COUNT(*) AS rows,
+      COUNT(DISTINCT case_number) AS filings,
+      COALESCE(SUM(worker_positions), 0) AS jobs,
+      COALESCE(SUM(weighted_entries), 0) AS weight,
+      QUANTILE_CONT(annual_wage_from, 0.5) AS median_wage,
+      AVG(wage_premium_pct) AS avg_premium,
+      SUM(CASE WHEN cap_season_proxy_flag THEN worker_positions ELSE 0 END) AS cap_jobs
+    FROM lca ${where}
+    GROUP BY 1
+    ORDER BY jobs DESC, rows DESC
+    LIMIT ${glimit}
+  `);
+  const rows = arrowToRows(res);
+
+  const tbody = $('grouped-body');
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="8" class="empty-row muted">No results.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = rows.map(r => {
+    const wt = Number(r.weight) || 0;
+    const est = universeWeight > 0 ? (selected * wt / universeWeight) : null;
+    return `<tr>
+      <td>${escHtml(r.group_label)}</td>
+      <td class="num">${fmtNum(r.jobs)}</td>
+      <td class="num">${fmtNum(r.weight)}</td>
+      <td class="num">${fmtNum(r.filings)}</td>
+      <td class="num amber">${fmtDollar(r.median_wage)}</td>
+      <td class="num ${r.avg_premium > 0 ? 'green' : ''}">${r.avg_premium !== null ? '+'+fmtPct(r.avg_premium) : '—'}</td>
+      <td class="num">${fmtNum(r.cap_jobs)}</td>
+      <td class="num">${est ? fmtNum(est,0) : '—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderResults() {
+  const start = currentPage * rowsPerPage;
+  const end   = Math.min(start + rowsPerPage, currentRows.length);
+  const page  = currentRows.slice(start, end);
+  const tbody = $('results-body');
+
+  if (!page.length) {
+    tbody.innerHTML = '<tr><td colspan="16" class="empty-row muted">No results.</td></tr>';
+    $('pagination').style.display = 'none';
+    return;
+  }
+
+  tbody.innerHTML = page.map(r => {
+    const capVal = r.cap_season_proxy_flag;
+    const isCap  = capVal === true || capVal === 'true' || capVal === 1;
+    const prem   = Number(r.wage_premium_pct);
+    const premClass = prem > 30 ? 'green' : prem > 0 ? '' : 'red';
+    const beginStr = r.begin_date ? String(r.begin_date).slice(0,10) : '—';
+    return `<tr>
+      <td class="mono">${escHtml(r.case_number || '—')}</td>
+      <td>${escHtml(r.employer_name || '—')}</td>
+      <td>${escHtml(r.soc_title || '—')}</td>
+      <td class="mono muted">${escHtml(r.soc_code || '—')}</td>
+      <td>${escHtml(r.worksite_city || '—')}</td>
+      <td class="muted">${escHtml(r.worksite_state || '—')}</td>
+      <td class="muted">${escHtml(r.wage_level || '—')}</td>
+      <td class="num">${fmtNum(r.worker_positions)}</td>
+      <td class="num muted">${fmtNum(r.weighted_entries)}</td>
+      <td class="num amber">${fmtDollar(r.annual_wage_from)}</td>
+      <td class="num muted">${r.annual_wage_to ? fmtDollar(r.annual_wage_to) : '—'}</td>
+      <td class="num muted">${fmtDollar(r.annual_prevailing_wage)}</td>
+      <td class="num ${premClass}">${r.wage_premium_pct !== null ? '+'+fmtPct(r.wage_premium_pct) : '—'}</td>
+      <td class="muted">${escHtml(r.salary_band || '—')}</td>
+      <td class="mono muted">${beginStr}</td>
+      <td>${isCap ? '<span class="badge-cap badge-yes">Yes</span>' : '<span class="badge-cap badge-no">No</span>'}</td>
+    </tr>`;
+  }).join('');
+
+  $('page-info').textContent = `${fmtNum(start+1)}–${fmtNum(end)} of ${fmtNum(currentRows.length)}`;
+  $('btn-prev').disabled = currentPage === 0;
+  $('btn-next').disabled = end >= currentRows.length;
+  $('pagination').style.display = 'flex';
+}
+
+window.prevPage = function() { if (currentPage > 0) { currentPage--; renderResults(); } };
+window.nextPage = function() {
+  if ((currentPage + 1) * rowsPerPage < currentRows.length) { currentPage++; renderResults(); }
+};
+
+window.resetFilters = function() {
+  $('f-employer').value  = '';
+  $('f-occupation').value = '';
+  $('f-soc').value        = '';
+  $('f-case').value       = '';
+  $('f-state').value      = '';
+  $('f-city').value       = '';
+  $('f-wagelevel').value  = '';
+  $('f-status').value     = 'Certified';
+  $('f-band').value       = '';
+  $('f-minwage').value    = '';
+  $('f-maxwage').value    = '';
+  $('f-plausible').checked = true;
+  $('f-cap').checked      = false;
+  $('f-sort').value       = 'worker_positions';
+  $('f-dir').value        = 'DESC';
+  $('f-limit').value      = '100';
+  $('f-selected').value   = '120141';
+  runSearch();
+};
+
+function escHtml(s) {
+  return String(s || '')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+// Enter key triggers search
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !$('btn-search').disabled) runSearch();
+});
+
+// Boot
+initDuckDB().catch(e => {
+  showError('Initialization failed: ' + e.message + '. Try reloading the page.');
+  console.error(e);
+});
+</script>
+</body>
+</html>

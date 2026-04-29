@@ -33,8 +33,8 @@
     .badge { display:inline-block; background:rgba(59,130,246,0.08); border:1px solid rgba(59,130,246,0.2);
       border-radius:20px; padding:4px 12px; font-size:0.65rem; font-weight:600; color:#3B82F6; letter-spacing:1px; text-transform:uppercase; }
 
-    .dashboards { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-top:48px; }
-    @media(max-width:640px) { .dashboards { grid-template-columns:1fr; } h1 { font-size:2rem; } }
+    .dashboards { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:20px; margin-top:48px; }
+    @media(max-width:640px) { h1 { font-size:2rem; } }
 
     .dash-card { background:var(--glass); border:1px solid var(--glass-border); border-radius:20px;
       padding:28px; text-decoration:none; display:flex; flex-direction:column; gap:12px;
@@ -42,18 +42,22 @@
     .dash-card:hover { transform:translateY(-5px); border-color:rgba(59,130,246,0.35);
       box-shadow:0 20px 40px rgba(0,0,0,0.4); }
     .dash-card.purple:hover { border-color:rgba(139,92,246,0.35); }
+    .dash-card.gold:hover { border-color:rgba(245,158,11,0.35); }
 
     .dash-icon { font-size:2.4rem; }
     .dash-tag { font-size:0.62rem; font-weight:700; text-transform:uppercase; letter-spacing:2px; color:var(--accent); }
     .dash-card.purple .dash-tag { color:var(--purple); }
+    .dash-card.gold .dash-tag { color:var(--gold); }
     .dash-card h2 { font-size:1.2rem; font-weight:700; color:#fff; }
     .dash-card p { font-size:0.82rem; color:#71717a; line-height:1.6; flex:1; }
     .dash-pills { display:flex; gap:6px; flex-wrap:wrap; }
     .dash-pill { background:rgba(59,130,246,0.08); border:1px solid rgba(59,130,246,0.15);
       border-radius:12px; padding:3px 10px; font-size:0.65rem; color:#71717a; }
     .dash-card.purple .dash-pill { background:rgba(139,92,246,0.08); border-color:rgba(139,92,246,0.15); }
+    .dash-card.gold .dash-pill { background:rgba(245,158,11,0.08); border-color:rgba(245,158,11,0.15); }
     .dash-cta { font-size:0.78rem; font-weight:600; color:var(--accent); margin-top:4px; }
     .dash-card.purple .dash-cta { color:var(--purple); }
+    .dash-card.gold .dash-cta { color:var(--gold); }
 
     .footer { margin-top:60px; padding-top:24px; border-top:1px solid var(--grid);
       display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; }
@@ -102,6 +106,21 @@
         <span class="dash-pill">Lottery weight</span>
       </div>
       <div class="dash-cta">View Dashboard &rarr;</div>
+    </a>
+
+    <!-- Dashboard 3: H-1B Query Tool -->
+    <a href="h1b_query.html" class="dash-card gold">
+      <div class="dash-icon">🔎</div>
+      <div class="dash-tag">No-SQL Explorer &mdash; New</div>
+      <h2>H-1B Wage Query Tool</h2>
+      <p>Search public LCA wage records by company, occupation, state, city, wage level, salary band, and likely cap-season filings directly in the browser.</p>
+      <div class="dash-pills">
+        <span class="dash-pill">120K rows</span>
+        <span class="dash-pill">DuckDB-WASM</span>
+        <span class="dash-pill">Parquet</span>
+        <span class="dash-pill">No backend</span>
+      </div>
+      <div class="dash-cta">Open Query Tool &rarr;</div>
     </a>
   </div>
 
