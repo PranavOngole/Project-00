@@ -161,6 +161,14 @@ td.red { color:var(--red); font-family:var(--mono); }
 .error-banner { background:rgba(248,113,113,0.06); border:1px solid rgba(248,113,113,0.15);
                 border-radius:6px; padding:12px 16px; font-size:0.8rem; color:var(--red);
                 margin-bottom:12px; display:none; }
+.error-banner strong { color:#fff; }
+.error-banner a { color:var(--amber); text-decoration:none; font-weight:600; }
+.error-banner a:hover { text-decoration:underline; }
+.error-banner code { color:#fff; background:rgba(255,255,255,0.06); border:1px solid var(--border2);
+                     border-radius:4px; padding:2px 6px; font-family:var(--mono); font-size:0.76rem; }
+.error-actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
+.error-actions a { display:inline-flex; align-items:center; padding:7px 12px; border-radius:4px;
+                   border:1px solid rgba(240,180,41,0.24); background:rgba(240,180,41,0.08); }
 
 /* ── Footer ── */
 .footer { max-width:1400px; margin:32px auto 0; padding:20px 32px 40px;
@@ -478,6 +486,7 @@ td.red { color:var(--red); font-family:var(--mono); }
 // ────────────────────────────────────────────────────────────────
 const PARQUET_URL = new URL('./data/wasm/h1b_lca_fy2026_q1.parquet', location.href).href;
 const DEFAULT_SELECTED = 120141;
+const LIVE_QUERY_URL = 'https://pranavongole.github.io/Project-00/h1b_query.html';
 
 let conn = null;
 let currentRows = [];
@@ -497,6 +506,28 @@ function showError(msg) {
   b.style.display = 'block';
 }
 
+function showRichError(html) {
+  const b = $('err-banner');
+  b.innerHTML = html;
+  b.style.display = 'block';
+}
+
+function showFileModeHelp() {
+  $('init-bar').style.display = 'none';
+  $('btn-search').disabled = true;
+  showRichError(`
+    <strong>This page is open as a local file, so the browser blocked the query engine.</strong><br>
+    DuckDB-WASM needs an <code>https://</code> page or a local <code>http://</code> server. The data is fine; this is just browser security around <code>file://</code> pages.
+    <div class="error-actions">
+      <a href="${LIVE_QUERY_URL}">Open the live dashboard</a>
+      <a href="http://127.0.0.1:8766/h1b_query.html">Open local server version</a>
+    </div>
+    <div style="margin-top:10px;color:var(--muted);">
+      To run it locally: <code>python3 -m http.server 8766</code>, then open <code>http://127.0.0.1:8766/h1b_query.html</code>.
+    </div>
+  `);
+}
+
 // ── Initialize DuckDB-WASM ───────────────────────────────────────
 async function initDuckDB() {
   setProgress(5, 'loading DuckDB-WASM module…');
@@ -509,7 +540,11 @@ async function initDuckDB() {
     try {
       duckdb = await import('https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.28.0/dist/duckdb-browser.mjs');
     } catch(e2) {
-      showError('Failed to load DuckDB-WASM. Please try a modern browser (Chrome/Firefox/Safari/Edge).');
+      showRichError(`
+        <strong>Failed to load DuckDB-WASM.</strong><br>
+        Try the hosted dashboard, refresh the page, or use a modern browser with network access to jsDelivr.
+        <div class="error-actions"><a href="${LIVE_QUERY_URL}">Open the live dashboard</a></div>
+      `);
       return;
     }
   }
@@ -843,10 +878,14 @@ document.addEventListener('keydown', e => {
 });
 
 // Boot
-initDuckDB().catch(e => {
-  showError('Initialization failed: ' + e.message + '. Try reloading the page.');
-  console.error(e);
-});
+if (location.protocol === 'file:') {
+  showFileModeHelp();
+} else {
+  initDuckDB().catch(e => {
+    showError('Initialization failed: ' + e.message + '. Try reloading the page.');
+    console.error(e);
+  });
+}
 </script>
 </body>
 </html>
