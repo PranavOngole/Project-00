@@ -9,6 +9,7 @@ Outputs: docs/dashboard.html (GitHub Pages ready)
 import json
 import duckdb
 import plotly.graph_objects as go
+from html import escape
 from pathlib import Path
 
 DB_PATH = Path(__file__).parent.parent / "database" / "immigration.duckdb"
@@ -180,6 +181,128 @@ def fetch_all_data():
         LIMIT 25
     """)
 
+    # --- V1.1: H-1B LCA wage intelligence ---
+    data["h1b_lca_stats"] = q(con, """
+        WITH base AS (
+            SELECT
+                COUNT(*) FILTER (WHERE case_status = 'Certified') AS certified_cases,
+                SUM(total_worker_positions) FILTER (WHERE case_status = 'Certified') AS certified_positions,
+                MEDIAN(annual_wage_from) FILTER (
+                    WHERE case_status = 'Certified'
+                      AND wage_plausibility_flag = 'PLAUSIBLE'
+                ) AS median_annual_wage,
+                SUM(total_worker_positions) FILTER (
+                    WHERE case_status = 'Certified'
+                      AND wage_level IN ('Level III', 'Level IV')
+                ) * 1.0 / NULLIF(SUM(total_worker_positions) FILTER (
+                    WHERE case_status = 'Certified'
+                      AND wage_level != 'Unknown'
+                ), 0) AS share_level_iii_iv,
+                SUM(total_worker_positions * weighted_entries_per_worker) FILTER (
+                    WHERE case_status = 'Certified'
+                ) AS weighted_entries
+            FROM h1b_lca_cases
+        ),
+        proxy AS (
+            SELECT COALESCE(SUM(proxy_worker_positions), 0) AS cap_proxy_positions
+            FROM h1b_cap_season_proxy
+        )
+        SELECT * FROM base, proxy
+    """).iloc[0].to_dict()
+
+    data["df_h1b_wage_levels"] = q(con, """
+        SELECT
+            wage_level,
+            COUNT(*) AS case_count,
+            SUM(total_worker_positions) AS worker_positions,
+            SUM(total_worker_positions * weighted_entries_per_worker) AS weighted_entries,
+            MEDIAN(annual_wage_from) AS median_annual_wage
+        FROM h1b_lca_cases
+        WHERE case_status = 'Certified'
+          AND wage_plausibility_flag = 'PLAUSIBLE'
+        GROUP BY wage_level
+        ORDER BY CASE wage_level
+            WHEN 'Level I' THEN 1
+            WHEN 'Level II' THEN 2
+            WHEN 'Level III' THEN 3
+            WHEN 'Level IV' THEN 4
+            ELSE 5
+        END
+    """)
+
+    data["df_h1b_top_employers"] = q(con, """
+        SELECT
+            employer_name,
+            SUM(proxy_worker_positions) AS proxy_positions,
+            COUNT(*) AS case_count,
+            MEDIAN(annual_wage_from) AS median_annual_wage,
+            SUM(proxy_weighted_entries) AS weighted_entries
+        FROM h1b_cap_season_proxy
+        GROUP BY employer_name
+        ORDER BY proxy_positions DESC, case_count DESC
+        LIMIT 12
+    """)
+
+    data["df_h1b_top_occupations"] = q(con, """
+        SELECT
+            soc_title,
+            soc_code,
+            SUM(total_worker_positions) AS worker_positions,
+            COUNT(*) AS case_count,
+            MEDIAN(annual_wage_from) AS median_annual_wage
+        FROM h1b_lca_cases
+        WHERE case_status = 'Certified'
+          AND wage_plausibility_flag = 'PLAUSIBLE'
+        GROUP BY soc_title, soc_code
+        ORDER BY worker_positions DESC, case_count DESC
+        LIMIT 12
+    """)
+
+    data["df_h1b_salary_bins"] = q(con, """
+        WITH binned AS (
+            SELECT
+                wage_level,
+                FLOOR(annual_wage_from / 25000) * 25000 AS bin_floor,
+                SUM(total_worker_positions) AS worker_positions
+            FROM h1b_lca_cases
+            WHERE case_status = 'Certified'
+              AND wage_plausibility_flag = 'PLAUSIBLE'
+              AND annual_wage_from <= 500000
+            GROUP BY wage_level, FLOOR(annual_wage_from / 25000) * 25000
+        )
+        SELECT
+            wage_level,
+            bin_floor,
+            bin_floor + 25000 AS bin_ceiling,
+            worker_positions
+        FROM binned
+        ORDER BY bin_floor, CASE wage_level
+            WHEN 'Level I' THEN 1
+            WHEN 'Level II' THEN 2
+            WHEN 'Level III' THEN 3
+            WHEN 'Level IV' THEN 4
+            ELSE 5
+        END
+    """)
+
+    data["df_h1b_hotspots"] = q(con, """
+        SELECT
+            worksite_state,
+            worksite_city,
+            SUM(total_worker_positions) AS worker_positions,
+            COUNT(*) AS case_count,
+            MEDIAN(annual_wage_from) AS median_annual_wage,
+            SUM(total_worker_positions * weighted_entries_per_worker) AS weighted_entries
+        FROM h1b_lca_cases
+        WHERE case_status = 'Certified'
+          AND wage_plausibility_flag = 'PLAUSIBLE'
+          AND worksite_state IS NOT NULL
+          AND worksite_city IS NOT NULL
+        GROUP BY worksite_state, worksite_city
+        ORDER BY worker_positions DESC, case_count DESC
+        LIMIT 20
+    """)
+
     # --- Explorer data ---
     visa_types = [r[0] for r in con.execute("""
         SELECT column_name FROM information_schema.columns
@@ -329,6 +452,120 @@ def chart_bvisa_workload(df):
     return make_chart(fig)
 
 
+def chart_h1b_wage_levels(df):
+    """H-1B LCA wage-level distribution and weighted entries."""
+    levels = df["wage_level"].tolist()
+    positions = [float(x or 0) for x in df["worker_positions"].tolist()]
+    weighted = [float(x or 0) for x in df["weighted_entries"].tolist()]
+    medians = [float(x or 0) for x in df["median_annual_wage"].tolist()]
+
+    fig = go.Figure()
+    fig.add_trace(go.Bar(
+        x=levels, y=positions, name="Worker positions",
+        marker=dict(color=ACCENT2),
+        customdata=medians,
+        hovertemplate="<b>%{x}</b><br>Positions: %{y:,.0f}<br>Median wage: $%{customdata:,.0f}<extra></extra>",
+    ))
+    fig.add_trace(go.Bar(
+        x=levels, y=weighted, name="Weighted entries",
+        marker=dict(color=GOLD),
+        hovertemplate="<b>%{x}</b><br>Weighted entries: %{y:,.0f}<extra></extra>",
+    ))
+    fig.update_layout(
+        title=dict(text="Certified H-1B LCA Wage Levels — Positions vs Weighted Entries", font=dict(size=18, color=TEXT), x=0.5),
+        xaxis=dict(title="DOL Prevailing Wage Level", gridcolor=GRID, color=TEXT),
+        yaxis=dict(title="Count", gridcolor=GRID, color=TEXT),
+        legend=dict(bgcolor="rgba(21,25,33,0.9)", bordercolor=GRID, borderwidth=1, font=dict(size=12),
+            orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5),
+        height=460,
+    )
+    return make_chart(fig)
+
+
+def chart_h1b_top_employers(df):
+    """Top employers in the cap-season proxy by positions and median wage."""
+    ds = df.sort_values("proxy_positions", ascending=True)
+    fig = go.Figure()
+    fig.add_trace(go.Bar(
+        y=ds["employer_name"].tolist(),
+        x=[float(x or 0) for x in ds["proxy_positions"].tolist()],
+        orientation="h",
+        marker=dict(color=ACCENT),
+        customdata=[
+            [float(row["median_annual_wage"] or 0), float(row["weighted_entries"] or 0)]
+            for _, row in ds.iterrows()
+        ],
+        hovertemplate="<b>%{y}</b><br>Proxy positions: %{x:,.0f}<br>Median wage: $%{customdata[0]:,.0f}<br>Weighted entries: %{customdata[1]:,.0f}<extra></extra>",
+    ))
+    fig.update_layout(
+        title=dict(text="Top Employers by FY2027 Cap-Season Proxy Positions", font=dict(size=18, color=TEXT), x=0.5),
+        xaxis=dict(title="Proxy worker positions", gridcolor=GRID, color=TEXT),
+        yaxis=dict(color=TEXT, tickfont=dict(size=10)),
+        height=560, margin=dict(l=220, r=25, t=80, b=45),
+    )
+    return make_chart(fig)
+
+
+def chart_h1b_top_occupations(df):
+    """Top H-1B occupations by certified worker positions."""
+    ds = df.sort_values("worker_positions", ascending=True)
+    labels = [f"{row['soc_title']} ({row['soc_code']})" for _, row in ds.iterrows()]
+    fig = go.Figure()
+    fig.add_trace(go.Bar(
+        y=labels,
+        x=[float(x or 0) for x in ds["worker_positions"].tolist()],
+        orientation="h",
+        marker=dict(color=RED),
+        customdata=[
+            [float(row["median_annual_wage"] or 0), int(row["case_count"] or 0)]
+            for _, row in ds.iterrows()
+        ],
+        hovertemplate="<b>%{y}</b><br>Positions: %{x:,.0f}<br>Median wage: $%{customdata[0]:,.0f}<br>LCA cases: %{customdata[1]:,.0f}<extra></extra>",
+    ))
+    fig.update_layout(
+        title=dict(text="Top Occupations by Certified H-1B LCA Worker Positions", font=dict(size=18, color=TEXT), x=0.5),
+        xaxis=dict(title="Certified worker positions", gridcolor=GRID, color=TEXT),
+        yaxis=dict(color=TEXT, tickfont=dict(size=9)),
+        height=600, margin=dict(l=300, r=25, t=80, b=45),
+    )
+    return make_chart(fig)
+
+
+def chart_h1b_salary_distribution(df):
+    """Annualized offered wage distribution by DOL wage level."""
+    fig = go.Figure()
+    order = ["Level I", "Level II", "Level III", "Level IV", "Unknown"]
+    color_map = {
+        "Level I": ACCENT2,
+        "Level II": ACCENT,
+        "Level III": GOLD,
+        "Level IV": RED,
+        "Unknown": "#5E8B9A",
+    }
+    bins = sorted(df["bin_floor"].unique().tolist())
+    labels = [f"${int(b/1000)}K-${int((b + 25000)/1000)}K" for b in bins]
+    for level in order:
+        ld = df[df["wage_level"] == level].set_index("bin_floor")
+        y = [float(ld.loc[b]["worker_positions"]) if b in ld.index else 0 for b in bins]
+        fig.add_trace(go.Bar(
+            x=labels,
+            y=y,
+            name=level,
+            marker=dict(color=color_map[level]),
+            hovertemplate=f"<b>{level}</b><br>Wage bin: %{{x}}<br>Positions: %{{y:,.0f}}<extra></extra>",
+        ))
+    fig.update_layout(
+        barmode="stack",
+        title=dict(text="Certified H-1B Offered Wage Distribution", font=dict(size=18, color=TEXT), x=0.5),
+        xaxis=dict(title="Annualized offered wage from", gridcolor=GRID, color=TEXT, tickangle=-45),
+        yaxis=dict(title="Worker positions", gridcolor=GRID, color=TEXT),
+        legend=dict(bgcolor="rgba(21,25,33,0.9)", bordercolor=GRID, borderwidth=1, font=dict(size=11),
+            orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5),
+        height=520, margin=dict(l=65, r=25, t=90, b=90),
+    )
+    return make_chart(fig)
+
+
 def fmt(n, suffix=""):
     """Format large numbers: 10,967,703 -> 10.97M"""
     if n >= 1_000_000:
@@ -336,6 +573,38 @@ def fmt(n, suffix=""):
     if n >= 1_000:
         return f"{n/1_000:.0f}K{suffix}"
     return f"{n:,.0f}{suffix}"
+
+
+def fmt_money(n):
+    """Format a dollar value for compact dashboard cards."""
+    if n is None:
+        return "N/A"
+    return f"${float(n)/1000:.0f}K"
+
+
+def fmt_pct(n):
+    """Format a decimal as a percentage."""
+    if n is None:
+        return "N/A"
+    return f"{float(n) * 100:.1f}%"
+
+
+def build_h1b_hotspot_rows(df):
+    """Build rows for the geographic wage hotspot table."""
+    rows = []
+    for _, row in df.iterrows():
+        city = escape(str(row["worksite_city"]))
+        state = escape(str(row["worksite_state"]))
+        rows.append(
+            "<tr>"
+            f"<td>{city}, {state}</td>"
+            f"<td>{int(row['worker_positions']):,}</td>"
+            f"<td>{int(row['case_count']):,}</td>"
+            f"<td>${float(row['median_annual_wage']):,.0f}</td>"
+            f"<td>{int(row['weighted_entries']):,}</td>"
+            "</tr>"
+        )
+    return "\n".join(rows)
 
 
 def build_timeline_json(df_global, df_countries):
@@ -496,6 +765,11 @@ def build_html(data, charts):
     heatmap_json = build_heatmap_json(d["df_heatmap"])
     insight_json = build_insight_json(d["df_insight_fy24"], d["df_insight_fy19"], d["df_insight_avg5"], d["df_refusal_all"])
     all_countries_json = json.dumps(sorted(d["df_insight_fy24"]["country"].tolist()))
+    h1b_lca = d["h1b_lca_stats"]
+    certified_positions = float(h1b_lca.get("certified_positions") or 0)
+    weighted_entries = float(h1b_lca.get("weighted_entries") or 0)
+    weighted_mix = weighted_entries / certified_positions if certified_positions else 0
+    h1b_hotspot_rows = build_h1b_hotspot_rows(d["df_h1b_hotspots"])
 
     # COVID annotation data for timeline
     covid_row = d["df_timeline"][d["df_timeline"]["fiscal_year"] == 2020]
@@ -620,6 +894,17 @@ body::before {{
   -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }}
 .fact-card .fact-label {{ font-size:0.7rem; color:#5A6577; text-transform:uppercase; letter-spacing:1.5px; font-weight:600; margin-top:2px; }}
 .fact-card .fact-desc {{ font-size:0.82rem; color:#7A8494; margin-top:8px; line-height:1.5; }}
+
+/* === H-1B Wage Intelligence === */
+.wage-stats-grid {{ display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:16px; margin:16px 0 24px; }}
+.wage-stat {{ background:var(--glass); border:1px solid rgba(196,163,90,0.18); border-radius:14px; padding:18px 20px; }}
+.wage-stat .wage-value {{ font-size:1.65rem; font-weight:800; color:#fff; }}
+.wage-stat .wage-label {{ font-size:0.62rem; color:{GOLD}; text-transform:uppercase; letter-spacing:1.4px; font-weight:700; margin-top:4px; }}
+.wage-stat .wage-detail {{ font-size:0.75rem; color:#5A6577; margin-top:6px; line-height:1.4; }}
+.caveat-box {{ font-size:0.82rem; color:#7A8494; line-height:1.6; padding:14px 16px; margin:16px 0 20px;
+  background:rgba(196,163,90,0.08); border-left:3px solid {GOLD}; border-radius:8px; }}
+.hotspot-table td:nth-child(n+2) {{ text-align:right; }}
+.hotspot-table th:nth-child(n+2) {{ text-align:right; }}
 
 /* === AI Stats === */
 .ai-stats-grid {{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; margin:16px 0 32px; }}
@@ -747,7 +1032,7 @@ body::before {{
   .stat-card {{ min-width:100px; padding:14px 16px; }}
   .stat-card .value {{ font-size:1.4rem; }}
   .insight-card {{ flex-direction:column; text-align:center; }}
-  .know-grid,.facts-grid,.ai-stats-grid,.rel-grid {{ grid-template-columns:1fr; }}
+  .know-grid,.facts-grid,.wage-stats-grid,.ai-stats-grid,.rel-grid {{ grid-template-columns:1fr; }}
   .explorer-controls,.chart-controls {{ flex-direction:column; }}
   .ctrl select,.chart-ctrl select {{ min-width:100%; }}
   .layer-nodes {{ flex-direction:column; }}
@@ -915,9 +1200,71 @@ body::before {{
   </div>
   <div class="chart-card">
     {charts['h1b']}
-    <div class="chart-note">Note: H-1B data is broken down by country of origin, not by occupation. Occupation-level data (e.g., Software Engineers, Mechanical Engineers) is published separately by USCIS and is planned for a future update.</div>
+    <div class="chart-note">Note: State Department H-1B issuance data is broken down by country of origin. The wage intelligence section below uses DOL LCA records for employer, occupation, worksite, and salary analysis.</div>
   </div>
   <div class="chart-card">{charts['india_china']}</div>
+</div>
+
+<!-- ===== SECTION: H-1B Wage Intelligence ===== -->
+<div class="section">
+  <div class="section-header">
+    <div class="tag">H-1B Wage Intelligence</div>
+    <h2>What Are H-1B Employers Offering?</h2>
+    <p>V1.1 adds DOL OFLC Labor Condition Application data for certified H-1B wage offers, prevailing wage levels, occupations, employers, and worksite geographies.</p>
+  </div>
+  <div class="caveat-box">
+    Methodology caveat: this is LCA-based wage intelligence, not a list of exact lottery picks or selected beneficiaries. One LCA can cover multiple workers, public files exclude worker names, and LCA certification does not prove lottery selection or USCIS petition approval.
+  </div>
+  <div class="wage-stats-grid">
+    <div class="wage-stat">
+      <div class="wage-value">{fmt(h1b_lca['certified_cases'])}</div>
+      <div class="wage-label">Certified H-1B LCAs</div>
+      <div class="wage-detail">FY2026 Q1 DOL disclosure rows analyzed</div>
+    </div>
+    <div class="wage-stat">
+      <div class="wage-value">{fmt(h1b_lca['cap_proxy_positions'])}</div>
+      <div class="wage-label">Cap-Season Proxy Positions</div>
+      <div class="wage-detail">Certified new-employment LCAs near the FY2027 start window</div>
+    </div>
+    <div class="wage-stat">
+      <div class="wage-value">{fmt_money(h1b_lca['median_annual_wage'])}</div>
+      <div class="wage-label">Median Offered Wage</div>
+      <div class="wage-detail">Annualized from WAGE_RATE_OF_PAY_FROM</div>
+    </div>
+    <div class="wage-stat">
+      <div class="wage-value">{fmt_pct(h1b_lca['share_level_iii_iv'])}</div>
+      <div class="wage-label">Level III/IV Share</div>
+      <div class="wage-detail">Share of certified positions with known wage level</div>
+    </div>
+    <div class="wage-stat">
+      <div class="wage-value">{weighted_mix:.2f}x</div>
+      <div class="wage-label">Weighted-Entry Mix</div>
+      <div class="wage-detail">{fmt(weighted_entries)} weighted entries across {fmt(certified_positions)} positions</div>
+    </div>
+  </div>
+  <div class="chart-card">{charts['h1b_wage_levels']}</div>
+  <div class="chart-card">{charts['h1b_top_employers']}</div>
+  <div class="chart-card">{charts['h1b_top_occupations']}</div>
+  <div class="chart-card">{charts['h1b_salary_distribution']}</div>
+  <div class="chart-card">
+    <div class="heatmap-wrap">
+      <table class="heatmap-table hotspot-table">
+        <thead>
+          <tr>
+            <th>Worksite</th>
+            <th>Positions</th>
+            <th>LCA Cases</th>
+            <th>Median Wage</th>
+            <th>Weighted Entries</th>
+          </tr>
+        </thead>
+        <tbody>
+          {h1b_hotspot_rows}
+        </tbody>
+      </table>
+    </div>
+    <div class="chart-note">Geographic hotspots use certified H-1B LCAs with plausible annualized wages between $15,080 and $1,000,000. DOL worksite city values are shown as published after basic text normalization.</div>
+  </div>
 </div>
 
 <!-- ===== SECTION: FY2024 Snapshot (CLIENT-SIDE INTERACTIVE) ===== -->
@@ -1114,13 +1461,13 @@ body::before {{
     </div>
     <div class="ai-stat-card">
       <div class="ai-label">Pipeline</div>
-      <div class="ai-value">5 ETL Scripts, 6 DuckDB Tables</div>
-      <div class="ai-detail">3 data sources ingested and normalized</div>
+      <div class="ai-value">6 ETL Scripts, 12 DuckDB Tables</div>
+      <div class="ai-detail">State Department and DOL OFLC sources ingested and normalized</div>
     </div>
     <div class="ai-stat-card">
       <div class="ai-label">Data Points Processed</div>
-      <div class="ai-value">5,878 Total</div>
-      <div class="ai-detail">5,564 visa issuance rows + 81 workload rows + 199 refusal rates + 34 country mappings</div>
+      <div class="ai-value">200K+ Clean Rows</div>
+      <div class="ai-detail">Visa statistics plus 79,852 H-1B LCA cases and 120,532 H-1B worksite rows</div>
     </div>
     <div class="ai-stat-card">
       <div class="ai-label">PDF Pages Parsed</div>
@@ -1155,34 +1502,37 @@ body::before {{
   <div class="section-header">
     <div class="tag">Architecture</div>
     <h2>Data Model &amp; Pipeline Architecture</h2>
-    <p>From raw government PDFs and Excel files to interactive dashboard — 5 ETL scripts, 8 DuckDB tables, 6,000+ rows of cleaned data, and one Python generator that stitches it all together.</p>
+    <p>From raw government PDFs and Excel files to interactive dashboard — 6 ETL scripts, 12 DuckDB tables, 200,000+ cleaned rows, and one Python generator that stitches it all together.</p>
   </div>
   <div class="chart-card">
     <div class="pipeline">
       <div class="pipeline-layer">
-        <div class="layer-label">Raw Sources (5 files)</div>
+        <div class="layer-label">Raw Sources (State Dept + DOL)</div>
         <div class="layer-nodes">
           <div class="p-node source">State Dept Excel<span>FYs97-24_NIVDetailTable.xlsx — 28 sheets, one per fiscal year, 5,564 rows</span></div>
           <div class="p-node source">NIV Workload PDF<span>FY2024 workload by visa category — 3 pages, 81 visa classes</span></div>
           <div class="p-node source">B-Visa Refusal PDF<span>FY2024 adjusted refusal rates by nationality — 7 pages, 199 countries</span></div>
           <div class="p-node source">Table XIX PDF<span>Visa ineligibility grounds — every INA section with IV/NIV findings &amp; waivers</span></div>
           <div class="p-node source">Table IV PDF<span>Visas issued by consular post — 220 embassies/consulates across 6 regions</span></div>
+          <div class="p-node source">DOL LCA Disclosure<span>FY2026 Q1 OFLC H-1B case-level wage records — 79,852 filtered rows</span></div>
+          <div class="p-node source">DOL LCA Worksites<span>FY2026 Q1 OFLC H-1B worksite records — 120,532 filtered rows</span></div>
         </div>
       </div>
       <div class="pipeline-arrow">&#x25BC; &#x25BC; &#x25BC; &#x25BC; &#x25BC;</div>
       <div class="pipeline-layer">
-        <div class="layer-label">ETL Scripts (5 scripts)</div>
+        <div class="layer-label">ETL Scripts (6 scripts)</div>
         <div class="layer-nodes">
           <div class="p-node etl">merge_niv_sheets.py<span>Reads 28 Excel sheets &rarr; standardizes 96 visa type names &rarr; single CSV (5,564 rows)</span></div>
           <div class="p-node etl">extract_refusal_data.py<span>pdfplumber extracts tables from B-visa PDF &rarr; cleans rates &rarr; CSV</span></div>
           <div class="p-node etl">standardize_countries.py<span>34 name mappings across tables — "Korea, South" &harr; "South Korea" etc.</span></div>
           <div class="p-node etl">extract_refusal_grounds.py<span>Regex parser for Table XIX &rarr; 79 INA sections with finding/overcome counts</span></div>
           <div class="p-node etl">extract_consular_posts.py<span>Text extraction for Table IV &rarr; 220 posts with IV/NIV/BCC breakdowns</span></div>
+          <div class="p-node etl">extract_h1b_lca_data.py<span>Streams OFLC XLSX files &rarr; annualizes wages &rarr; flags outliers &rarr; H-1B wage tables</span></div>
         </div>
       </div>
       <div class="pipeline-arrow">&#x25BC; &#x25BC; &#x25BC; &#x25BC; &#x25BC;</div>
       <div class="pipeline-layer">
-        <div class="layer-label">DuckDB Tables (8 tables)</div>
+        <div class="layer-label">DuckDB Tables (12 tables)</div>
         <div class="layer-nodes">
           <div class="p-node table primary">visa_issuances<span>5,564 rows &middot; 28 FYs &times; 199 countries &middot; 90+ visa columns &middot; Primary fact table</span></div>
           <div class="p-node table">niv_workload<span>81 rows &middot; FY2024 applications, issued, refused by category</span></div>
@@ -1192,13 +1542,17 @@ body::before {{
           <div class="p-node table">niv_workload_by_country<span>Derived &middot; National totals disaggregated by country proportion</span></div>
           <div class="p-node table">visa_ineligibility_grounds<span>79 rows &middot; INA sections with IV/NIV finding &amp; overcome counts</span></div>
           <div class="p-node table">visas_by_consular_post<span>227 rows &middot; 220 posts + 7 regional/grand totals across 6 regions</span></div>
+          <div class="p-node table primary">h1b_lca_cases<span>79,852 rows &middot; Certified/pending/denied H-1B LCA cases with annualized wages</span></div>
+          <div class="p-node table">h1b_lca_worksites<span>120,532 rows &middot; H-1B worksite-level location and wage records</span></div>
+          <div class="p-node table">h1b_wage_summary<span>Derived &middot; Employer/SOC/location/wage-level aggregates</span></div>
+          <div class="p-node table">h1b_cap_season_proxy<span>1,204 rows &middot; Certified new-employment proxy for FY2027 cap-season filings</span></div>
         </div>
       </div>
       <div class="pipeline-arrow">&#x25BC;</div>
       <div class="pipeline-layer">
         <div class="layer-label">Output</div>
         <div class="layer-nodes">
-          <div class="p-node output">dashboard.html<span>760 KB single-file static site &rarr; GitHub Pages &middot; All data embedded as JSON &middot; Zero server dependencies</span></div>
+          <div class="p-node output">dashboard.html<span>~1.1 MB single-file static site &rarr; GitHub Pages &middot; All data embedded as JSON &middot; Zero server dependencies</span></div>
         </div>
       </div>
     </div>
@@ -1243,7 +1597,7 @@ body::before {{
     <div class="know-card">
       <div class="kc-tag other">Data Sources</div>
       <h4>U.S. Department of State</h4>
-      <p>All data comes from officially published State Department statistics: NIV issuance tables (FY1997–2024), NIV Workload by Category (FY2024), B-Visa Refusal Rates (FY2024), Table XIX ineligibility grounds (FY2024), and Table IV consular post issuances (FY2024). Five source files, five ETL scripts, eight DuckDB tables.</p>
+      <p>Core visa data comes from officially published State Department statistics: NIV issuance tables (FY1997–2024), NIV Workload by Category (FY2024), B-Visa Refusal Rates (FY2024), Table XIX ineligibility grounds (FY2024), and Table IV consular post issuances (FY2024). V1.1 adds DOL OFLC LCA disclosure and worksite files for H-1B wage intelligence.</p>
     </div>
     <div class="know-card">
       <div class="kc-tag other">Estimated Refusals</div>
@@ -1262,7 +1616,7 @@ body::before {{
 
 <!-- ===== FOOTER ===== -->
 <div class="footer">
-  Built by <strong>Pranav Ongole</strong> | Data: U.S. Department of State |
+  Built by <strong>Pranav Ongole</strong> | Data: U.S. Department of State + DOL OFLC |
   <a href="https://github.com/PranavOngole/Project-00">View on GitHub</a><br>
   <span style="font-size:0.7rem;color:#1E2530;margin-top:8px;display:inline-block;">DataForge365 &middot; Project 00 &middot; 2026</span>
 </div>
@@ -2060,6 +2414,10 @@ def main():
         "india_china": chart_india_china(data["df_ivc"]),
         "workload": chart_workload(data["df_workload"]),
         "bvisa_wl": chart_bvisa_workload(data["df_bvisa_wl"]),
+        "h1b_wage_levels": chart_h1b_wage_levels(data["df_h1b_wage_levels"]),
+        "h1b_top_employers": chart_h1b_top_employers(data["df_h1b_top_employers"]),
+        "h1b_top_occupations": chart_h1b_top_occupations(data["df_h1b_top_occupations"]),
+        "h1b_salary_distribution": chart_h1b_salary_distribution(data["df_h1b_salary_bins"]),
     }
 
     print("Generating HTML...")

@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>H-1B Wage Dashboard</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <div class="eyebrow">Public DOL LCA Data</div>
+      <h1>H-1B Wage Dashboard</h1>
+      <p>Search public H-1B wage filings by company, job, location, wage level, and estimated selection strength. Plain English first, database terms second.</p>
+    </div>
+    <div class="source-card">
+      <div class="source-label">Default picked estimate</div>
+      <div class="source-value" id="selected_source_count">120,141</div>
+      <a id="selection_source" href="#" target="_blank" rel="noreferrer">USCIS aggregate source</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="truth-box">
+      <strong>Filed vs picked:</strong>
+      <span><b>Filed</b> means public certified LCA filings/jobs requested. <b>Picked</b> is an estimate allocated from USCIS aggregate selected registrations using wage-level weights. Exact picked workers by company, job, or city are not public.</span>
+    </section>
+
+    <form id="filters" class="filters">
+      <div><label>Company</label><input name="employer" placeholder="NVIDIA, Amazon, Qualcomm"></div>
+      <div><label>Job / Occupation</label><input name="occupation" placeholder="Software Developer, Data Scientist"></div>
+      <div><label>Occupation Code</label><input name="soc" placeholder="15-1252.00"></div>
+      <div><label>LCA Case Number</label><input name="case_number" placeholder="I-200-..."></div>
+      <div><label>State</label><select name="state" id="state"><option value="">All states</option></select></div>
+      <div><label>City</label><input name="city" placeholder="San Diego"></div>
+      <div><label>Wage Level</label><select name="wage_level" id="wage_level"><option value="">All levels</option></select></div>
+      <div><label>Filing Status</label><select name="case_status" id="case_status"></select></div>
+      <div><label>Salary Band</label><select name="salary_band" id="salary_band"><option value="">All bands</option></select></div>
+      <div><label>Min Offered Salary</label><input name="min_wage" type="number" min="0" step="1000" placeholder="100000"></div>
+      <div><label>Max Offered Salary</label><input name="max_wage" type="number" min="0" step="1000" placeholder="250000"></div>
+      <div><label>Selected registrations</label><input name="selected_total" id="selected_total" type="number" min="1" step="1"></div>
+      <div class="checks">
+        <label class="check"><input name="plausible" type="checkbox" checked> Only realistic wages</label>
+        <label class="check"><input name="cap_proxy" type="checkbox"> Likely cap-season only</label>
+      </div>
+      <div><label>Sort by</label><select name="sort">
+        <option value="worker_positions">Jobs requested</option>
+        <option value="annual_wage_from">Offered salary</option>
+        <option value="weighted_entries">Lottery weight points</option>
+        <option value="wage_premium_pct">Offer vs required wage</option>
+        <option value="begin_date">Start date</option>
+        <option value="employer_name">Company</option>
+      </select></div>
+      <div><label>Direction</label><select name="dir"><option value="desc">High to low</option><option value="asc">Low to high</option></select></div>
+      <div><label>Rows</label><select name="limit"><option>50</option><option selected>100</option><option>250</option><option>500</option><option>1000</option></select></div>
+      <div class="actions">
+        <button type="submit">Search</button>
+        <button class="secondary" type="button" id="reset">Reset</button>
+      </div>
+    </form>
+
+    <div id="error" class="error"></div>
+
+    <section class="cards">
+      <div class="card primary"><div class="v" id="jobs_requested">-</div><div class="l">Filed Jobs Requested</div></div>
+      <div class="card primary"><div class="v" id="estimated_picked">-</div><div class="l">Estimated Picked</div></div>
+      <div class="card"><div class="v" id="estimated_pick_rate">-</div><div class="l">Estimated Pick Rate</div></div>
+      <div class="card"><div class="v" id="lca_filings">-</div><div class="l">LCA Filings</div></div>
+      <div class="card"><div class="v" id="median_offer">-</div><div class="l">Median Offered Salary</div></div>
+      <div class="card"><div class="v" id="lottery_weight_points">-</div><div class="l">Lottery Weight Points</div></div>
+      <div class="card"><div class="v" id="avg_offer_vs_required">-</div><div class="l">Avg Offer Above Required Wage</div></div>
+      <div class="card"><div class="v" id="public_wage_rows">-</div><div class="l">Public Wage Rows</div></div>
+    </section>
+
+    <section class="panel explain">
+      <h2>What else can we show from public data?</h2>
+      <div class="idea-grid">
+        <div><b>Company behavior</b><span>Who files most, who pays more, who uses higher wage levels.</span></div>
+        <div><b>Job benchmarks</b><span>Median offered salary by occupation and location.</span></div>
+        <div><b>Location hotspots</b><span>Which cities/states have the most filings and highest pay.</span></div>
+        <div><b>Offer strength</b><span>How far the offer is above the required prevailing wage.</span></div>
+        <div><b>Cap-season proxy</b><span>Likely new-employment filings around the October start window.</span></div>
+        <div><b>Employer risk signals</b><span>H-1B dependent, secondary worksite/client placement, willful violator flags.</span></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Grouped Summary</h2>
+        <div class="panel-controls">
+          <select id="dimension"></select>
+          <select id="group_limit"><option>25</option><option selected>50</option><option>100</option><option>250</option></select>
+        </div>
+      </div>
+      <div class="table-wrap"><table id="group_table"></table></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Matching Public Wage Filings</h2>
+        <div class="hint">Use case number for a direct LCA lookup. Use company/job/location filters for market research.</div>
+      </div>
+      <div class="table-wrap"><table id="results_table"></table></div>
+    </section>
+  </main>
+
+  <script src="/app.js"></script>
+</body>
+</html>
