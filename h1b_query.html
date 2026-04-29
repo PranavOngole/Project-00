@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>H-1B LCA Query | FY2026 Q1 | DataForge365</title>
+<title>H-1B LCA Query | FY2026 Q1 | Pranav Ongole</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script type="importmap">
 {
@@ -35,13 +35,27 @@ body { background:var(--bg); color:var(--text); font-family:'Inter',system-ui,sa
 
 /* ── Nav ── */
 .nav { display:flex; align-items:center; justify-content:space-between;
-       padding:14px 32px; border-bottom:1px solid var(--border); }
-.nav-brand { font-size:0.7rem; font-weight:700; color:var(--muted);
-             text-transform:uppercase; letter-spacing:2px; }
-.nav-links { display:flex; gap:20px; }
+       padding:14px 32px; border-bottom:1px solid var(--border); gap:16px; flex-wrap:wrap; }
+.nav-brand { display:flex; align-items:center; gap:12px; flex-shrink:0; }
+.nav-brand-name { font-size:0.82rem; font-weight:700; color:#e4e4e7;
+                  text-decoration:none; letter-spacing:-0.2px; transition:color 0.15s; }
+.nav-brand-name:hover { color:#fff; }
+.nav-brand-sep { color:var(--border2); font-size:0.7rem; }
+.nav-brand-proj { font-size:0.68rem; font-weight:600; color:var(--muted);
+                  text-transform:uppercase; letter-spacing:2px; }
+.nav-social { display:flex; align-items:center; gap:6px; }
+.nav-social a { display:flex; align-items:center; gap:5px; padding:4px 9px;
+                border:1px solid var(--border2); border-radius:4px; font-size:0.68rem;
+                font-weight:600; color:var(--muted); text-decoration:none;
+                transition:all 0.15s; letter-spacing:0.3px; }
+.nav-social a:hover { color:var(--text); border-color:var(--dim); }
+.nav-social a.linkedin:hover { color:#0a66c2; border-color:#0a66c2; }
+.nav-social a.github:hover  { color:#e4e4e7; border-color:var(--dim); }
+.nav-links { display:flex; gap:20px; align-items:center; }
 .nav-links a { font-size:0.78rem; color:var(--muted); text-decoration:none;
                font-weight:500; transition:color 0.15s; }
 .nav-links a:hover, .nav-links a.active { color:var(--text); }
+.nav-right { display:flex; align-items:center; gap:20px; }
 
 /* ── Page header ── */
 .page-header { padding:28px 32px 0; max-width:1400px; margin:0 auto; }
@@ -177,33 +191,70 @@ td.red { color:var(--red); font-family:var(--mono); }
 .error-actions a { display:inline-flex; align-items:center; padding:7px 12px; border-radius:4px;
                    border:1px solid rgba(240,180,41,0.24); background:rgba(240,180,41,0.08); }
 
+/* ── Stat tooltip ── */
+.stat-box { position:relative; }
+.stat-box[data-tip]:hover::after {
+  content: attr(data-tip);
+  position:absolute; bottom:calc(100% + 6px); left:50%; transform:translateX(-50%);
+  background:#1c1c28; border:1px solid var(--border2); border-radius:5px;
+  padding:7px 10px; font-size:0.68rem; color:var(--text); line-height:1.45;
+  white-space:nowrap; z-index:100; pointer-events:none;
+  box-shadow:0 4px 12px rgba(0,0,0,0.5);
+}
+
 /* ── Footer ── */
 .footer { max-width:1400px; margin:32px auto 0; padding:20px 32px 40px;
-          border-top:1px solid var(--border); display:flex; align-items:center;
-          justify-content:space-between; flex-wrap:wrap; gap:12px; }
-.footer p { font-size:0.72rem; color:var(--dim); }
-.footer a { color:var(--muted); text-decoration:none; font-size:0.72rem; }
-.footer a:hover { color:var(--text); }
+          border-top:1px solid var(--border); }
+.footer-top { display:flex; align-items:flex-start; justify-content:space-between;
+              flex-wrap:wrap; gap:16px; margin-bottom:16px; }
+.footer-credit { display:flex; flex-direction:column; gap:3px; }
+.footer-credit-name { font-size:0.82rem; font-weight:600; color:#e4e4e7; }
+.footer-credit-name a { color:var(--amber); text-decoration:none; }
+.footer-credit-name a:hover { text-decoration:underline; }
+.footer-credit-sub { font-size:0.68rem; color:var(--muted); }
+.footer-links { display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+.footer-links a { display:flex; align-items:center; gap:5px; padding:5px 11px;
+                  border:1px solid var(--border2); border-radius:4px; font-size:0.72rem;
+                  font-weight:500; color:var(--muted); text-decoration:none; transition:all 0.15s; }
+.footer-links a:hover { color:var(--text); border-color:var(--dim); }
+.footer-links a.linkedin:hover { color:#0a66c2; border-color:#0a66c2; }
+.footer-bottom { font-size:0.68rem; color:var(--dim); padding-top:14px; border-top:1px solid var(--border); }
 </style>
 </head>
 <body>
 
 <!-- Nav -->
 <nav class="nav">
-  <span class="nav-brand">DataForge365 &mdash; Project 00</span>
+  <div class="nav-brand">
+    <a href="https://www.pranavongole.com" target="_blank" class="nav-brand-name">Pranav Ongole</a>
+    <span class="nav-brand-sep">/</span>
+    <span class="nav-brand-proj">Project 00</span>
+    <div class="nav-social">
+      <a href="https://www.linkedin.com/in/pranavo/" target="_blank" class="linkedin" title="LinkedIn">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+        Follow
+      </a>
+      <a href="https://github.com/PranavOngole/Project-00" target="_blank" class="github" title="GitHub">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+        GitHub
+      </a>
+    </div>
+  </div>
   <div class="nav-links">
     <a href="dashboard.html">Visa Overview</a>
     <a href="h1b_wages.html">H-1B Analytics</a>
     <a href="h1b_query.html" class="active">Live Query</a>
-    <a href="https://github.com/PranavOngole/Project-00" target="_blank">GitHub</a>
   </div>
 </nav>
 
 <!-- Page header -->
 <div class="page-header">
   <h1>H-1B LCA Query</h1>
-  <p>Filter the DOL LCA disclosure dataset without writing SQL. Public offered wages and worksite records &mdash; not exact lottery winners or payroll data.</p>
-  <div class="period-badge">&#9679;&nbsp; FY2026 Q1 &mdash; Oct&ndash;Dec 2025 &mdash; 120,532 Records</div>
+  <p>Filter DOL Labor Condition Application records — the public salary disclosures employers file before sponsoring H-1B workers. Not exact lottery winners or payroll data.</p>
+  <div class="period-badge">&#9679;&nbsp; FY2026 Q1 &mdash; Oct&ndash;Dec 2025 &mdash; 120,532 LCA worksite rows</div>
+  <p style="font-size:0.7rem;color:var(--dim);margin-top:6px;">
+    The US fiscal year starts Oct 1, so FY2026 Q1 = calendar Oct&ndash;Dec 2025. These are salary disclosures for H-1B roles that <em>started</em> in that quarter &mdash; not applications processed by USCIS.
+  </p>
 </div>
 
 <!-- Filter panel -->
@@ -365,32 +416,32 @@ td.red { color:var(--red); font-family:var(--mono); }
 <!-- Stats -->
 <div class="stats-section" id="stats-section">
   <div class="stats-row">
-    <div class="stat-box">
+    <div class="stat-box" data-tip="Number of individual worksite wage rows matching your filters. One LCA can produce multiple rows (e.g. multiple worksites).">
       <div class="stat-val" id="s-rows">—</div>
       <div class="stat-lbl">Matching Rows</div>
     </div>
-    <div class="stat-box">
+    <div class="stat-box" data-tip="Distinct LCA case numbers matched. Each LCA is one employer filing — it can cover multiple workers or worksites.">
       <div class="stat-val" id="s-filings">—</div>
       <div class="stat-lbl">LCA Filings</div>
     </div>
-    <div class="stat-box">
+    <div class="stat-box" data-tip="Total worker positions listed across matched LCAs. This is how many H-1B roles were requested — NOT how many got lottery-selected. One LCA can request 100+ positions for a single job title.">
       <div class="stat-val" id="s-jobs">—</div>
-      <div class="stat-lbl">Jobs Requested</div>
+      <div class="stat-lbl">Positions Filed</div>
     </div>
-    <div class="stat-box">
+    <div class="stat-box" data-tip="Positions × H-1B registration weight (Masters = 2x regular cap entries). Used to estimate proportional lottery probability.">
       <div class="stat-val" id="s-weight">—</div>
       <div class="stat-lbl">Lottery Weight</div>
     </div>
-    <div class="stat-box">
+    <div class="stat-box" data-tip="Median offered annual salary across matched rows (50th percentile of wage_from). Oct–Dec 2025 data.">
       <div class="stat-val amber" id="s-median">—</div>
       <div class="stat-lbl">Median Wage</div>
     </div>
-    <div class="stat-box">
+    <div class="stat-box" data-tip="Average % that offered wages exceed the DOL prevailing wage for the role and location. Positive = paying above market.">
       <div class="stat-val green" id="s-premium">—</div>
       <div class="stat-lbl">Avg Premium</div>
       <div class="stat-sub">vs. prevailing wage</div>
     </div>
-    <div class="stat-box">
+    <div class="stat-box" data-tip="Estimated lottery selections if USCIS picked the configured number of registrations proportionally from this subset. Rough probability model — not official.">
       <div class="stat-val" id="s-picks">—</div>
       <div class="stat-lbl">Est. Selections</div>
       <div class="stat-sub" id="s-pickrate"></div>
@@ -423,13 +474,13 @@ td.red { color:var(--red); font-family:var(--mono); }
       <thead>
         <tr>
           <th id="gh-label">Employer</th>
-          <th class="sorted">Positions <span class="sort-arrow">↓</span></th>
-          <th>Weighted Entries</th>
-          <th>Cases</th>
-          <th>Median Wage</th>
-          <th>Avg Premium</th>
-          <th>Cap Proxy Pos.</th>
-          <th>Est. Selections</th>
+          <th class="sorted" title="Total H-1B worker positions filed in LCAs (not lottery-selected workers)">Positions Filed <span class="sort-arrow">↓</span></th>
+          <th title="Positions × H-1B lottery weight multiplier — used to estimate pick probability">Lottery Weight</th>
+          <th title="Distinct LCA case numbers filed">Cases</th>
+          <th title="Median offered annual salary (50th percentile)">Median Wage</th>
+          <th title="Avg % above DOL prevailing wage for the role">Avg Premium</th>
+          <th title="Positions likely filed for the FY2027 cap season (Oct 2026 start date proxy)">Cap Proxy Pos.</th>
+          <th title="Estimated lottery selections if picks are proportional to lottery weight">Est. Selections</th>
         </tr>
       </thead>
       <tbody id="grouped-body">
@@ -456,8 +507,8 @@ td.red { color:var(--red); font-family:var(--mono); }
           <th>City</th>
           <th>State</th>
           <th>Level</th>
-          <th class="num">Positions</th>
-          <th class="num">Weighted</th>
+          <th class="num" title="Worker positions filed in this LCA row">Positions Filed</th>
+          <th class="num" title="Lottery-weighted entries for probability estimate">Wtd. Entries</th>
           <th class="num">Wage From</th>
           <th class="num">Wage To</th>
           <th class="num">Prevailing</th>
@@ -480,10 +531,29 @@ td.red { color:var(--red); font-family:var(--mono); }
 </div>
 
 <div class="footer">
-  <p>Source: DOL OFLC LCA Disclosure Data FY2026 Q1 &mdash; Certified filings only; wages may differ from actual payroll</p>
-  <div style="display:flex;gap:16px;">
-    <a href="h1b_wages.html">&#8592; Analytics</a>
-    <a href="https://github.com/PranavOngole/Project-00" target="_blank">GitHub</a>
+  <div class="footer-top">
+    <div class="footer-credit">
+      <div class="footer-credit-name">Built by <a href="https://www.pranavongole.com" target="_blank">Pranav Ongole</a> &mdash; DataForge365 Project 00</div>
+      <div class="footer-credit-sub">Data: DOL OFLC LCA Disclosure, FY2026 Q1 (Oct&ndash;Dec 2025) &mdash; Certified filings only; wages are offered amounts, not final payroll</div>
+    </div>
+    <div class="footer-links">
+      <a href="https://www.pranavongole.com" target="_blank">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        pranavongole.com
+      </a>
+      <a href="https://www.linkedin.com/in/pranavo/" target="_blank" class="linkedin">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+        LinkedIn
+      </a>
+      <a href="https://github.com/PranavOngole/Project-00" target="_blank">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+        GitHub
+      </a>
+      <a href="h1b_wages.html">&#8592; Analytics Dashboard</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    LCA certification ≠ H-1B lottery selection. One LCA may cover multiple workers. Positions filed ≠ positions lottery-selected. FY2026 Q1 = Oct&ndash;Dec 2025. YOY comparisons require future quarters.
   </div>
 </div>
 
