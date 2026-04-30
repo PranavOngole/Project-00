@@ -53,10 +53,8 @@ body { background:var(--bg); color:var(--text); font-family:'Inter',system-ui,sa
 .nav-social a:hover { color:var(--text); border-color:var(--dim); }
 .nav-social a.linkedin:hover { color:#60a5fa; border-color:rgba(96,165,250,0.4); }
 .nav-social a.github:hover  { color:#e4e4e7; border-color:var(--dim); }
-.nav-feedback { font-size:0.7rem; color:var(--dim); text-decoration:none;
-                border-bottom:1px dashed var(--dim); padding-bottom:1px;
-                transition:color 0.15s, border-color 0.15s; white-space:nowrap; }
-.nav-feedback:hover { color:var(--muted); border-color:var(--muted); }
+.nav-title { font-size:0.65rem; color:var(--dim); white-space:nowrap;
+             padding-left:4px; border-left:1px solid var(--border); }
 .nav-links { display:flex; gap:20px; align-items:center; }
 .nav-links a { font-size:0.78rem; color:var(--muted); text-decoration:none;
                font-weight:500; transition:color 0.15s; }
@@ -125,17 +123,41 @@ select option { background:#1a1a24; }
 .progress-bar-fill { height:100%; background:var(--amber); border-radius:2px;
                      width:0%; transition:width 0.3s ease; }
 
+/* ── Key findings ── */
+.findings-section { max-width:1400px; margin:24px auto 0; padding:0 32px; }
+.findings-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(220px,1fr)); gap:12px; }
+.finding-card { background:var(--surface); border:1px solid var(--border); border-radius:8px;
+                padding:16px 18px; display:flex; flex-direction:column; gap:6px; }
+.finding-card.highlight { border-color:rgba(240,180,41,0.25); background:rgba(240,180,41,0.04); }
+.finding-num { font-size:1.9rem; font-weight:800; letter-spacing:-1px; line-height:1;
+               color:#fff; font-variant-numeric:tabular-nums; }
+.finding-num.amber { color:var(--amber); }
+.finding-num.green { color:var(--green); }
+.finding-label { font-size:0.72rem; font-weight:600; color:var(--text); line-height:1.35; }
+.finding-sub { font-size:0.65rem; color:var(--dim); line-height:1.4; }
+
+/* ── Methodology note ── */
+.methodology-note { max-width:1400px; margin:16px auto 0; padding:0 32px; }
+.methodology-box { background:var(--surface); border:1px solid var(--border); border-radius:6px;
+                   padding:12px 16px; display:flex; gap:10px; align-items:flex-start; }
+.methodology-icon { font-size:0.82rem; flex-shrink:0; margin-top:1px; color:var(--muted); }
+.methodology-text { font-size:0.72rem; color:var(--muted); line-height:1.55; }
+.methodology-text strong { color:var(--text); font-weight:600; }
+
 /* ── Stats ── */
 .stats-section { max-width:1400px; margin:20px auto 0; padding:0 32px; display:none; }
-.stats-row { display:flex; gap:12px; flex-wrap:wrap; }
+.stats-row { display:flex; gap:12px; flex-wrap:wrap; align-items:stretch; }
 .stat-box { flex:1; min-width:120px; background:var(--surface); border:1px solid var(--border);
             border-radius:8px; padding:14px 16px; }
+.stat-box.dominant { flex:1.6; border-color:rgba(240,180,41,0.2); background:rgba(240,180,41,0.04); }
 .stat-val { font-size:1.5rem; font-weight:700; color:#fff; font-variant-numeric:tabular-nums;
             letter-spacing:-0.5px; line-height:1; }
+.stat-box.dominant .stat-val { font-size:2.2rem; letter-spacing:-1px; }
 .stat-val.amber { color:var(--amber); }
 .stat-val.green { color:var(--green); }
 .stat-lbl { font-size:0.6rem; font-weight:600; text-transform:uppercase; letter-spacing:1.5px;
             color:var(--muted); margin-top:4px; }
+.stat-box.dominant .stat-lbl { color:rgba(240,180,41,0.7); }
 .stat-sub { font-size:0.65rem; color:var(--dim); margin-top:2px; }
 
 /* ── Sections ── */
@@ -247,7 +269,7 @@ td.red { color:var(--red); font-family:var(--mono); }
         GitHub
       </a>
     </div>
-    <a href="https://www.pranavongole.com" target="_blank" class="nav-feedback">feedback / bugs?</a>
+    <span class="nav-title">Data Analyst &amp; Engineer</span>
   </div>
   <div class="nav-links">
     <a href="dashboard.html">Visa Overview</a>
@@ -264,6 +286,44 @@ td.red { color:var(--red); font-family:var(--mono); }
   <p style="font-size:0.7rem;color:var(--dim);margin-top:6px;">
     The US fiscal year starts Oct 1, so FY2026 Q1 = calendar Oct&ndash;Dec 2025. These are salary disclosures for H-1B roles that <em>started</em> in that quarter &mdash; not applications processed by USCIS.
   </p>
+</div>
+
+<!-- Key Findings -->
+<div class="findings-section" id="findings-section">
+  <div class="findings-grid">
+    <div class="finding-card highlight">
+      <div class="finding-num amber">$133,500</div>
+      <div class="finding-label">Median offered wage across all certified H-1B positions</div>
+      <div class="finding-sub">Oct–Dec 2025 · 108K+ worksite rows · plausible wages only</div>
+    </div>
+    <div class="finding-card">
+      <div class="finding-num">+27.9%</div>
+      <div class="finding-label">Average premium above DOL prevailing wage</div>
+      <div class="finding-sub">Employers are paying meaningfully above the legal minimum — the floor, not the ceiling</div>
+    </div>
+    <div class="finding-card">
+      <div class="finding-num">29,882</div>
+      <div class="finding-label">Qualcomm positions — more than Amazon &amp; Google combined</div>
+      <div class="finding-sub">Staffing-model LCAs can cover hundreds of workers per filing, inflating single-employer counts</div>
+    </div>
+    <div class="finding-card">
+      <div class="finding-num green">58%</div>
+      <div class="finding-label">Estimated pick rate if selections are proportional to lottery weight</div>
+      <div class="finding-sub">Based on 120,141 USCIS-registered cap slots · rough model, not a guarantee</div>
+    </div>
+  </div>
+</div>
+
+<!-- Methodology note -->
+<div class="methodology-note">
+  <div class="methodology-box">
+    <span class="methodology-icon">ℹ</span>
+    <div class="methodology-text">
+      <strong>What this data is:</strong> Public DOL Labor Condition Application records — the salary disclosures employers must file <em>before</em> sponsoring an H-1B worker.
+      <strong>What it is not:</strong> Actual payroll, lottery results, or USCIS approvals. One LCA can cover many workers. Certification does not mean the petition was approved or the lottery was won.
+      Source: DOL OFLC FY2026 Q1 (Oct–Dec 2025), certified filings only.
+    </div>
+  </div>
 </div>
 
 <!-- Filter panel -->
@@ -425,35 +485,32 @@ td.red { color:var(--red); font-family:var(--mono); }
 <!-- Stats -->
 <div class="stats-section" id="stats-section">
   <div class="stats-row">
-    <div class="stat-box" data-tip="Number of individual worksite wage rows matching your filters. One LCA can produce multiple rows (e.g. multiple worksites).">
-      <div class="stat-val" id="s-rows">—</div>
-      <div class="stat-lbl">Matching Rows</div>
-    </div>
-    <div class="stat-box" data-tip="Distinct LCA case numbers matched. Each LCA is one employer filing — it can cover multiple workers or worksites.">
-      <div class="stat-val" id="s-filings">—</div>
-      <div class="stat-lbl">LCA Filings</div>
-    </div>
-    <div class="stat-box" data-tip="Total worker positions listed across matched LCAs. This is how many H-1B roles were requested — NOT how many got lottery-selected. One LCA can request 100+ positions for a single job title.">
-      <div class="stat-val" id="s-jobs">—</div>
-      <div class="stat-lbl">Positions Filed</div>
-    </div>
-    <div class="stat-box" data-tip="Positions × H-1B registration weight (Masters = 2x regular cap entries). Used to estimate proportional lottery probability.">
-      <div class="stat-val" id="s-weight">—</div>
-      <div class="stat-lbl">Lottery Weight</div>
-    </div>
-    <div class="stat-box" data-tip="Median offered annual salary across matched rows (50th percentile of wage_from). Oct–Dec 2025 data.">
+    <div class="stat-box dominant" data-tip="Median offered annual salary across matched rows (50th percentile of wage_from). Plausible wages only.">
       <div class="stat-val amber" id="s-median">—</div>
-      <div class="stat-lbl">Median Wage</div>
+      <div class="stat-lbl">Median Offered Wage</div>
+      <div class="stat-sub">50th percentile · offered, not final payroll</div>
     </div>
-    <div class="stat-box" data-tip="Average % that offered wages exceed the DOL prevailing wage for the role and location. Positive = paying above market.">
+    <div class="stat-box" data-tip="Average % that offered wages exceed the DOL prevailing wage for the role and location. Positive = paying above market floor.">
       <div class="stat-val green" id="s-premium">—</div>
       <div class="stat-lbl">Avg Premium</div>
       <div class="stat-sub">vs. prevailing wage</div>
     </div>
-    <div class="stat-box" data-tip="Estimated lottery selections if USCIS picked the configured number of registrations proportionally from this subset. Rough probability model — not official.">
-      <div class="stat-val" id="s-picks">—</div>
-      <div class="stat-lbl">Est. Selections</div>
-      <div class="stat-sub" id="s-pickrate"></div>
+    <div class="stat-box" data-tip="Share of matched positions at wage Level III or IV — senior and fully competent roles. Higher = more experienced hires.">
+      <div class="stat-val" id="s-senior">—</div>
+      <div class="stat-lbl">Senior Roles</div>
+      <div class="stat-sub">Level III + IV positions</div>
+    </div>
+    <div class="stat-box" data-tip="Total worker positions listed across matched LCAs. NOT lottery-selected workers — one LCA can request hundreds of positions.">
+      <div class="stat-val" id="s-jobs">—</div>
+      <div class="stat-lbl">Positions Filed</div>
+    </div>
+    <div class="stat-box" data-tip="Distinct LCA case numbers matched. Each is one employer filing — can cover multiple workers or worksites.">
+      <div class="stat-val" id="s-filings">—</div>
+      <div class="stat-lbl">LCA Filings</div>
+    </div>
+    <div class="stat-box" data-tip="Number of individual worksite wage rows matching your filters.">
+      <div class="stat-val" id="s-rows">—</div>
+      <div class="stat-lbl">Matching Rows</div>
     </div>
   </div>
 </div>
@@ -774,23 +831,21 @@ window.runSearch = async function() {
         COALESCE(SUM(worker_positions), 0) AS jobs,
         COALESCE(SUM(weighted_entries), 0) AS weight,
         QUANTILE_CONT(annual_wage_from, 0.5) AS median_wage,
-        AVG(wage_premium_pct) AS avg_premium
+        AVG(wage_premium_pct) AS avg_premium,
+        COALESCE(SUM(CASE WHEN wage_level IN ('Level III','Level IV') THEN worker_positions ELSE 0 END), 0) AS senior_jobs
       FROM lca ${where}
     `);
     const summ = arrowToRows(summRes)[0];
-    const weight = Number(summ.weight) || 0;
     const jobs   = Number(summ.jobs) || 0;
-    const estPicks = universeWeight > 0 ? (selected * weight / universeWeight) : null;
-    const pickRate = estPicks && jobs > 0 ? (estPicks / jobs * 100) : null;
+    const seniorJobs = Number(summ.senior_jobs) || 0;
+    const seniorPct = jobs > 0 ? (seniorJobs / jobs * 100) : null;
 
     $('s-rows').textContent    = fmtNum(summ.rows);
     $('s-filings').textContent = fmtNum(summ.filings);
     $('s-jobs').textContent    = fmtNum(jobs);
-    $('s-weight').textContent  = fmtNum(weight);
     $('s-median').textContent  = fmtDollar(summ.median_wage);
     $('s-premium').textContent = summ.avg_premium !== null ? '+' + fmtPct(summ.avg_premium) : '—';
-    $('s-picks').textContent   = estPicks ? fmtNum(estPicks, 0) : '—';
-    $('s-pickrate').textContent= pickRate ? fmtPct(pickRate) + ' pick rate' : '';
+    $('s-senior').textContent  = seniorPct !== null ? fmtPct(seniorPct) : '—';
 
     // 3. Grouped summary
     await renderGrouped(where, selected);
