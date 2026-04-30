@@ -147,4 +147,4 @@ python scripts/build_all_quarters.py
 
 ---
 
-*Built by [Pranav Ongole](https://www.pranavongole.com) — [pranavongole.com](https://www.pranavongole.com) · [LinkedIn](https://www.linkedin.com/in/pranavo/) · Part of the DataForge365 series*
+*Built by [Pranav Ongole](https://www.pranavongole.com) — [pranavongole.com](https://www.pranavongole.com) · [LinkedIn](https://www.linkedin.com/in/pranavo/) · *
