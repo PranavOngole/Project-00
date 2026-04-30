@@ -42,6 +42,8 @@ DB_PATH = BASE_DIR / "database" / "immigration.duckdb"
 DOL_BASE_URL = "https://www.dol.gov/sites/dolgov/files/ETA/oflc/pdfs"
 DEFAULT_FY = 2026
 AVAILABLE_QUARTERS = {
+    2024: ["Q4"],
+    2025: ["Q1", "Q2", "Q3", "Q4"],
     2026: ["Q1"],
 }
 
@@ -732,7 +734,7 @@ def main(argv: List[str]) -> int:
     if not cases_raw.exists():
         raise FileNotFoundError(f"Missing raw case file: {cases_raw}")
     if not worksites_raw.exists():
-        raise FileNotFoundError(f"Missing raw worksites file: {worksites_raw}")
+        print(f"WARNING: Worksites file not found ({worksites_raw.name}) — location columns will be NULL for this quarter.")
 
     cases_csv = PROCESSED_DIR / f"h1b_lca_cases_{output_suffix}.csv"
     worksites_csv = PROCESSED_DIR / f"h1b_lca_worksites_{output_suffix}.csv"
@@ -745,7 +747,13 @@ def main(argv: List[str]) -> int:
     print(f"Fiscal year: {fiscal_year}  Quarter: {quarter}")
 
     h1b_cases = extract_cases(cases_raw, cases_csv, fiscal_year, quarter)
-    extract_worksites(worksites_raw, worksites_csv, h1b_cases, fiscal_year, quarter)
+    if worksites_raw.exists():
+        extract_worksites(worksites_raw, worksites_csv, h1b_cases, fiscal_year, quarter)
+    else:
+        # Write header-only CSV so load_and_derive can still LEFT JOIN with zero matches
+        with worksites_csv.open("w", newline="", encoding="utf-8") as f:
+            csv.DictWriter(f, fieldnames=WORKSITE_OUTPUT_COLUMNS).writeheader()
+        print(f"  wrote empty worksites CSV (no source file for {quarter})")
     load_and_derive(cases_csv, worksites_csv, summary_csv, proxy_csv, fiscal_year, quarter)
 
     print("\nOutputs:")

@@ -282,9 +282,9 @@ td.red { color:var(--red); font-family:var(--mono); }
 <div class="page-header">
   <h1>H-1B LCA Query</h1>
   <p>Filter DOL Labor Condition Application records — the public salary disclosures employers file before sponsoring H-1B workers. Not exact lottery winners or payroll data.</p>
-  <div class="period-badge">&#9679;&nbsp; FY2026 Q1 &mdash; Oct&ndash;Dec 2025 &mdash; 120,532 LCA worksite rows</div>
+  <div class="period-badge">&#9679;&nbsp; FY2025 Q1 &ndash; FY2026 Q1 &mdash; 5 Quarters &mdash; 701K+ rows</div>
   <p style="font-size:0.7rem;color:var(--dim);margin-top:6px;">
-    The US fiscal year starts Oct 1, so FY2026 Q1 = calendar Oct&ndash;Dec 2025. These are salary disclosures for H-1B roles that <em>started</em> in that quarter &mdash; not applications processed by USCIS.
+    Covers Oct 2024 &ndash; Dec 2025 (5 quarters). FY2025 Q1&ndash;Q3 have employer/wage data only &mdash; worksite files were not published by DOL for those quarters. Use the <strong>Quarter</strong> filter to isolate a specific period.
   </p>
 </div>
 
@@ -292,24 +292,24 @@ td.red { color:var(--red); font-family:var(--mono); }
 <div class="findings-section" id="findings-section">
   <div class="findings-grid">
     <div class="finding-card highlight">
-      <div class="finding-num amber">$133,500</div>
-      <div class="finding-label">Median offered wage across all certified H-1B positions</div>
-      <div class="finding-sub">Oct–Dec 2025 · 108K+ worksite rows · plausible wages only</div>
+      <div class="finding-num amber">$123,766</div>
+      <div class="finding-label">Median offered wage across 5 quarters of certified H-1B filings</div>
+      <div class="finding-sub">FY2025 Q1 – FY2026 Q1 · 701K+ rows · plausible wages only</div>
     </div>
     <div class="finding-card">
-      <div class="finding-num">+27.9%</div>
+      <div class="finding-num">+21.4%</div>
       <div class="finding-label">Average premium above DOL prevailing wage</div>
-      <div class="finding-sub">Employers are paying meaningfully above the legal minimum — the floor, not the ceiling</div>
+      <div class="finding-sub">Employers paying above the legal floor — the prevailing wage is the minimum, not the target</div>
     </div>
     <div class="finding-card">
-      <div class="finding-num">29,882</div>
-      <div class="finding-label">Qualcomm positions — more than Amazon &amp; Google combined</div>
-      <div class="finding-sub">Staffing-model LCAs can cover hundreds of workers per filing, inflating single-employer counts</div>
+      <div class="finding-num">73,520</div>
+      <div class="finding-label">Grandison Management positions — largest single filer across all quarters</div>
+      <div class="finding-sub">Staffing-model LCAs can cover hundreds of workers per filing; Amazon #2 at 69,746</div>
     </div>
     <div class="finding-card">
-      <div class="finding-num green">58%</div>
-      <div class="finding-label">Estimated pick rate if selections are proportional to lottery weight</div>
-      <div class="finding-sub">Based on 120,141 USCIS-registered cap slots · rough model, not a guarantee</div>
+      <div class="finding-num green">34.7%</div>
+      <div class="finding-label">Positions at Level III or IV — senior and fully competent roles</div>
+      <div class="finding-sub">Majority of filings are Level I–II; filter by wage level to see how the senior mix varies by employer</div>
     </div>
   </div>
 </div>
@@ -377,6 +377,17 @@ td.red { color:var(--red); font-family:var(--mono); }
           <option>Level II</option>
           <option>Level III</option>
           <option>Level IV</option>
+        </select>
+      </div>
+      <div class="filter-field">
+        <label class="filter-label" for="f-quarter">Quarter</label>
+        <select id="f-quarter">
+          <option value="">All quarters</option>
+          <option value="2025|Q1">FY2025 Q1 (Oct–Dec 2024)</option>
+          <option value="2025|Q2">FY2025 Q2 (Jan–Mar 2025)</option>
+          <option value="2025|Q3">FY2025 Q3 (Apr–Jun 2025)</option>
+          <option value="2025|Q4">FY2025 Q4 (Jul–Sep 2025)</option>
+          <option value="2026|Q1">FY2026 Q1 (Oct–Dec 2025)</option>
         </select>
       </div>
       <div class="filter-field">
@@ -627,7 +638,7 @@ td.red { color:var(--red); font-family:var(--mono); }
 // ────────────────────────────────────────────────────────────────
 //  DuckDB-WASM init + query engine
 // ────────────────────────────────────────────────────────────────
-const PARQUET_URL = new URL('./data/wasm/h1b_lca_fy2026_q1.parquet', location.href).href;
+const PARQUET_URL = new URL('./data/wasm/h1b_lca_combined.parquet', location.href).href;
 const DUCKDB_BASE_URL = 'https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.29.0/dist/';
 const DEFAULT_SELECTED = 120141;
 const LIVE_QUERY_URL = 'https://pranavongole.github.io/Project-00/h1b_query.html';
@@ -767,6 +778,7 @@ function buildWhere(includeSearch = true) {
     const minWage   = parseFloat($('f-minwage').value) || null;
     const maxWage   = parseFloat($('f-maxwage').value) || null;
 
+    const quarterVal = $('f-quarter').value;
     if (employer)  { clauses.push(`employer_name ILIKE '%${esc(employer)}%'`); }
     if (occ)       { clauses.push(`soc_title ILIKE '%${esc(occ)}%'`); }
     if (soc)       { clauses.push(`soc_code ILIKE '%${esc(soc)}%'`); }
@@ -777,6 +789,10 @@ function buildWhere(includeSearch = true) {
     if (band)      { clauses.push(`salary_band = '${esc(band)}'`); }
     if (minWage !== null) { clauses.push(`annual_wage_from >= ${minWage}`); }
     if (maxWage !== null) { clauses.push(`annual_wage_from <= ${maxWage}`); }
+    if (quarterVal) {
+      const [fy, q] = quarterVal.split('|');
+      clauses.push(`fiscal_year = ${esc(fy)} AND quarter = '${esc(q)}'`);
+    }
   }
 
   const status = $('f-status').value;
@@ -989,6 +1005,7 @@ window.resetFilters = function() {
   $('f-occupation').value = '';
   $('f-soc').value        = '';
   $('f-case').value       = '';
+  $('f-quarter').value    = '';
   $('f-state').value      = '';
   $('f-city').value       = '';
   $('f-wagelevel').value  = '';
