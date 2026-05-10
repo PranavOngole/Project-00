@@ -507,12 +507,15 @@ const BASE = {
   xaxis:{gridcolor:"#1c1c28",color:"#50506a",zerolinecolor:"#1c1c28",linecolor:"#1c1c28"},
   yaxis:{gridcolor:"#1c1c28",color:"#50506a",zerolinecolor:"#1c1c28",linecolor:"#1c1c28"},
 };
-function L(o) { return {...BASE,...o,
-  xaxis:{...BASE.xaxis,...(o.xaxis||{})},
-  yaxis:{...BASE.yaxis,...(o.yaxis||{})},
-  xaxis2:o.xaxis2 ? {...BASE.xaxis,...o.xaxis2} : undefined,
-  yaxis2:o.yaxis2 ? {...BASE.yaxis,...o.yaxis2} : undefined,
-}; }
+function L(o) {
+  const r = {...BASE,...o,
+    xaxis:{...BASE.xaxis,...(o.xaxis||{})},
+    yaxis:{...BASE.yaxis,...(o.yaxis||{})},
+  };
+  if (o.xaxis2) r.xaxis2 = {...BASE.xaxis,...o.xaxis2};
+  if (o.yaxis2) r.yaxis2 = {...BASE.yaxis,...o.yaxis2};
+  return r;
+}
 
 // ── Chart 1: WL Jobs donut ───────────────────────────────────────
 Plotly.newPlot("chart-wl-jobs",[{
