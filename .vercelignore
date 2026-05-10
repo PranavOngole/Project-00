@@ -1,0 +1,9 @@
+data/raw/
+data/processed/
+data/postgres_exports/
+database/
+scripts/
+docs/
+wage_dashboard/
+CLAUDE.md
+data/wasm/h1b_lca_fy2026_q1.parquet
