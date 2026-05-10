@@ -1062,11 +1062,20 @@ function buildWhere(includeSearch = true) {
     const maxWage   = parseFloat($('f-maxwage').value) || null;
 
     const quarterVal = $('f-quarter').value;
-    if (employer)  { clauses.push(`employer_name ILIKE '%${esc(employer)}%'`); }
-    if (occ)       { clauses.push(`soc_title ILIKE '%${esc(occ)}%'`); }
+    if (employer)  {
+      const en = employer.toLowerCase().replace(/\s+/g, '');
+      clauses.push(`REPLACE(LOWER(employer_name), ' ', '') LIKE '%${esc(en)}%'`);
+    }
+    if (occ)       {
+      const on = occ.toLowerCase().replace(/\s+/g, '');
+      clauses.push(`REPLACE(LOWER(soc_title), ' ', '') LIKE '%${esc(on)}%'`);
+    }
     if (soc)       { clauses.push(`soc_code ILIKE '%${esc(soc)}%'`); }
     if (caseNum)   { clauses.push(`case_number ILIKE '%${esc(caseNum)}%'`); }
-    if (city)      { clauses.push(`worksite_city ILIKE '%${esc(city)}%'`); }
+    if (city)      {
+      const cn = city.toLowerCase().replace(/\s+/g, '');
+      clauses.push(`REPLACE(LOWER(worksite_city), ' ', '') LIKE '%${esc(cn)}%'`);
+    }
     if (state)     { clauses.push(`worksite_state = '${esc(state)}'`); }
     if (wageLevel) { clauses.push(`wage_level = '${esc(wageLevel)}'`); }
     if (band)      { clauses.push(`salary_band = '${esc(band)}'`); }
