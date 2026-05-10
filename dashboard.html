@@ -180,11 +180,33 @@ body::before {
   .layer-nodes { flex-direction:column; }
   .p-node { max-width:100%; }
 }
+
+/* === Site Nav === */
+.site-nav { display:flex; align-items:center; justify-content:space-between;
+  padding:14px 32px; border-bottom:1px solid rgba(39,39,42,0.8); position:relative; z-index:10; }
+.nav-brand { font-size:0.7rem; font-weight:700; color:#52525b;
+  text-transform:uppercase; letter-spacing:2px; }
+.nav-links { display:flex; gap:20px; }
+.nav-links a { font-size:0.78rem; color:#52525b; text-decoration:none;
+  font-weight:500; transition:color 0.15s; }
+.nav-links a:hover { color:#d4d4d8; }
+.nav-links a.active { color:#d4d4d8; }
 </style>
 </head>
 <body>
 
 <div class="content">
+
+<!-- ===== NAV ===== -->
+<nav class="site-nav">
+  <span class="nav-brand">DataForge365 — Project 00</span>
+  <div class="nav-links">
+    <a href="dashboard.html" class="active">Visa Overview</a>
+    <a href="h1b_wages.html">H-1B Analytics</a>
+    <a href="h1b_query.html">Live Query</a>
+    <a href="https://github.com/PranavOngole/Project-00" target="_blank">GitHub</a>
+  </div>
+</nav>
 
 <!-- ===== HERO ===== -->
 <div class="hero">
