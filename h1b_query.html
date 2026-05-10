@@ -76,8 +76,8 @@ body { background:var(--bg); color:var(--text); font-family:'Inter',system-ui,sa
 .nav-social a:hover { color:var(--text); border-color:var(--dim); }
 .nav-social a.linkedin:hover { color:#60a5fa; border-color:rgba(96,165,250,0.4); }
 .nav-social a.github:hover  { color:#e4e4e7; border-color:var(--dim); }
-.nav-title { font-size:0.65rem; color:var(--dim); white-space:nowrap;
-             padding-left:4px; border-left:1px solid var(--border); }
+.nav-title { font-size:0.68rem; font-weight:500; color:var(--muted); white-space:nowrap;
+             padding-left:8px; border-left:1px solid var(--border2); letter-spacing:0.1px; }
 .nav-links { display:flex; gap:20px; align-items:center; }
 .nav-links a { font-size:0.78rem; color:var(--muted); text-decoration:none;
                font-weight:500; transition:color 0.15s; }
@@ -1475,14 +1475,7 @@ function renderResults() {
 
   if (!page.length) {
     const tips = buildNoResultsTips();
-    const tipsHtml = tips.map((tip, i) => {
-      if (tip.action) {
-        return `<li><button onclick="window._noResultsActions[${i}]()">${tip.text}</button></li>`;
-      }
-      return `<li>${tip.text}</li>`;
-    }).join('');
-    window._noResultsActions = tips.map(t => t.action).filter(Boolean);
-    // Re-index button indices to match only actionable tips
+    window._noResultsActions = tips.filter(t => t.action).map(t => t.action);
     let actionIdx = 0;
     const tipsHtmlFinal = tips.map(tip => {
       if (tip.action) {
@@ -1491,7 +1484,6 @@ function renderResults() {
       }
       return `<li>${tip.text}</li>`;
     }).join('');
-    window._noResultsActions = tips.filter(t => t.action).map(t => t.action);
     tbody.innerHTML = `<tr><td colspan="16"><div class="no-results-box">
       <div class="no-results-title">No results found</div>
       <ul class="no-results-tips">${tipsHtmlFinal}</ul>
