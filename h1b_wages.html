@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>H-1B Wage Analytics | FY2026 Q1 | DataForge365</title>
-<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<title>H-1B Wage Analytics | FY2025 Q1–FY2026 Q1 | DataForge365</title>
+<script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.26.0/plotly.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -126,7 +126,6 @@ body { background:var(--bg); color:var(--text);
 <nav class="nav">
   <span class="nav-brand">DataForge365 &mdash; Project 00</span>
   <div class="nav-links">
-    <a href="dashboard.html">Visa Overview</a>
     <a href="h1b_wages.html" class="active">H-1B Analytics</a>
     <a href="h1b_query.html">Live Query</a>
     <a href="https://github.com/PranavOngole/Project-00" target="_blank">GitHub</a>
@@ -138,11 +137,11 @@ body { background:var(--bg); color:var(--text);
   <div class="hero-top">
     <div>
       <h1>H-1B Wage Analytics</h1>
-      <p class="tagline">DOL Labor Condition Application disclosures &mdash; FY2026 Q1 (Oct&ndash;Dec 2025).
-        Every certified LCA filing, every wage level, every lottery weight point.</p>
+      <p class="tagline">DOL Labor Condition Application disclosures &mdash; FY2025 Q1 through FY2026 Q1 (Oct 2024&ndash;Dec 2025).
+        Five quarters of certified LCA filings: 1.17M positions, every wage level, every employer.</p>
       <div class="badge-row">
-        <span class="badge badge-amber">FY2026 Q1 Only</span>
-        <span class="badge badge-neutral">120,532 LCA Records</span>
+        <span class="badge badge-amber">FY2025 Q1 &ndash; FY2026 Q1</span>
+        <span class="badge badge-neutral">701K+ LCA Records</span>
         <span class="badge badge-neutral">Source: DOL OFLC</span>
       </div>
     </div>
@@ -153,50 +152,50 @@ body { background:var(--bg); color:var(--text);
 <!-- Stats -->
 <div class="stats-row">
   <div class="stat-card">
-    <div class="stat-val">71.7K</div>
+    <div class="stat-val">610K</div>
     <div class="stat-lbl">Unique LCA Filings</div>
-    <div class="stat-ctx">Distinct case numbers, certified</div>
+    <div class="stat-ctx">Distinct case numbers, certified, 5 quarters</div>
   </div>
   <div class="stat-card">
-    <div class="stat-val">206.7K</div>
+    <div class="stat-val">1.17M</div>
     <div class="stat-lbl">Worker Positions Requested</div>
     <div class="stat-ctx">Not lottery registrations &mdash; see note below</div>
   </div>
   <div class="stat-card">
-    <div class="stat-val amber">$133.5K</div>
+    <div class="stat-val amber">$123.8K</div>
     <div class="stat-lbl">Median Offered Wage</div>
     <div class="stat-ctx">Annual, certified + plausible filings</div>
   </div>
   <div class="stat-card">
-    <div class="stat-val">+27.9%</div>
+    <div class="stat-val">+21.4%</div>
     <div class="stat-lbl">Avg Premium Over Prevailing</div>
     <div class="stat-ctx">DOL wage vs employer offer</div>
   </div>
   <div class="stat-card">
     <div class="stat-val">435K</div>
-    <div class="stat-lbl">Lottery Weight Points</div>
-    <div class="stat-ctx">FY2026 wage-based lottery currency</div>
+    <div class="stat-lbl">FY2026 Q1 Lottery Weight</div>
+    <div class="stat-ctx">Cap-season wage-based lottery points</div>
   </div>
 </div>
 
-<!-- What is 206K? Context box -->
+<!-- Context box -->
 <div class="context-box">
   <div class="context-inner">
     <div class="ctx-item">
-      <div class="ctx-label">What is the 206,730 number?</div>
+      <div class="ctx-label">What is the 1.17M number?</div>
       <div class="ctx-text">
-        This is the total <strong>worker positions requested</strong> across all certified LCA filings in Q1.
+        Total <strong>worker positions requested</strong> across all certified LCA filings in 5 quarters.
         Each LCA can cover multiple workers at the same employer/worksite. It is <em>not</em> the lottery count.
-        USCIS separately reported ~120,141 registrations entered the FY2026 lottery across all cap-subject petitions.
-        One employer may file one LCA covering 10 workers, contributing 10 to the 206K but only some of those workers may have
-        entered the lottery.
+        USCIS separately reported ~120,141 registrations entered the FY2026 lottery. One employer may file one
+        LCA covering 10 workers, contributing 10 to the 1.17M, but only some may have entered the lottery.
       </div>
     </div>
     <div class="ctx-item">
       <div class="ctx-label">Data period &amp; completeness</div>
       <div class="ctx-text">
-        This dataset covers <strong>FY2026 Q1 only</strong> (Oct&ndash;Dec 2025). No prior years are in the current database.
-        When additional quarters are added, a year/quarter filter will appear in the Live Query tool.
+        This dataset covers <strong>FY2025 Q1 through FY2026 Q1</strong> (Oct 2024&ndash;Dec 2025 &mdash; 5 quarters).
+        FY2025 Q1&ndash;Q3 have employer/wage data only; DOL did not publish worksite files for those quarters.
+        Use the <strong>Live Query Tool</strong> to filter by specific quarter or compare across quarters.
         LCAs are a prerequisite for H-1B petitions but not all LCAs result in a filed petition.
       </div>
     </div>
@@ -205,8 +204,8 @@ body { background:var(--bg); color:var(--text);
       <div class="ctx-text">
         Under the FY2026 wage-based lottery, each H-1B registration earns points based on how far the
         offered wage exceeds the DOL prevailing wage. <strong>Higher offer = more weight = better lottery odds.</strong>
-        The 435K weighted entries shown here correspond to cap-proxy filings only;
-        non-cap and cap-exempt filings carry 0 weight in the lottery.
+        The 435K weighted entries correspond to all certified cap-eligible filings in FY2026 Q1;
+        prior quarters did not have a wage-based lottery and carry 0 cap weight.
       </div>
     </div>
   </div>
@@ -216,13 +215,13 @@ body { background:var(--bg); color:var(--text);
 <div class="section">
   <div class="sec-head">
     <div class="sec-tag">Wage Levels</div>
-    <div class="sec-title">Jobs &amp; Lottery Weight by DOL Wage Level</div>
-    <div class="sec-sub">Levels I&ndash;IV reflect experience tiers relative to the OES wage distribution for each occupation/area. Level I = entry (&lt;17th pctile); Level IV = fully competent (&gt;50th pctile).</div>
+    <div class="sec-title">Jobs &amp; Wage Distribution by DOL Wage Level</div>
+    <div class="sec-sub">Levels I&ndash;IV reflect experience tiers relative to the OES wage distribution for each occupation/area. Level I = entry (&lt;17th pctile); Level IV = fully competent (&gt;50th pctile). All 5 quarters.</div>
   </div>
   <div class="grid-2">
     <div class="chart-card">
       <div class="chart-title">Jobs by Wage Level</div>
-      <div class="chart-sub">Certified + plausible filings. Level II holds the most positions by far.</div>
+      <div class="chart-sub">Certified + plausible filings, 5 quarters. Level II holds the most positions.</div>
       <div id="chart-wl-jobs" style="height:300px;"></div>
     </div>
     <div class="chart-card">
@@ -232,10 +231,10 @@ body { background:var(--bg); color:var(--text);
     </div>
   </div>
   <div class="chart-card">
-    <div class="chart-title">Lottery Weight Points by Wage Level</div>
-    <div class="chart-sub">Cap-proxy filings only. Level II earns the most aggregate weight — mass volume beats high-level premiums in aggregate.</div>
+    <div class="chart-title">FY2026 Q1 Lottery Weight Points by Wage Level</div>
+    <div class="chart-sub">Cap-eligible filings, FY2026 Q1 only. Level II earns the most aggregate weight &mdash; volume beats high-level premiums in aggregate.</div>
     <div id="chart-wl-weight" style="height:260px;"></div>
-    <div class="chart-note">&#9432;&nbsp; Level I employers pay 82.9% above prevailing on average &mdash; not generosity, but lottery strategy. Higher offer price buys more weight per registration.</div>
+    <div class="chart-note">&#9432;&nbsp; FY2026 Q1: Level I filings averaged +82.9% above prevailing &mdash; concentrated lottery strategy by large staffing filers. Lottery weight data is FY2026 Q1 specific; prior quarters had no wage-based lottery.</div>
   </div>
   <div class="drill-callout">
     <p>Want to filter by wage level? &rarr;</p>
@@ -248,11 +247,11 @@ body { background:var(--bg); color:var(--text);
   <div class="sec-head">
     <div class="sec-tag">Salary Distribution</div>
     <div class="sec-title">Where Do H-1B Salaries Actually Land?</div>
-    <div class="sec-sub">$150K&ndash;$200K is the single largest band. The curve is right-skewed — tech hubs and senior roles pull the mean above the median.</div>
+    <div class="sec-sub">$150K&ndash;$200K is the single largest band across 5 quarters. The curve is right-skewed &mdash; tech hubs and senior roles pull the mean above the median.</div>
   </div>
   <div class="chart-card">
     <div class="chart-title">Jobs by Annual Salary Band</div>
-    <div class="chart-sub">Certified + plausible filings. Annual wage (offered, from).</div>
+    <div class="chart-sub">Certified + plausible filings, all 5 quarters. Annual wage (offered, from).</div>
     <div id="chart-salary-band" style="height:340px;"></div>
     <div class="drill-callout" style="margin-top:12px;margin-bottom:0;">
       <p>Drill into a specific band &rarr;</p>
@@ -266,7 +265,7 @@ body { background:var(--bg); color:var(--text);
   <div class="sec-head">
     <div class="sec-tag">Employers</div>
     <div class="sec-title">Top 25 H-1B Employers by Jobs Requested</div>
-    <div class="sec-sub">Qualcomm's 29,882 positions — 14.5% of all certified LCA jobs — is not a display error. Three Qualcomm entities (Technologies, Atheros, Innovation Center, Incorporated) together account for ~18,000+ additional positions.</div>
+    <div class="sec-sub">Grandison Management's 73,520 positions across 5 quarters are almost entirely Occupational Therapist and Physical Therapist filings at Level I wages &mdash; a staffing play, not a tech surge. Amazon entities collectively exceed 99K positions.</div>
   </div>
   <div class="chart-card">
     <div class="chart-title">Top 25 Employers &mdash; Positions vs. Median Wage</div>
@@ -287,7 +286,7 @@ body { background:var(--bg); color:var(--text);
   <div class="sec-head">
     <div class="sec-tag">Occupations</div>
     <div class="sec-title">Top 20 Occupations by Jobs</div>
-    <div class="sec-sub">Software Developers = 73,905 jobs (36% of certified positions). The gap between #1 and #2 is larger than most companies' entire H-1B footprint.</div>
+    <div class="sec-sub">Software Developers = 383K jobs (33% of certified positions across 5 quarters). Physical Therapists and Occupational Therapists rank in the top 10 &mdash; driven by Grandison Management's concentrated staffing model.</div>
   </div>
   <div class="chart-card">
     <div class="chart-title">Top 20 SOC Titles &mdash; Positions vs. Median Wage</div>
@@ -304,7 +303,7 @@ body { background:var(--bg); color:var(--text);
   <div class="sec-head">
     <div class="sec-tag">Geography</div>
     <div class="sec-title">Where H-1B Workers Are Going</div>
-    <div class="sec-sub">California's 66,638 jobs and $176K median are in their own tier. San Diego is #1 city — almost entirely due to Qualcomm.</div>
+    <div class="sec-sub">California's 289K jobs and $162K median are in their own tier. Santa Clara overtakes San Diego as #1 city over 5 quarters &mdash; San Diego dominated Q1 thanks to Qualcomm but has lower volume in prior quarters.</div>
   </div>
   <div class="grid-2">
     <div class="chart-card">
@@ -314,13 +313,13 @@ body { background:var(--bg); color:var(--text);
     </div>
     <div class="chart-card">
       <div class="chart-title">Top 15 Cities &mdash; Jobs &amp; Median Wage</div>
-      <div class="chart-sub">Bar = jobs. Diamond = median wage. San Diego skewed by Qualcomm campus concentration.</div>
+      <div class="chart-sub">Bar = jobs. Diamond = median wage. FY2025 Q1&ndash;Q3 lack worksite data; city counts are lower-bound estimates.</div>
       <div id="chart-cities" style="height:440px;"></div>
     </div>
   </div>
   <div class="chart-card">
     <div class="chart-title">Wage Level Mix by State &mdash; Top 10 States</div>
-    <div class="chart-sub">Illinois's Level I spike is visible and notable: staffing/consulting firms drive unusually high entry-level volume out of Chicago.</div>
+    <div class="chart-sub">Illinois's Level I spike remains notable across all 5 quarters: staffing/consulting firms drive unusually high entry-level volume out of Chicago and suburban IL. New York also shows elevated Level I share.</div>
     <div id="chart-wl-state" style="height:380px;"></div>
   </div>
 </div>
@@ -330,13 +329,13 @@ body { background:var(--bg); color:var(--text);
   <div class="sec-head">
     <div class="sec-tag">Lottery Strategy</div>
     <div class="sec-title">Cap Season vs. Year-Round: Do Employers Pay More in April?</div>
-    <div class="sec-sub">Cap-season proxy filings (estimated April registration window) show higher median wages at Level III and IV. The wage premium at senior levels is a deliberate bid for lottery weight.</div>
+    <div class="sec-sub">FY2026 Q1 data only. Cap-season proxy filings (estimated April registration window) show higher median wages at Level III and IV. The wage premium at senior levels is a deliberate bid for lottery weight.</div>
   </div>
   <div class="chart-card">
-    <div class="chart-title">Median Wage by Level &mdash; Cap Season vs. Year-Round</div>
-    <div class="chart-sub">Cap-season = estimated April H-1B registration window (heuristic). At Level IV, cap-season employers pay ~$15K more at median.</div>
+    <div class="chart-title">Median Wage by Level &mdash; Cap Season vs. Year-Round (FY2026 Q1)</div>
+    <div class="chart-sub">Cap-season = estimated April H-1B registration window (heuristic). At Level IV, cap-season employers pay ~$18K more at median.</div>
     <div id="chart-cap" style="height:340px;"></div>
-    <div class="chart-note">&#9432;&nbsp; Cap-proxy flag is a heuristic (begin date Oct 1, filed Jan&ndash;Mar 2025). Not official USCIS data.</div>
+    <div class="chart-note">&#9432;&nbsp; Cap-proxy flag is a heuristic (begin date Oct 1, filed Jan&ndash;Mar 2025). Not official USCIS data. Analysis scoped to FY2026 Q1 &mdash; the only quarter with active cap-season filings in this dataset.</div>
   </div>
 </div>
 
@@ -350,127 +349,140 @@ body { background:var(--bg); color:var(--text);
 <div class="source-section">
   <div class="source-card">
     <h3>Source, Definitions &amp; Caveats</h3>
-    <p><strong>Source:</strong> DOL OFLC — <a href="https://www.dol.gov/agencies/eta/foreign-labor/performance" target="_blank">LCA Disclosure Data FY2026 Q1</a> (cases received Oct–Dec 2025). Two files joined on case number + worksite sequence.</p>
-    <p><strong>Filtered universe:</strong> 108,529 certified + plausible records (of 120,532 total). Excluded: non-certified cases, and statistical outliers where offered wage &lt;50% or &gt;500% of prevailing (wage_plausibility_flag = 'IMPLAUSIBLE').</p>
-    <p><strong>206K "worker positions":</strong> Each LCA filing specifies how many workers it covers at a given worksite. This is an employer intention, not a headcount of lottery entrants. USCIS registered ~120,141 cap-subject registrations for FY2026; those two numbers measure different things.</p>
-    <p><strong>Wage level:</strong> DOL assigns Level I–IV based on OES percentile for the occupation/geography. Higher level = higher DOL floor.</p>
-    <p><strong>Lottery weight &amp; premium:</strong> Under FY2026 rules, each registration earns weight proportional to the wage-over-prevailing ratio. Higher wage offer → more weight → better lottery odds.</p>
-    <p><strong>Pipeline:</strong> Python + pandas for ETL · DuckDB as the query engine · DuckDB-WASM for browser-side live queries · Plotly.js for charts · GitHub Pages</p>
+    <p><strong>Source:</strong> DOL OFLC &mdash; <a href="https://www.dol.gov/agencies/eta/foreign-labor/performance" target="_blank">LCA Disclosure Data FY2025 Q1 through FY2026 Q1</a> (Oct 2024&ndash;Dec 2025). Five quarters combined. Two files per quarter joined on case number + worksite sequence.</p>
+    <p><strong>Filtered universe:</strong> 701,011 certified + plausible records. Excluded: non-certified cases, and statistical outliers where offered wage &lt;50% or &gt;500% of prevailing (wage_plausibility_flag = 'IMPLAUSIBLE'). FY2025 Q1&ndash;Q3 do not have worksite-level files from DOL; city/state data for those quarters is unavailable.</p>
+    <p><strong>1.17M "worker positions":</strong> Each LCA filing specifies how many workers it covers at a given worksite. This is an employer intention, not a headcount of lottery entrants. USCIS registered ~120,141 cap-subject registrations for FY2026; those two numbers measure different things.</p>
+    <p><strong>Wage level:</strong> DOL assigns Level I&ndash;IV based on OES percentile for the occupation/geography. Higher level = higher DOL floor.</p>
+    <p><strong>Lottery weight &amp; premium:</strong> Under FY2026 rules, each registration earns weight proportional to the wage-over-prevailing ratio. Higher wage offer &rarr; more weight &rarr; better lottery odds. Prior quarters (FY2025) did not operate under wage-based lottery rules.</p>
+    <p><strong>Pipeline:</strong> Python + pandas for ETL &middot; DuckDB as the query engine &middot; DuckDB-WASM for browser-side live queries &middot; Plotly.js for charts &middot; GitHub Pages + Vercel</p>
   </div>
 </div>
 
 <script>
 // ── Data ─────────────────────────────────────────────────────────
+
+// 5-quarter wage level data (FY2025 Q1 – FY2026 Q1)
 const WL = [
-  {level:"Level I",   jobs:31858, weight:31842,  median:87000,  premium:82.9},
-  {level:"Level II",  jobs:69075, weight:137950, median:113000, premium:22.0},
-  {level:"Level III", jobs:43542, weight:130533, median:141898, premium:15.3},
-  {level:"Level IV",  jobs:33815, weight:135064, median:170248, premium:17.6}
+  {level:"Level I",   jobs:228183, median:83000,  premium:34.3},
+  {level:"Level II",  jobs:401884, median:110000, premium:21.4},
+  {level:"Level III", jobs:230731, median:140000, premium:16.1},
+  {level:"Level IV",  jobs:173340, median:167024, premium:18.0}
 ];
+
+// FY2026 Q1 only — lottery weight is quarter-specific
+const WL_Q1_WEIGHT = [31842, 137950, 130533, 135064];
+
 const SALARY_BANDS = [
-  {band:"<$50K",       jobs:870},
-  {band:"$50K-$75K",   jobs:21442},
-  {band:"$75K-$100K",  jobs:26577},
-  {band:"$100K-$125K", jobs:35934},
-  {band:"$125K-$150K", jobs:43072},
-  {band:"$150K-$200K", jobs:56236},
-  {band:"$200K-$250K", jobs:16088},
-  {band:"$250K-$300K", jobs:4426},
-  {band:"$300K+",      jobs:2085}
+  {band:"<$50K",       jobs:8393},
+  {band:"$50K-$75K",   jobs:125564},
+  {band:"$75K-$100K",  jobs:211983},
+  {band:"$100K-$125K", jobs:222015},
+  {band:"$125K-$150K", jobs:210527},
+  {band:"$150K-$200K", jobs:267044},
+  {band:"$200K-$250K", jobs:88512},
+  {band:"$250K-$300K", jobs:20186},
+  {band:"$300K+",      jobs:11262}
 ];
 const EMPLOYERS = [
-  {name:"QUALCOMM TECHNOLOGIES, INC.",          jobs:29882, median:156853},
-  {name:"GRANDISON MANAGEMENT, INC.",           jobs:15680, median:71968},
-  {name:"AMAZON.COM SERVICES LLC",              jobs:10371, median:159610},
-  {name:"CGI TECHNOLOGIES AND SOLUTIONS INC.", jobs:6242,  median:112923},
-  {name:"QUALCOMM ATHEROS, INC.",               jobs:5107,  median:161250},
-  {name:"LINKEDIN CORPORATION",                 jobs:3693,  median:180710},
-  {name:"AMAZON WEB SERVICES, INC.",            jobs:2928,  median:160000},
-  {name:"CISCO SYSTEMS, INC.",                  jobs:2868,  median:149300},
-  {name:"NVIDIA CORPORATION",                   jobs:2826,  median:196679},
-  {name:"KFORCE INC.",                          jobs:2730,  median:125694},
-  {name:"INFOSYS LIMITED",                      jobs:2315,  median:94682},
-  {name:"QUALCOMM INNOVATION CENTER, INC.",     jobs:2202,  median:130187},
-  {name:"DELOITTE CONSULTING LLP",              jobs:2094,  median:146846},
-  {name:"META PLATFORMS, INC",                  jobs:2087,  median:222772},
-  {name:"MICROSOFT CORPORATION",               jobs:2027,  median:180710},
-  {name:"STV INCORPORATED",                    jobs:1762,  median:85227},
-  {name:"SALESFORCE, INC.",                    jobs:1683,  median:214200},
-  {name:"ERNST & YOUNG U.S. LLP",              jobs:1509,  median:171400},
-  {name:"COGNIZANT TECHNOLOGY SOLUTIONS US CORP",jobs:1383,median:114795},
-  {name:"AMAZON DEVELOPMENT CENTER U.S., INC.",jobs:1361,  median:159500},
-  {name:"QUALCOMM INCORPORATED",               jobs:1201,  median:131560},
-  {name:"GOOGLE LLC",                          jobs:1201,  median:194630},
-  {name:"APPLE INC.",                          jobs:1196,  median:181532},
-  {name:"COMPUNNEL SOFTWARE GROUP, INC",       jobs:1165,  median:115000},
-  {name:"FIDELITY TECHNOLOGY GROUP, LLC",      jobs:1076,  median:125119}
+  {name:"GRANDISON MANAGEMENT, INC.",                  jobs:73520, median:72114},
+  {name:"AMAZON.COM SERVICES LLC",                     jobs:69746, median:155000},
+  {name:"NVIDIA CORPORATION",                          jobs:48530, median:190486},
+  {name:"QUALCOMM TECHNOLOGIES, INC.",                 jobs:32071, median:143187},
+  {name:"APPLE INC.",                                  jobs:30395, median:175800},
+  {name:"MICROSOFT CORPORATION",                       jobs:20705, median:172982},
+  {name:"ORACLE AMERICA, INC.",                        jobs:19979, median:145468},
+  {name:"AMAZON WEB SERVICES, INC.",                   jobs:18772, median:154200},
+  {name:"INFOSYS LIMITED",                             jobs:18618, median:92581},
+  {name:"CGI TECHNOLOGIES AND SOLUTIONS INC.",         jobs:16653, median:115290},
+  {name:"CISCO SYSTEMS, INC.",                         jobs:16414, median:140400},
+  {name:"META PLATFORMS, INC",                         jobs:15723, median:210000},
+  {name:"COGNIZANT TECHNOLOGY SOLUTIONS US CORP",      jobs:12625, median:109886},
+  {name:"KFORCE INC.",                                 jobs:12430, median:120973},
+  {name:"GOLDMAN SACHS & CO. LLC",                     jobs:11623, median:120000},
+  {name:"ERNST & YOUNG U.S. LLP",                      jobs:10967, median:146887},
+  {name:"AMAZON DEVELOPMENT CENTER U.S., INC.",        jobs:10898, median:151819},
+  {name:"GOOGLE LLC",                                  jobs:10378, median:186000},
+  {name:"DELOITTE CONSULTING LLP",                     jobs:9936,  median:140100},
+  {name:"GOLDMAN SACHS SERVICES LLC",                  jobs:9804,  median:140000},
+  {name:"TATA CONSULTANCY SERVICES LIMITED",           jobs:8922,  median:86445},
+  {name:"GOLDMAN SACHS BANK USA",                      jobs:8880,  median:130000},
+  {name:"PALO ALTO NETWORKS, INC.",                    jobs:7427,  median:186237},
+  {name:"SYNOPSYS, INC.",                              jobs:7178,  median:143662},
+  {name:"MCKINSEY & COMPANY, INC. UNITED STATES",      jobs:6264,  median:192000}
 ];
 const SOC = [
-  {title:"Software Developers",                        jobs:73905, median:145000},
-  {title:"Electronics Engineers, Except Computer",     jobs:24365, median:161179},
-  {title:"Occupational Therapists",                    jobs:9770,  median:71968},
-  {title:"IT Project Managers",                        jobs:8091,  median:139443},
-  {title:"Software QA Analysts & Testers",             jobs:7119,  median:110364},
-  {title:"Physical Therapists",                        jobs:6213,  median:87360},
-  {title:"Computer & Info Systems Managers",           jobs:5402,  median:204000},
-  {title:"Data Scientists",                            jobs:4822,  median:140000},
-  {title:"Computer Systems Engineers/Architects",      jobs:4335,  median:111800},
-  {title:"Business Intelligence Analysts",             jobs:3504,  median:130000},
-  {title:"Computer Systems Analysts",                  jobs:3090,  median:116500},
-  {title:"Computer Programmers",                       jobs:3004,  median:98301},
-  {title:"Mechanical Engineers",                       jobs:2060,  median:112975},
-  {title:"Operations Research Analysts",               jobs:1936,  median:137700},
-  {title:"Project Management Specialists",             jobs:1933,  median:133183},
-  {title:"Network & Computer Systems Admins",          jobs:1795,  median:105301},
-  {title:"Computer & Info Research Scientists",        jobs:1742,  median:191250},
-  {title:"Financial & Investment Analysts",            jobs:1665,  median:155000},
-  {title:"Civil Engineers",                            jobs:1579,  median:105000},
-  {title:"Database Administrators",                    jobs:1575,  median:122402}
+  {title:"Software Developers",                            jobs:382995, median:138000},
+  {title:"Electronics Engineers, Except Computer",         jobs:60140,  median:151221},
+  {title:"Information Technology Project Managers",        jobs:45271,  median:133950},
+  {title:"Physical Therapists",                            jobs:39123,  median:82410},
+  {title:"Computer Systems Engineers/Architects",          jobs:38913,  median:103376},
+  {title:"Software QA Analysts And Testers",               jobs:38127,  median:106454},
+  {title:"Occupational Therapists",                        jobs:36350,  median:71968},
+  {title:"Data Scientists",                                jobs:35074,  median:131133},
+  {title:"Computer And Information Systems Managers",      jobs:30973,  median:199600},
+  {title:"Business Intelligence Analysts",                 jobs:24914,  median:118893},
+  {title:"Computer Systems Analysts",                      jobs:20263,  median:106840},
+  {title:"Computer Programmers",                           jobs:19991,  median:92200},
+  {title:"Management Analysts",                            jobs:16366,  median:121742},
+  {title:"Mechanical Engineers",                           jobs:15875,  median:106142},
+  {title:"Operations Research Analysts",                   jobs:14603,  median:123600},
+  {title:"Accountants And Auditors",                       jobs:13844,  median:94973},
+  {title:"Financial And Investment Analysts",              jobs:13673,  median:137717},
+  {title:"Electrical Engineers",                           jobs:12503,  median:124509},
+  {title:"Computer And Info Research Scientists",          jobs:11821,  median:182000},
+  {title:"Network And Computer Systems Admins",            jobs:11001,  median:99008}
 ];
 const STATES = [
-  {state:"CA",jobs:66638,median:176016},{state:"TX",jobs:26802,median:122000},
-  {state:"WA",jobs:14667,median:166835},{state:"IL",jobs:12831,median:121066},
-  {state:"NY",jobs:12293,median:145000},{state:"NJ",jobs:7845, median:137280},
-  {state:"NC",jobs:7025, median:124237},{state:"MA",jobs:5884, median:133000},
-  {state:"GA",jobs:5183, median:126443},{state:"MI",jobs:4656, median:115000},
-  {state:"PA",jobs:4526, median:114608},{state:"VA",jobs:4140, median:126090},
-  {state:"FL",jobs:3829, median:123000},{state:"OH",jobs:3384, median:115000},
-  {state:"MD",jobs:2745, median:125000}
+  {state:"CA", jobs:289354, median:161637},
+  {state:"TX", jobs:163021, median:112923},
+  {state:"WA", jobs:100288, median:160000},
+  {state:"NY", jobs:96171,  median:131997},
+  {state:"IL", jobs:65777,  median:109203},
+  {state:"NJ", jobs:44900,  median:124000},
+  {state:"NC", jobs:37816,  median:116709},
+  {state:"MA", jobs:34617,  median:122970},
+  {state:"GA", jobs:32807,  median:110000},
+  {state:"VA", jobs:27550,  median:120349},
+  {state:"FL", jobs:27070,  median:107786},
+  {state:"PA", jobs:25320,  median:106184},
+  {state:"MI", jobs:22426,  median:109114},
+  {state:"OH", jobs:20059,  median:102627},
+  {state:"AZ", jobs:14742,  median:110000}
 ];
 const CITIES = [
-  {city:"San Diego, CA",   jobs:21078,median:152479},
-  {city:"Santa Clara, CA", jobs:18225,median:186472},
-  {city:"Seattle, WA",     jobs:7323, median:161000},
-  {city:"New York, NY",    jobs:7069, median:160805},
-  {city:"Austin, TX",      jobs:6530, median:139152},
-  {city:"Sunnyvale, CA",   jobs:4723, median:186472},
-  {city:"San Francisco, CA",jobs:3880,median:190000},
-  {city:"Bellevue, WA",    jobs:3659, median:165000},
-  {city:"San Jose, CA",    jobs:3234, median:187741},
-  {city:"Chicago, IL",     jobs:2898, median:125000},
-  {city:"Dallas, TX",      jobs:2587, median:125000},
-  {city:"Irving, TX",      jobs:2422, median:120000},
-  {city:"Boston, MA",      jobs:2194, median:131525},
-  {city:"Atlanta, GA",     jobs:2180, median:129061},
-  {city:"Charlotte, NC",   jobs:2040, median:122060}
+  {city:"Santa Clara, CA",    jobs:72143, median:176000},
+  {city:"New York, NY",       jobs:62505, median:150000},
+  {city:"Seattle, WA",        jobs:50984, median:155000},
+  {city:"Austin, TX",         jobs:38087, median:131352},
+  {city:"San Diego, CA",      jobs:31031, median:135000},
+  {city:"Sunnyvale, CA",      jobs:28085, median:177366},
+  {city:"Dallas, TX",         jobs:25026, median:112950},
+  {city:"San Jose, CA",       jobs:23654, median:173000},
+  {city:"Bellevue, WA",       jobs:22019, median:159700},
+  {city:"San Francisco, CA",  jobs:19658, median:180000},
+  {city:"Redmond, WA",        jobs:18366, median:168346},
+  {city:"Chicago, IL",        jobs:16810, median:116100},
+  {city:"Atlanta, GA",        jobs:15228, median:115000},
+  {city:"Cupertino, CA",      jobs:14810, median:181397},
+  {city:"Plano, TX",          jobs:13579, median:112923}
 ];
 const WL_STATE = [
-  ["CA","Level I",2353],["CA","Level II",18570],["CA","Level III",13860],["CA","Level IV",12938],
-  ["GA","Level I",369], ["GA","Level II",2243], ["GA","Level III",1248], ["GA","Level IV",1033],
-  ["IL","Level I",8325],["IL","Level II",1869], ["IL","Level III",1196], ["IL","Level IV",1095],
-  ["MA","Level I",1112],["MA","Level II",2042], ["MA","Level III",1336], ["MA","Level IV",884],
-  ["MI","Level I",1184],["MI","Level II",1652], ["MI","Level III",820],  ["MI","Level IV",890],
-  ["NC","Level I",473], ["NC","Level II",2953], ["NC","Level III",2153], ["NC","Level IV",1021],
-  ["NJ","Level I",1175],["NJ","Level II",2965], ["NJ","Level III",1607], ["NJ","Level IV",1363],
-  ["NY","Level I",3742],["NY","Level II",3436], ["NY","Level III",2356], ["NY","Level IV",1637],
-  ["TX","Level I",2913],["TX","Level II",11980],["TX","Level III",6095], ["TX","Level IV",4586],
-  ["WA","Level I",1333],["WA","Level II",5319], ["WA","Level III",3955], ["WA","Level IV",1871]
+  ["CA","Level I",23586], ["CA","Level II",72582], ["CA","Level III",57471], ["CA","Level IV",56175],
+  ["GA","Level I",4325],  ["GA","Level II",14787], ["GA","Level III",6899],  ["GA","Level IV",5225],
+  ["IL","Level I",37453], ["IL","Level II",13366], ["IL","Level III",7283],  ["IL","Level IV",5948],
+  ["MA","Level I",8736],  ["MA","Level II",11741], ["MA","Level III",6320],  ["MA","Level IV",4880],
+  ["NC","Level I",3908],  ["NC","Level II",15691], ["NC","Level III",9908],  ["NC","Level IV",5855],
+  ["NJ","Level I",8779],  ["NJ","Level II",18171], ["NJ","Level III",8388],  ["NJ","Level IV",6226],
+  ["NY","Level I",31358], ["NY","Level II",29893], ["NY","Level III",18501], ["NY","Level IV",10588],
+  ["TX","Level I",23792], ["TX","Level II",71394], ["TX","Level III",35036], ["TX","Level IV",25286],
+  ["VA","Level I",5826],  ["VA","Level II",13306], ["VA","Level III",4501],  ["VA","Level IV",2431],
+  ["WA","Level I",13608], ["WA","Level II",39868], ["WA","Level III",24895], ["WA","Level IV",13284]
 ];
 const CAP = [
-  {cap:false,level:"Level I",  median:87772},
-  {cap:false,level:"Level II", median:113000},
-  {cap:false,level:"Level III",median:141750},
-  {cap:false,level:"Level IV", median:170000},
+  {cap:false,level:"Level I",  median:83000},
+  {cap:false,level:"Level II", median:110000},
+  {cap:false,level:"Level III",median:140000},
+  {cap:false,level:"Level IV", median:167000},
   {cap:true, level:"Level I",  median:70955},
   {cap:true, level:"Level II", median:112923},
   {cap:true, level:"Level III",median:152506},
@@ -513,7 +525,7 @@ Plotly.newPlot("chart-wl-jobs",[{
   legend:{orientation:"h",yanchor:"bottom",y:-0.12,xanchor:"center",x:0.5,
           bgcolor:"rgba(0,0,0,0)",borderwidth:0,font:{size:10}},
   margin:{l:10,r:10,t:10,b:40},
-  annotations:[{text:"<b>206K</b><br><span style='font-size:10px;fill:#50506a'>positions</span>",
+  annotations:[{text:"<b>1.03M</b><br><span style='font-size:10px;fill:#50506a'>positions</span>",
     x:0.5,y:0.5,font:{size:15,color:"#fff"},showarrow:false}]
 },{responsive:true});
 
@@ -539,15 +551,15 @@ Plotly.newPlot("chart-wl-wage",[
           bgcolor:"rgba(0,0,0,0)",borderwidth:0,font:{size:10}}
 }),{responsive:true});
 
-// ── Chart 3: Lottery Weight ──────────────────────────────────────
+// ── Chart 3: FY2026 Q1 Lottery Weight ────────────────────────────
 Plotly.newPlot("chart-wl-weight",[{
-  type:"bar",x:WL.map(d=>d.level),y:WL.map(d=>d.weight),
+  type:"bar",x:WL.map(d=>d.level),y:WL_Q1_WEIGHT,
   marker:{color:WL_COLORS,opacity:0.85},
-  text:WL.map(d=>(d.weight/1000).toFixed(0)+"K"),textposition:"outside",textfont:{size:11},
+  text:WL_Q1_WEIGHT.map(w=>(w/1000).toFixed(0)+"K"),textposition:"outside",textfont:{size:11},
   hovertemplate:"%{x}<br>Weight: %{y:,}<extra></extra>"
 }],L({
   xaxis:{title:{text:"Wage Level"}},
-  yaxis:{title:{text:"Lottery Weight Points"},tickformat:".2s"},
+  yaxis:{title:{text:"FY2026 Q1 Lottery Weight Points"},tickformat:".2s"},
   margin:{l:70,r:20,t:30,b:50},showlegend:false
 }),{responsive:true});
 
@@ -569,8 +581,18 @@ Plotly.newPlot("chart-salary-band",[{
 // ── Chart 5: Top Employers ───────────────────────────────────────
 (function(){
   const data=[...EMPLOYERS].reverse();
-  const names=data.map(d=>d.name.replace("TECHNOLOGIES AND SOLUTIONS INC.","TECH & SOLUTIONS").replace(", LLC D/B/A FIDELITY INVESTMENTS","").replace(" CORPORATION","").replace(", INC.","").replace(", INC","").replace(", LLC","").replace(" LLC","").replace(" LIMITED","").replace(" LLP","").replace(" U.S. LLP",""));
-  const barColors=data.map(d=>d.name.includes("QUALCOMM")?C_AMBER:d.name.includes("AMAZON")?C_GREEN:C_BLUE);
+  const names=data.map(d=>d.name
+    .replace("TECHNOLOGIES AND SOLUTIONS INC.","TECH & SOLUTIONS")
+    .replace(", LLC D/B/A FIDELITY INVESTMENTS","")
+    .replace(" CORPORATION","").replace(", INC.","").replace(", INC","")
+    .replace(", LLC","").replace(" LLC","").replace(" LIMITED","")
+    .replace(" LLP","").replace(" U.S. LLP","")
+    .replace("MCKINSEY & COMPANY, INC. UNITED STATES","MCKINSEY & COMPANY")
+    .replace("AMAZON DEVELOPMENT CENTER U.S.,","AMAZON DEV CENTER U.S."));
+  const barColors=data.map(d=>
+    d.name.includes("GRANDISON")?C_RED:
+    d.name.includes("AMAZON")?C_GREEN:
+    d.name.includes("NVIDIA")?C_AMBER:C_BLUE);
   const el=document.getElementById("chart-employers");
 
   Plotly.newPlot("chart-employers",[
@@ -592,8 +614,8 @@ Plotly.newPlot("chart-salary-band",[{
 
   el.on('plotly_click', e => {
     if (!e.points || !e.points[0]) return;
-    const name = data[data.length-1-e.points[0].pointIndex]?.name || '';
-    const url = 'h1b_query.html#' + encodeURIComponent(name);
+    const idx = data.length - 1 - e.points[0].pointIndex;
+    const name = EMPLOYERS[idx]?.name || '';
     const note = document.getElementById('emp-click-note');
     const link = document.getElementById('emp-click-link');
     note.style.display='flex';
@@ -627,8 +649,8 @@ Plotly.newPlot("chart-salary-band",[{
 
   el.on('plotly_click', e => {
     if (!e.points || !e.points[0]) return;
-    const title = data[data.length-1-e.points[0].pointIndex]?.title || '';
-    const fullTitle = SOC.find(s=>s.title===title);
+    const idx = data.length - 1 - e.points[0].pointIndex;
+    const title = SOC[idx]?.title || '';
     const note = document.getElementById('occ-click-note');
     const link = document.getElementById('occ-click-link');
     note.style.display='flex';
@@ -664,7 +686,7 @@ Plotly.newPlot("chart-salary-band",[{
   const data=[...CITIES].reverse();
   Plotly.newPlot("chart-cities",[
     {type:"bar",orientation:"h",name:"Jobs",y:data.map(d=>d.city),x:data.map(d=>d.jobs),
-     marker:{color:data.map(d=>d.city.includes("San Diego")?C_AMBER:C_GREEN),opacity:0.85},
+     marker:{color:data.map(d=>d.city.includes("Santa Clara")?C_AMBER:C_GREEN),opacity:0.85},
      hovertemplate:"%{y}<br>Jobs: %{x:,}<extra></extra>",xaxis:"x"},
     {type:"scatter",mode:"markers",name:"Median Wage",y:data.map(d=>d.city),x:data.map(d=>d.median),
      marker:{color:C_RED,size:8,symbol:"diamond"},
@@ -700,7 +722,7 @@ Plotly.newPlot("chart-salary-band",[{
     }),{responsive:true});
 })();
 
-// ── Chart 10: Cap vs Year-Round ───────────────────────────────────
+// ── Chart 10: Cap vs Year-Round (FY2026 Q1) ───────────────────────
 (function(){
   const levels=["Level I","Level II","Level III","Level IV"];
   Plotly.newPlot("chart-cap",[
@@ -721,12 +743,6 @@ Plotly.newPlot("chart-salary-band",[{
             bgcolor:"rgba(0,0,0,0)",borderwidth:0,font:{size:10}}
   }),{responsive:true});
 })();
-
-// ── SessionStorage passthrough for drill-downs ───────────────────
-window.addEventListener('load', () => {
-  // If returning from a click, pre-fill the query page
-  // (query page reads sessionStorage on load)
-});
 </script>
 </body>
 </html>
