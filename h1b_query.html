@@ -681,8 +681,26 @@ const ANALYTICS = {
   resultPages: 0,
   maxScrollDepth: 0,
   scrollMarks: new Set(),
-  engagementSent: false
+  engagementSent: false,
+  firstSearchAt: null
 };
+
+function trackSessionStart() {
+  const params = new URLSearchParams(location.search);
+  let referrerDomain = 'direct';
+  try { if (document.referrer) referrerDomain = new URL(document.referrer).hostname; } catch(_) {}
+  trackEvent('h1b_session_start', {
+    referrer_domain: referrerDomain,
+    referrer_full: document.referrer || 'direct',
+    utm_source: params.get('utm_source') || null,
+    utm_medium: params.get('utm_medium') || null,
+    utm_campaign: params.get('utm_campaign') || null,
+    utm_content: params.get('utm_content') || null,
+    landing_path: location.pathname,
+    viewport_width: window.innerWidth,
+    viewport_height: window.innerHeight
+  });
+}
 const FILTER_FIELD_NAMES = {
   'f-employer': 'employer',
   'f-occupation': 'occupation',
@@ -776,6 +794,10 @@ function filterAnalyticsSnapshot() {
   return {
     active_text_filter_count: textFilters.length,
     active_text_filters: textFilters.join('|') || 'none',
+    employer_filter: $('f-employer').value.trim() || null,
+    occupation_filter: $('f-occupation').value.trim() || null,
+    soc_filter: $('f-soc').value.trim() || null,
+    city_filter: $('f-city').value.trim() || null,
     categorical_filters: categoricalFilterSummary(),
     min_wage: rawNum($('f-minwage').value),
     max_wage: rawNum($('f-maxwage').value),
@@ -864,16 +886,27 @@ function trackEngagement(reason) {
 }
 
 function setupAnalyticsListeners() {
+  trackSessionStart();
   document.addEventListener('change', trackFilterChange);
   document.addEventListener('click', e => {
     trackLinkClick(e);
 
     const resultsRow = e.target.closest('#results-body tr');
     if (resultsRow && !resultsRow.classList.contains('empty-row')) {
+      const rowIndexOnPage = Array.prototype.indexOf.call(resultsRow.parentNode.children, resultsRow);
+      const rowData = currentRows[currentPage * rowsPerPage + rowIndexOnPage] || {};
       trackEvent('h1b_result_row_click', {
         page_number: currentPage + 1,
-        row_index_on_page: Array.prototype.indexOf.call(resultsRow.parentNode.children, resultsRow) + 1,
-        rows_available: currentRows.length
+        row_index_on_page: rowIndexOnPage + 1,
+        rows_available: currentRows.length,
+        employer_name: rowData.employer_name || null,
+        occupation: rowData.soc_title || null,
+        soc_code: rowData.soc_code || null,
+        wage_level: rowData.wage_level || null,
+        annual_wage: rawNum(rowData.annual_wage_from),
+        worksite_state: rowData.worksite_state || null,
+        fiscal_year: rowData.fiscal_year || null,
+        quarter: rowData.quarter || null
       });
     }
 
@@ -881,7 +914,10 @@ function setupAnalyticsListeners() {
     if (groupedRow && !groupedRow.classList.contains('empty-row')) {
       trackEvent('h1b_grouped_row_click', {
         grouped_dimension: $('g-dim').value,
-        row_index: Array.prototype.indexOf.call(groupedRow.parentNode.children, groupedRow) + 1
+        row_index: Array.prototype.indexOf.call(groupedRow.parentNode.children, groupedRow) + 1,
+        group_label: (groupedRow.cells[0] && groupedRow.cells[0].textContent.trim()) || null,
+        positions_filed: rawInt(groupedRow.cells[1] && groupedRow.cells[1].textContent.replace(/,/g, '')),
+        median_wage_display: (groupedRow.cells[4] && groupedRow.cells[4].textContent.trim()) || null
       });
     }
   });
@@ -1133,11 +1169,16 @@ window.runSearch = async function(source = 'manual') {
     renderResults();
     $('results-pagination-info').textContent =
       `Tip: use Case Number for an exact LCA lookup.`;
+    const matchingRows = Number(summ.rows) || 0;
+    if (!ANALYTICS.firstSearchAt) ANALYTICS.firstSearchAt = performance.now();
     ANALYTICS.searches += 1;
     trackEvent('h1b_search', {
       search_source: source,
       query_ms: Math.round(performance.now() - queryStartedAt),
-      matching_rows: Number(summ.rows) || 0,
+      time_to_first_search_ms: ANALYTICS.searches === 1
+        ? Math.round(ANALYTICS.firstSearchAt - ANALYTICS.pageStartedAt) : null,
+      matching_rows: matchingRows,
+      zero_results: matchingRows === 0,
       lca_filings: Number(summ.filings) || 0,
       positions_filed: jobs,
       median_wage: rawNum(summ.median_wage),
