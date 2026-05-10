@@ -801,7 +801,7 @@ function trackFilterChange(e) {
   };
 
   if (TEXT_FILTER_IDS.includes(target.id)) {
-    params.raw_value = target.id === 'f-case' ? '[case_number_redacted]' : target.value.trim();
+    params.raw_value = target.value.trim();
   } else if (target.type === 'checkbox') {
     params.checked = target.checked;
   } else if (target.type === 'number') {
