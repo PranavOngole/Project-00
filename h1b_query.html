@@ -287,11 +287,11 @@ td.red { color:var(--red); font-family:var(--mono); }
 /* ── Quick Query Chips ── */
 .chips-row { display:flex; align-items:center; gap:7px; flex-wrap:wrap; margin-bottom:14px; padding-bottom:14px; border-bottom:1px solid var(--border); }
 .chips-label { font-size:0.62rem; font-weight:600; text-transform:uppercase; letter-spacing:1.5px; color:var(--dim); white-space:nowrap; }
-.chip { padding:4px 12px; border-radius:20px; border:1px solid var(--border2); background:transparent;
-        color:var(--muted); font-size:0.72rem; font-weight:500; cursor:pointer;
+.chip { padding:5px 13px; border-radius:20px; border:1px solid var(--border2); background:rgba(255,255,255,0.04);
+        color:#9191a8; font-size:0.73rem; font-weight:500; cursor:pointer;
         transition:all 0.15s; font-family:inherit; white-space:nowrap; }
-.chip:hover { color:var(--text); border-color:var(--dim); background:rgba(255,255,255,0.04); }
-.chip.active { color:var(--amber); border-color:rgba(240,180,41,0.4); background:rgba(240,180,41,0.06); }
+.chip:hover { color:var(--text); border-color:#3a3a52; background:rgba(255,255,255,0.07); }
+.chip.active { color:var(--amber); border-color:rgba(240,180,41,0.5); background:rgba(240,180,41,0.1); font-weight:600; }
 
 /* ── Distribution Charts ── */
 .charts-section { max-width:1400px; margin:12px auto 0; padding:0 32px; }
@@ -1559,6 +1559,7 @@ window.nextPage = function() {
 
 window.resetFilters = function() {
   trackEvent('h1b_filters_reset', { searches_before_reset: ANALYTICS.searches });
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
   $('f-employer').value  = '';
   $('f-occupation').value = '';
   $('f-soc').value        = '';
@@ -1716,6 +1717,11 @@ async function renderEmployerProfile(conn, employer, summ, seniorPct, jobs) {
 
 // ── Feature 3: Quick Query Chips ─────────────────────────────────
 window.applyChip = function(filters) {
+  const btn = event.target.closest('.chip');
+  const wasActive = btn && btn.classList.contains('active');
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+
+  // Always clear filters first
   ['f-employer','f-occupation','f-soc','f-case','f-city'].forEach(id => $(id).value = '');
   $('f-state').value = '';
   $('f-wagelevel').value = '';
@@ -1725,6 +1731,10 @@ window.applyChip = function(filters) {
   $('f-maxwage').value = '';
   $('f-cap').checked = false;
   $('f-status').value = 'Certified';
+
+  // If chip was already active, clicking again = deselect and reset
+  if (wasActive) { runSearch('chip_deselect'); return; }
+
   if (filters.employer) $('f-employer').value = filters.employer;
   if (filters.occupation) $('f-occupation').value = filters.occupation;
   if (filters.state) $('f-state').value = filters.state;
@@ -1732,8 +1742,7 @@ window.applyChip = function(filters) {
   if (filters.minwage) $('f-minwage').value = filters.minwage;
   if (filters.maxwage) $('f-maxwage').value = filters.maxwage;
   if (filters.cap) $('f-cap').checked = true;
-  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-  event.target.classList.add('active');
+  if (btn) btn.classList.add('active');
   runSearch('chip');
 };
 
