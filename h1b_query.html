@@ -5,6 +5,29 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>H-1B LCA Query | FY2026 Q1 | Pranav Ongole</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- Google Analytics 4 for private aggregate visitor analytics. -->
+<script>
+window.GA_MEASUREMENT_ID = 'G-40YG7LKTZM';
+(function () {
+  const measurementId = window.GA_MEASUREMENT_ID;
+  if (!measurementId || measurementId === 'G-XXXXXXXXXX') return;
+
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = function(){ window.dataLayer.push(arguments); };
+
+  const script = document.createElement('script');
+  script.async = true;
+  script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(measurementId)}`;
+  document.head.appendChild(script);
+
+  window.gtag('js', new Date());
+  window.gtag('config', measurementId, {
+    page_title: document.title,
+    page_location: window.location.href,
+    send_page_view: true
+  });
+})();
+</script>
 <script type="importmap">
 {
   "imports": {
@@ -468,7 +491,7 @@ td.red { color:var(--red); font-family:var(--mono); }
       <div class="filter-field filter-actions">
         <label class="filter-label" style="visibility:hidden">Go</label>
         <div style="display:flex;gap:8px;">
-          <button class="btn btn-primary" id="btn-search" disabled onclick="runSearch()">Search</button>
+          <button class="btn btn-primary" id="btn-search" disabled onclick="runSearch('button')">Search</button>
           <button class="btn btn-ghost" onclick="resetFilters()">Reset</button>
         </div>
       </div>
@@ -531,7 +554,7 @@ td.red { color:var(--red); font-family:var(--mono); }
   <div class="section-head">
     <span class="section-title">Grouped Summary</span>
     <div class="section-controls">
-      <select id="g-dim" onchange="runSearch()">
+      <select id="g-dim" onchange="runSearch('group_controls')">
         <option value="employer">Employer</option>
         <option value="occupation">Occupation</option>
         <option value="location">City + State</option>
@@ -539,7 +562,7 @@ td.red { color:var(--red); font-family:var(--mono); }
         <option value="wage_level">Wage Level</option>
         <option value="salary_band">Salary Band</option>
       </select>
-      <select id="g-limit" onchange="runSearch()">
+      <select id="g-limit" onchange="runSearch('group_controls')">
         <option value="25">25</option>
         <option value="50" selected>50</option>
         <option value="100">100</option>
@@ -631,6 +654,7 @@ td.red { color:var(--red); font-family:var(--mono); }
   </div>
   <div class="footer-bottom">
     LCA certification ≠ H-1B lottery selection. One LCA may cover multiple workers. Positions filed ≠ positions lottery-selected. FY2026 Q1 = Oct&ndash;Dec 2025. YOY comparisons require future quarters.
+    Uses Google Analytics for private aggregate traffic and interaction metrics; raw search text, case numbers, and typed filters are not sent.
   </div>
 </div>
 
@@ -650,10 +674,224 @@ let rowsPerPage = 100;
 let universeWeight = 0;
 
 const $ = id => document.getElementById(id);
+const ANALYTICS = {
+  pageStartedAt: performance.now(),
+  initStartedAt: 0,
+  searches: 0,
+  resultPages: 0,
+  maxScrollDepth: 0,
+  scrollMarks: new Set(),
+  engagementSent: false
+};
+const FILTER_FIELD_NAMES = {
+  'f-employer': 'employer',
+  'f-occupation': 'occupation',
+  'f-soc': 'soc_code',
+  'f-case': 'case_number',
+  'f-state': 'state',
+  'f-city': 'city',
+  'f-wagelevel': 'wage_level',
+  'f-quarter': 'quarter',
+  'f-status': 'case_status',
+  'f-band': 'salary_band',
+  'f-minwage': 'min_wage',
+  'f-maxwage': 'max_wage',
+  'f-plausible': 'plausible_wages_only',
+  'f-cap': 'cap_proxy_only',
+  'f-sort': 'sort_by',
+  'f-dir': 'sort_direction',
+  'f-limit': 'row_limit',
+  'f-selected': 'estimated_lottery_selections',
+  'g-dim': 'grouped_dimension',
+  'g-limit': 'grouped_limit'
+};
+const TEXT_FILTER_IDS = ['f-employer', 'f-occupation', 'f-soc', 'f-case', 'f-city'];
+const SCROLL_THRESHOLDS = [25, 50, 75, 90, 100];
+
 const setProgress = (pct, msg) => {
   $('prog-fill').style.width = pct + '%';
   $('init-status').textContent = msg;
 };
+
+function analyticsEnabled() {
+  return typeof window.gtag === 'function' &&
+    window.GA_MEASUREMENT_ID &&
+    window.GA_MEASUREMENT_ID !== 'G-XXXXXXXXXX';
+}
+
+function cleanAnalyticsValue(value) {
+  if (value === undefined || value === null) return null;
+  if (typeof value === 'boolean') return value;
+  if (typeof value === 'number') return Number.isFinite(value) ? value : null;
+  const text = String(value).trim();
+  return text ? text.slice(0, 100) : 'none';
+}
+
+function trackEvent(name, params = {}) {
+  if (!analyticsEnabled()) return;
+  const clean = {};
+  for (const [key, value] of Object.entries(params)) {
+    const safeValue = cleanAnalyticsValue(value);
+    if (safeValue !== null) clean[key] = safeValue;
+  }
+  window.gtag('event', name, clean);
+}
+
+function trackException(stage, error) {
+  trackEvent('h1b_error', {
+    error_stage: stage,
+    error_message: (error && error.message ? error.message : String(error)).slice(0, 100),
+    page_protocol: location.protocol
+  });
+}
+
+function rawNum(value) {
+  const n = parseFloat(value);
+  return Number.isFinite(n) ? n : null;
+}
+
+function rawInt(value) {
+  const n = parseInt(value, 10);
+  return Number.isFinite(n) ? n : null;
+}
+
+function activeTextFilters() {
+  return TEXT_FILTER_IDS
+    .filter(id => $(id).value.trim())
+    .map(id => FILTER_FIELD_NAMES[id]);
+}
+
+function categoricalFilterSummary() {
+  return [
+    `state=${$('f-state').value || 'all'}`,
+    `level=${$('f-wagelevel').value || 'all'}`,
+    `quarter=${$('f-quarter').value || 'all'}`,
+    `status=${$('f-status').value || 'all'}`,
+    `band=${$('f-band').value || 'all'}`
+  ].join('|');
+}
+
+function filterAnalyticsSnapshot() {
+  const textFilters = activeTextFilters();
+  return {
+    active_text_filter_count: textFilters.length,
+    active_text_filters: textFilters.join('|') || 'none',
+    categorical_filters: categoricalFilterSummary(),
+    min_wage: rawNum($('f-minwage').value),
+    max_wage: rawNum($('f-maxwage').value),
+    plausible_only: $('f-plausible').checked,
+    cap_proxy_only: $('f-cap').checked,
+    sort_by: $('f-sort').value,
+    sort_direction: $('f-dir').value,
+    row_limit: parseInt($('f-limit').value, 10) || 100,
+    grouped_dimension: $('g-dim').value,
+    grouped_limit: parseInt($('g-limit').value, 10) || 50,
+    selected_total: rawInt($('f-selected').value)
+  };
+}
+
+function trackFilterChange(e) {
+  const target = e.target;
+  if (!target || !target.id || !FILTER_FIELD_NAMES[target.id]) return;
+
+  const params = {
+    field_name: FILTER_FIELD_NAMES[target.id],
+    field_type: target.type || target.tagName.toLowerCase(),
+    active_text_filter_count: activeTextFilters().length
+  };
+
+  if (TEXT_FILTER_IDS.includes(target.id)) {
+    params.raw_value = target.id === 'f-case' ? '[case_number_redacted]' : target.value.trim();
+  } else if (target.type === 'checkbox') {
+    params.checked = target.checked;
+  } else if (target.type === 'number') {
+    params.raw_value = target.id === 'f-selected' ? rawInt(target.value) : rawNum(target.value);
+  } else {
+    params.selected_value = target.value || 'all';
+  }
+
+  trackEvent('h1b_filter_change', params);
+}
+
+function trackLinkClick(e) {
+  const link = e.target.closest('a[href]');
+  if (!link) return;
+  const url = new URL(link.href, location.href);
+  trackEvent('h1b_link_click', {
+    link_domain: url.hostname || 'local',
+    link_path: url.pathname,
+    link_text: (link.textContent || link.title || 'link').trim().replace(/\s+/g, ' ').slice(0, 80),
+    outbound: url.hostname !== location.hostname
+  });
+}
+
+function handleScrollDepth() {
+  const scrollable = Math.max(document.documentElement.scrollHeight - window.innerHeight, 1);
+  const rawDepth = Math.round(((window.scrollY || document.documentElement.scrollTop) / scrollable) * 100);
+  const depth = rawDepth >= 98 ? 100 : Math.min(rawDepth, 100);
+  ANALYTICS.maxScrollDepth = Math.max(ANALYTICS.maxScrollDepth, depth);
+
+  for (const mark of SCROLL_THRESHOLDS) {
+    if (depth >= mark && !ANALYTICS.scrollMarks.has(mark)) {
+      ANALYTICS.scrollMarks.add(mark);
+      trackEvent('h1b_scroll_depth', { percent_scrolled: mark });
+    }
+  }
+}
+
+function trackPagePerformance() {
+  const nav = performance.getEntriesByType('navigation')[0];
+  if (!nav) return;
+  trackEvent('h1b_page_performance', {
+    dom_content_loaded_ms: Math.round(nav.domContentLoadedEventEnd),
+    load_ms: Math.round(nav.loadEventEnd),
+    transfer_size: Math.round(nav.transferSize || 0),
+    decoded_body_size: Math.round(nav.decodedBodySize || 0)
+  });
+}
+
+function trackEngagement(reason) {
+  if (ANALYTICS.engagementSent) return;
+  ANALYTICS.engagementSent = true;
+  trackEvent('h1b_page_engagement', {
+    engagement_reason: reason,
+    seconds_on_page: Math.round((performance.now() - ANALYTICS.pageStartedAt) / 1000),
+    searches_run: ANALYTICS.searches,
+    result_pages_viewed: ANALYTICS.resultPages,
+    max_scroll_depth: ANALYTICS.maxScrollDepth,
+    transport_type: 'beacon'
+  });
+}
+
+function setupAnalyticsListeners() {
+  document.addEventListener('change', trackFilterChange);
+  document.addEventListener('click', e => {
+    trackLinkClick(e);
+
+    const resultsRow = e.target.closest('#results-body tr');
+    if (resultsRow && !resultsRow.classList.contains('empty-row')) {
+      trackEvent('h1b_result_row_click', {
+        page_number: currentPage + 1,
+        row_index_on_page: Array.prototype.indexOf.call(resultsRow.parentNode.children, resultsRow) + 1,
+        rows_available: currentRows.length
+      });
+    }
+
+    const groupedRow = e.target.closest('#grouped-body tr');
+    if (groupedRow && !groupedRow.classList.contains('empty-row')) {
+      trackEvent('h1b_grouped_row_click', {
+        grouped_dimension: $('g-dim').value,
+        row_index: Array.prototype.indexOf.call(groupedRow.parentNode.children, groupedRow) + 1
+      });
+    }
+  });
+  window.addEventListener('scroll', handleScrollDepth, { passive: true });
+  window.addEventListener('load', () => setTimeout(trackPagePerformance, 0));
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') trackEngagement('visibility_hidden');
+  });
+  window.addEventListener('pagehide', () => trackEngagement('pagehide'));
+}
 
 function showError(msg) {
   const b = $('err-banner');
@@ -670,6 +908,7 @@ function showRichError(html) {
 function showFileModeHelp() {
   $('init-bar').style.display = 'none';
   $('btn-search').disabled = true;
+  trackEvent('h1b_file_mode_blocked', { page_protocol: location.protocol });
   showRichError(`
     <strong>This page is open as a local file, so the browser blocked the query engine.</strong><br>
     DuckDB-WASM needs an <code>https://</code> page or a local <code>http://</code> server. The data is fine; this is just browser security around <code>file://</code> pages.
@@ -685,12 +924,15 @@ function showFileModeHelp() {
 
 // ── Initialize DuckDB-WASM ───────────────────────────────────────
 async function initDuckDB() {
+  ANALYTICS.initStartedAt = performance.now();
+  trackEvent('h1b_engine_init_start', { page_protocol: location.protocol });
   setProgress(5, 'loading DuckDB-WASM module…');
 
   let duckdb;
   try {
     duckdb = await import(new URL('duckdb-browser.mjs', DUCKDB_BASE_URL).href);
   } catch(e) {
+    trackException('duckdb_import', e);
     showRichError(`
       <strong>Failed to load DuckDB-WASM.</strong><br>
       The dashboard could not load the browser database engine from jsDelivr. Refresh the hosted page or check your browser/network access.
@@ -725,6 +967,7 @@ async function initDuckDB() {
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
     parquetBuf = await resp.arrayBuffer();
   } catch(e) {
+    trackException('parquet_fetch', e);
     showError(`Failed to load LCA data: ${e.message}. Make sure you are accessing this page via HTTPS.`);
     return;
   }
@@ -742,9 +985,13 @@ async function initDuckDB() {
   $('stats-section').style.display = 'block';
   $('grouped-section').style.display = 'block';
   $('results-section').style.display = 'block';
+  trackEvent('h1b_engine_ready', {
+    init_ms: Math.round(performance.now() - ANALYTICS.initStartedAt),
+    data_file: PARQUET_URL.split('/').pop()
+  });
 
   // Auto-run default search
-  await runSearch();
+  await runSearch('auto_boot');
 }
 
 // ── Query helpers ────────────────────────────────────────────────
@@ -820,8 +1067,9 @@ function fmtPct(n) {
 }
 
 // ── Main search ──────────────────────────────────────────────────
-window.runSearch = async function() {
+window.runSearch = async function(source = 'manual') {
   if (!conn) return;
+  const queryStartedAt = performance.now();
   $('btn-search').disabled = true;
   $('btn-search').textContent = 'Running…';
 
@@ -885,8 +1133,21 @@ window.runSearch = async function() {
     renderResults();
     $('results-pagination-info').textContent =
       `Tip: use Case Number for an exact LCA lookup.`;
+    ANALYTICS.searches += 1;
+    trackEvent('h1b_search', {
+      search_source: source,
+      query_ms: Math.round(performance.now() - queryStartedAt),
+      matching_rows: Number(summ.rows) || 0,
+      lca_filings: Number(summ.filings) || 0,
+      positions_filed: jobs,
+      median_wage: rawNum(summ.median_wage),
+      avg_premium: rawNum(summ.avg_premium),
+      senior_role_pct: rawNum(seniorPct),
+      ...filterAnalyticsSnapshot()
+    });
 
   } catch(e) {
+    trackException('query', e);
     showError('Query error: ' + e.message);
     console.error(e);
   } finally {
@@ -995,12 +1256,33 @@ function renderResults() {
   $('pagination').style.display = 'flex';
 }
 
-window.prevPage = function() { if (currentPage > 0) { currentPage--; renderResults(); } };
+window.prevPage = function() {
+  if (currentPage > 0) {
+    currentPage--;
+    ANALYTICS.resultPages += 1;
+    trackEvent('h1b_pagination', {
+      direction: 'prev',
+      page_number: currentPage + 1,
+      rows_available: currentRows.length
+    });
+    renderResults();
+  }
+};
 window.nextPage = function() {
-  if ((currentPage + 1) * rowsPerPage < currentRows.length) { currentPage++; renderResults(); }
+  if ((currentPage + 1) * rowsPerPage < currentRows.length) {
+    currentPage++;
+    ANALYTICS.resultPages += 1;
+    trackEvent('h1b_pagination', {
+      direction: 'next',
+      page_number: currentPage + 1,
+      rows_available: currentRows.length
+    });
+    renderResults();
+  }
 };
 
 window.resetFilters = function() {
+  trackEvent('h1b_filters_reset', { searches_before_reset: ANALYTICS.searches });
   $('f-employer').value  = '';
   $('f-occupation').value = '';
   $('f-soc').value        = '';
@@ -1019,7 +1301,7 @@ window.resetFilters = function() {
   $('f-dir').value        = 'DESC';
   $('f-limit').value      = '100';
   $('f-selected').value   = '120141';
-  runSearch();
+  runSearch('reset');
 };
 
 function escHtml(s) {
@@ -1030,14 +1312,16 @@ function escHtml(s) {
 
 // Enter key triggers search
 document.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && !$('btn-search').disabled) runSearch();
+  if (e.key === 'Enter' && !$('btn-search').disabled) runSearch('enter_key');
 });
 
 // Boot
+setupAnalyticsListeners();
 if (location.protocol === 'file:') {
   showFileModeHelp();
 } else {
   initDuckDB().catch(e => {
+    trackException('init', e);
     showError('Initialization failed: ' + e.message + '. Try reloading the page.');
     console.error(e);
   });
