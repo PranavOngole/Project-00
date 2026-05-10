@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>H-1B LCA Query | FY2026 Q1 | Pranav Ongole</title>
+<title>H-1B LCA Query | FY2025 Q1 – FY2026 Q1 | Pranav Ongole</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <!-- Google Analytics 4 for private aggregate visitor analytics. -->
 <script>
@@ -443,7 +443,7 @@ td.red { color:var(--red); font-family:var(--mono); }
     <div class="methodology-text">
       <strong>What this data is:</strong> Public DOL Labor Condition Application records — the salary disclosures employers must file <em>before</em> sponsoring an H-1B worker.
       <strong>What it is not:</strong> Actual payroll, lottery results, or USCIS approvals. One LCA can cover many workers. Certification does not mean the petition was approved or the lottery was won.
-      Source: DOL OFLC FY2026 Q1 (Oct–Dec 2025), certified filings only.
+      Source: DOL OFLC FY2025 Q1–FY2026 Q1 (Oct 2024–Dec 2025), certified filings only.
     </div>
   </div>
 </div>
@@ -804,7 +804,7 @@ td.red { color:var(--red); font-family:var(--mono); }
   <div class="footer-top">
     <div class="footer-credit">
       <div class="footer-credit-name">Built by <a href="https://www.pranavongole.com" target="_blank">Pranav Ongole</a> &mdash; DataForge365 Project 00</div>
-      <div class="footer-credit-sub">Data: DOL OFLC LCA Disclosure, FY2026 Q1 (Oct&ndash;Dec 2025) &mdash; Certified filings only; wages are offered amounts, not final payroll</div>
+      <div class="footer-credit-sub">Data: DOL OFLC LCA Disclosure, FY2025 Q1&ndash;FY2026 Q1 (Oct 2024&ndash;Dec 2025) &mdash; Certified filings only; wages are offered amounts, not final payroll</div>
     </div>
     <div class="footer-links">
       <a href="https://www.pranavongole.com" target="_blank">
@@ -1188,9 +1188,6 @@ async function initDuckDB() {
   setProgress(100, 'ready');
   $('init-bar').style.display = 'none';
   $('btn-search').disabled = false;
-  $('stats-section').style.display = 'block';
-  $('grouped-section').style.display = 'block';
-  $('results-section').style.display = 'block';
   trackEvent('h1b_engine_ready', {
     init_ms: Math.round(performance.now() - ANALYTICS.initStartedAt),
     data_file: PARQUET_URL.split('/').pop()
@@ -1266,7 +1263,7 @@ function buildWhere(includeSearch = true) {
     if (maxWage !== null) { clauses.push(`annual_wage_from <= ${maxWage}`); }
     if (quarterVal) {
       const [fy, q] = quarterVal.split('|');
-      clauses.push(`fiscal_year = ${esc(fy)} AND quarter = '${esc(q)}'`);
+      clauses.push(`fiscal_year = ${parseInt(fy, 10)} AND quarter = '${esc(q)}'`);
     }
   }
 
@@ -1338,6 +1335,11 @@ window.runSearch = async function(source = 'manual') {
     $('s-median').textContent  = fmtDollar(summ.median_wage);
     $('s-premium').textContent = summ.avg_premium !== null ? '+' + fmtPct(summ.avg_premium) : '—';
     $('s-senior').textContent  = seniorPct !== null ? fmtPct(seniorPct) : '—';
+
+    // Reveal sections on first successful query
+    $('stats-section').style.display = 'block';
+    $('grouped-section').style.display = 'block';
+    $('results-section').style.display = 'block';
 
     // 3. Grouped summary
     await renderGrouped(where, selected);
@@ -1448,7 +1450,20 @@ async function renderGrouped(where, selected) {
 
   const tbody = $('grouped-body');
   if (!rows.length) {
-    tbody.innerHTML = '<tr><td colspan="8" class="empty-row muted">No results.</td></tr>';
+    const tips = buildNoResultsTips();
+    window._noResultsActionsGrouped = tips.filter(t => t.action).map(t => t.action);
+    let actionIdx = 0;
+    const tipsHtml = tips.map(tip => {
+      if (tip.action) {
+        const idx = actionIdx++;
+        return `<li><button onclick="window._noResultsActionsGrouped[${idx}]()">${tip.text}</button></li>`;
+      }
+      return `<li>${tip.text}</li>`;
+    }).join('');
+    tbody.innerHTML = `<tr><td colspan="8"><div class="no-results-box">
+      <div class="no-results-title">No results found</div>
+      <ul class="no-results-tips">${tipsHtml}</ul>
+    </div></td></tr>`;
     return;
   }
   tbody.innerHTML = rows.map(r => {
@@ -1591,7 +1606,9 @@ function renderSummary(summ, seniorPct, jobs) {
   const occ      = $('f-occupation').value.trim();
   const state    = $('f-state').value;
   const level    = $('f-wagelevel').value;
-  const quarters = $('f-quarter').value;
+  const qSel = $('f-quarter');
+  const quarterLabel = qSel.value && qSel.selectedIndex >= 0
+    ? qSel.options[qSel.selectedIndex].text : '';
 
   // Build context phrase
   const parts = [];
@@ -1599,6 +1616,7 @@ function renderSummary(summ, seniorPct, jobs) {
   if (state) parts.push(`in <strong>${escHtml(state)}</strong>`);
   if (emp) parts.push(`at <strong>${escHtml(emp)}</strong>`);
   if (level) parts.push(`(<strong>${escHtml(level)}</strong>)`);
+  if (quarterLabel) parts.push(`in <strong>${escHtml(quarterLabel)}</strong>`);
 
   const contextStr = parts.length
     ? ' ' + parts.join(' ')
@@ -1649,7 +1667,6 @@ async function renderEmployerProfile(conn, employer, summ, seniorPct, jobs) {
     const stateRows = arrowToRows(stateRes);
 
     // Stats grid
-    const capJobs = jobs > 0 ? '—' : '—';
     $('profile-name').textContent = employer + ' — Employer Snapshot';
     $('profile-stats-grid').innerHTML = `
       <div class="profile-stat">
@@ -1832,6 +1849,42 @@ function loadFromURL() {
   if (p.get('band'))       $('f-band').value       = p.get('band');
   if (p.get('cap') === '1') $('f-cap').checked     = true;
   if (p.get('status'))     $('f-status').value     = p.get('status');
+  if (p.toString()) syncChipActiveState();
+}
+
+function syncChipActiveState() {
+  const chipDefs = [
+    {occupation:'Software'},
+    {occupation:'Software', state:'CA'},
+    {wagelevel:'Level I'},
+    {minwage:'200000'},
+    {cap:true},
+    {occupation:'Financial', state:'NY'},
+    {wagelevel:'Level IV'},
+    {occupation:'Data'}
+  ];
+  const checks = [
+    ['employer',   () => $('f-employer').value.trim()],
+    ['occupation', () => $('f-occupation').value.trim()],
+    ['state',      () => $('f-state').value],
+    ['wagelevel',  () => $('f-wagelevel').value],
+    ['minwage',    () => $('f-minwage').value.trim()],
+    ['maxwage',    () => $('f-maxwage').value.trim()],
+    ['cap',        () => $('f-cap').checked],
+    ['quarter',    () => $('f-quarter').value],
+    ['soc',        () => $('f-soc').value.trim()],
+    ['city',       () => $('f-city').value.trim()]
+  ];
+  document.querySelectorAll('.chip').forEach((chip, i) => {
+    const def = chipDefs[i];
+    if (!def) return;
+    const match = checks.every(([key, getter]) => {
+      const current = getter();
+      if (key === 'cap') return current === !!def[key];
+      return current === (def[key] || '');
+    });
+    if (match) chip.classList.add('active');
+  });
 }
 
 window.shareSearch = async function() {
