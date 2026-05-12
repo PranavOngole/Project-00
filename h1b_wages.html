@@ -334,7 +334,7 @@ body { background:var(--bg); color:var(--text);
   </div>
   <div class="chart-card">
     <div class="chart-title">Median Wage by Level &mdash; Cap Season vs. Year-Round (FY2026 Q1)</div>
-    <div class="chart-sub">Cap-season = estimated April H-1B registration window (heuristic). At Level IV, cap-season employers pay ~$18K more at median.</div>
+    <div class="chart-sub">Cap-season = estimated April H-1B registration window (heuristic). At Level IV, cap-season employers pay ~$15K more at median; at Level I they actually pay ~$17K less.</div>
     <div id="chart-cap" style="height:340px;"></div>
     <div class="chart-note">&#9432;&nbsp; Cap-proxy flag is a heuristic (begin date Oct 1, filed Jan&ndash;Mar 2025). Not official USCIS data. Analysis scoped to FY2026 Q1 &mdash; the only quarter with active cap-season filings in this dataset.</div>
   </div>
@@ -480,10 +480,10 @@ const WL_STATE = [
   ["WA","Level I",13607], ["WA","Level II",39892], ["WA","Level III",24904], ["WA","Level IV",13284]
 ];
 const CAP = [
-  {cap:false,level:"Level I",  median:83000},
-  {cap:false,level:"Level II", median:110000},
-  {cap:false,level:"Level III",median:140000},
-  {cap:false,level:"Level IV", median:167000},
+  {cap:false,level:"Level I",  median:87772},
+  {cap:false,level:"Level II", median:113000},
+  {cap:false,level:"Level III",median:141750},
+  {cap:false,level:"Level IV", median:170000},
   {cap:true, level:"Level I",  median:70955},
   {cap:true, level:"Level II", median:112923},
   {cap:true, level:"Level III",median:152506},
