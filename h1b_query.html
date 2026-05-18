@@ -752,6 +752,7 @@ td.red { color:var(--red); font-family:var(--mono); }
       <thead>
         <tr>
           <th id="gh-label">Employer</th>
+          <th title="Calendar year(s) when DOL received the LCAs represented in this grouped row">Filed Years</th>
           <th class="sorted" title="Total H-1B worker positions filed in LCAs (not lottery-selected workers)">Positions Filed <span class="sort-arrow">↓</span></th>
           <th title="Positions × H-1B lottery weight multiplier — used to estimate pick probability">Lottery Weight</th>
           <th title="Distinct LCA case numbers filed">Cases</th>
@@ -762,7 +763,7 @@ td.red { color:var(--red); font-family:var(--mono); }
         </tr>
       </thead>
       <tbody id="grouped-body">
-        <tr><td colspan="8" class="empty-row muted">Run a search to see grouped results.</td></tr>
+        <tr><td colspan="9" class="empty-row muted">Run a search to see grouped results.</td></tr>
       </tbody>
     </table>
   </div>
@@ -1098,8 +1099,9 @@ function setupAnalyticsListeners() {
         grouped_dimension: $('g-dim').value,
         row_index: Array.prototype.indexOf.call(groupedRow.parentNode.children, groupedRow) + 1,
         group_label: (groupedRow.cells[0] && groupedRow.cells[0].textContent.trim()) || null,
-        positions_filed: rawInt(groupedRow.cells[1] && groupedRow.cells[1].textContent.replace(/,/g, '')),
-        median_wage_display: (groupedRow.cells[4] && groupedRow.cells[4].textContent.trim()) || null
+        filed_years: (groupedRow.cells[1] && groupedRow.cells[1].textContent.trim()) || null,
+        positions_filed: rawInt(groupedRow.cells[2] && groupedRow.cells[2].textContent.replace(/,/g, '')),
+        median_wage_display: (groupedRow.cells[5] && groupedRow.cells[5].textContent.trim()) || null
       });
     }
   });
@@ -1489,6 +1491,7 @@ async function renderGrouped(where, selected) {
   const res = await conn.query(`
     SELECT
       ${expr} AS group_label,
+      STRING_AGG(DISTINCT CAST(EXTRACT(YEAR FROM received_date) AS VARCHAR), ', ' ORDER BY CAST(EXTRACT(YEAR FROM received_date) AS VARCHAR)) AS filed_years,
       COUNT(*) AS rows,
       COUNT(DISTINCT case_number) AS filings,
       COALESCE(SUM(worker_positions), 0) AS jobs,
@@ -1515,7 +1518,7 @@ async function renderGrouped(where, selected) {
       }
       return `<li>${tip.text}</li>`;
     }).join('');
-    tbody.innerHTML = `<tr><td colspan="8"><div class="no-results-box">
+    tbody.innerHTML = `<tr><td colspan="9"><div class="no-results-box">
       <div class="no-results-title">No results found</div>
       <ul class="no-results-tips">${tipsHtml}</ul>
     </div></td></tr>`;
@@ -1526,6 +1529,7 @@ async function renderGrouped(where, selected) {
     const est = universeWeight > 0 ? (selected * wt / universeWeight) : null;
     return `<tr>
       <td>${escHtml(r.group_label)}</td>
+      <td class="mono muted">${escHtml(r.filed_years || '—')}</td>
       <td class="num">${fmtNum(r.jobs)}</td>
       <td class="num">${fmtNum(r.weight)}</td>
       <td class="num">${fmtNum(r.filings)}</td>
